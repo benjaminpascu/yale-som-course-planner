@@ -9,8 +9,12 @@ import {
   uniqueSessions,
   uniqueUnits,
 } from '../lib/filterCourses'
+import { getConflictingCourseIds } from '../lib/scheduleConflicts'
+import { sectionTone } from '../lib/sectionTheme'
+import CollapseChevron from './CollapseChevron'
 import CourseFilters from './CourseFilters'
 import CourseRow from './CourseRow'
+import SectionHeader from './SectionHeader'
 
 function toggleInSet(set, value) {
   const next = new Set(set)
@@ -19,7 +23,12 @@ function toggleInSet(set, value) {
   return next
 }
 
-export default function CourseBrowser({ courses, tags }) {
+export default function CourseBrowser({
+  courses,
+  tags,
+  selectedIds,
+  onToggleCourse,
+}) {
   const [filters, setFilters] = useState(createEmptyFilters)
 
   const tagsByCourseNumber = useMemo(
@@ -40,6 +49,11 @@ export default function CourseBrowser({ courses, tags }) {
 
   const active = hasActiveFilters(filters)
 
+  const conflictingIds = useMemo(
+    () => getConflictingCourseIds(courses, selectedIds),
+    [courses, selectedIds],
+  )
+
   function handleToggle(key, value) {
     setFilters((prev) => ({
       ...prev,
@@ -51,31 +65,45 @@ export default function CourseBrowser({ courses, tags }) {
     setFilters(createEmptyFilters())
   }
 
-  return (
-    <div className="flex flex-col lg:flex-row">
-      <CourseFilters
-        sessions={sessions}
-        categories={categories}
-        unitValues={unitValues}
-        filters={filters}
-        onSearchChange={(search) =>
-          setFilters((prev) => ({ ...prev, search }))
-        }
-        onTimeFromChange={(timeFrom) =>
-          setFilters((prev) => ({ ...prev, timeFrom }))
-        }
-        onTimeToChange={(timeTo) =>
-          setFilters((prev) => ({ ...prev, timeTo }))
-        }
-        onToggle={handleToggle}
-        onClear={handleClear}
-        hasFilters={active}
-      />
+  const filterProps = {
+    sessions,
+    categories,
+    unitValues,
+    filters,
+    onSearchChange: (search) =>
+      setFilters((prev) => ({ ...prev, search })),
+    onTimeFromChange: (timeFrom) =>
+      setFilters((prev) => ({ ...prev, timeFrom })),
+    onTimeToChange: (timeTo) => setFilters((prev) => ({ ...prev, timeTo })),
+    onToggle: handleToggle,
+    onClear: handleClear,
+    hasFilters: active,
+  }
 
-      <section className="min-w-0 flex-1">
-        <p className="border-b border-gray-200 bg-gray-50 px-4 py-2 text-sm text-gray-600">
-          Showing {filtered.length} of {courses.length} courses
-        </p>
+  const filterTone = sectionTone('filters')
+  const catalogTone = sectionTone('catalog')
+
+  return (
+    <div className="flex w-full flex-col">
+      <details className={`group border-b ${filterTone.section}`}>
+        <summary
+          className={`flex cursor-pointer list-none items-center gap-2 border-b px-4 py-3 text-sm font-semibold text-yale-950 marker:content-none [&::-webkit-details-marker]:hidden ${filterTone.header}`}
+        >
+          <CollapseChevron />
+          <span className="flex-1">Search &amp; filters</span>
+          {active ? (
+            <span className="font-normal text-yale-800">(active)</span>
+          ) : null}
+        </summary>
+        <CourseFilters {...filterProps} />
+      </details>
+
+      <section className={`w-full ${catalogTone.section}`}>
+        <SectionHeader
+          tone="catalog"
+          title="Course catalog"
+          subtitle={`Showing ${filtered.length} of ${courses.length} courses · ${selectedIds.size} in plan`}
+        />
         {filtered.length === 0 ? (
           <p
             className={`px-4 py-8 text-center text-sm ${
@@ -86,9 +114,15 @@ export default function CourseBrowser({ courses, tags }) {
               'No courses found. Try expanding your selection criteria.'}
           </p>
         ) : (
-          <ul className="divide-y divide-gray-200">
+          <ul className="divide-y divide-gray-200/80">
             {filtered.map((course) => (
-              <CourseRow key={course.courseId} course={course} />
+              <CourseRow
+                key={course.courseId}
+                course={course}
+                isSelected={selectedIds.has(course.courseId)}
+                hasConflict={conflictingIds.has(course.courseId)}
+                onToggle={() => onToggleCourse(course.courseId)}
+              />
             ))}
           </ul>
         )}

@@ -69,10 +69,10 @@ const BID_BADGE = {
   bid: { label: 'Bid required', className: 'bg-amber-100 text-amber-900' },
   permission: {
     label: 'Permission required',
-    className: 'bg-violet-100 text-violet-900',
+    className: 'bg-yale-100 text-yale-900',
   },
-  core: { label: 'Core', className: 'bg-sky-100 text-sky-900' },
-  open: { label: 'Open', className: 'bg-emerald-100 text-emerald-900' },
+  core: { label: 'Core', className: 'bg-yale-800 text-white' },
+  open: { label: 'Open', className: 'bg-gray-100 text-gray-800' },
   other: { label: null, className: 'bg-gray-100 text-gray-800' },
 }
 

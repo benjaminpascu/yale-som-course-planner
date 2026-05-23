@@ -30,12 +30,12 @@ export default function FilterCheckboxGroup({
   const labelIdleClassName =
     layout === 'stack'
       ? ''
-      : 'border-gray-200 bg-gray-50 text-gray-700'
+      : 'border-yale-200 bg-yale-50 text-yale-900'
 
   const labelActiveClassName =
     layout === 'stack'
       ? ''
-      : 'border-blue-300 bg-blue-50 text-blue-900'
+      : 'border-yale-600 bg-yale-100 text-yale-950'
 
   return (
     <fieldset className="space-y-1.5">
@@ -59,10 +59,10 @@ export default function FilterCheckboxGroup({
                   type="checkbox"
                   className={
                     layout === 'inline'
-                      ? 'size-3.5 rounded border-gray-300 text-blue-800 focus:ring-blue-800'
+                      ? 'size-3.5 rounded border-gray-300 text-yale-800 focus:ring-yale-800'
                       : layout === 'wrap'
-                        ? 'size-3 rounded border-gray-300 text-blue-800 focus:ring-blue-800'
-                        : 'size-3.5 rounded border-gray-300 text-blue-800 focus:ring-blue-800'
+                        ? 'size-3 rounded border-gray-300 text-yale-800 focus:ring-yale-800'
+                        : 'size-3.5 rounded border-gray-300 text-yale-800 focus:ring-yale-800'
                   }
                   checked={checked}
                   onChange={() => onToggle(id)}

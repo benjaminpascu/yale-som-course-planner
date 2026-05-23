@@ -21,8 +21,10 @@ The user is a non-technical student. Explain clearly; ask explicitly when a prod
 | Milestone 1 — Scaffold + course list | ✅ Done |
 | Milestone 2 — Supabase + import | ✅ Done |
 | Course data fix (`courses_master_new.csv`) | ✅ Done |
-| Milestone 3 — Search + filters | ⏭️ **Next** (after user approves) |
-| Milestones 4–8 | Not started |
+| Milestone 3 — Search + filters | ✅ Done |
+| Milestone 4 — Calendar + conflicts | ✅ Done |
+| Milestone 5 — Tag unit tracker | ⏭️ **Next** (after user approves) |
+| Milestones 6–8 | Not started |
 
 Full detail: **`docs/PROJECT_STATUS.md`**.
 
@@ -62,7 +64,10 @@ npm run build
 
 | Area | Path |
 |------|------|
-| App shell / course list | `src/App.jsx` |
+| App shell / plan state | `src/App.jsx` |
+| Course browser + filters | `src/components/CourseBrowser.jsx` |
+| Weekly calendar | `src/components/WeeklyCalendar.jsx` |
+| Session-aware conflicts | `src/lib/scheduleConflicts.js` |
 | Load data (Supabase or bundled CSV) | `src/lib/loadData.js` |
 | Parse courses + `hasMeetingTime` | `src/lib/parseCourses.js` |
 | Parse tags | `src/lib/parseTags.js` |

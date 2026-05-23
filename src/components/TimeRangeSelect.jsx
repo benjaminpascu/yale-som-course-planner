@@ -1,7 +1,7 @@
 import { TIME_PICKER_OPTIONS } from '../lib/courseDisplay'
 
 const selectClassName =
-  'mt-0.5 w-full rounded-md border border-gray-300 bg-white px-2 py-2 text-sm shadow-sm focus:border-blue-800 focus:outline-none focus:ring-1 focus:ring-blue-800'
+  'mt-0.5 w-full rounded-md border border-yale-200 bg-yale-50/80 px-2 py-2 text-sm focus:border-yale-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-yale-800'
 
 export default function TimeRangeSelect({
   timeFrom,

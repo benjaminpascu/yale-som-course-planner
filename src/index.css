@@ -1,1 +1,17 @@
 @import "tailwindcss";
+
+/* Yale-inspired navy + grey scale (no purple accents) */
+@theme {
+  --color-yale-50: #f5f7fa;
+  --color-yale-100: #e8edf3;
+  --color-yale-150: #d4dce8;
+  --color-yale-200: #b8c5d6;
+  --color-yale-300: #8fa3bc;
+  --color-yale-600: #3d5a7a;
+  --color-yale-700: #264a6e;
+  --color-yale-800: #00356b;
+  --color-yale-900: #002a54;
+  --color-yale-950: #001d3d;
+  --color-yale-selected: #e8f2fa;
+  --color-yale-selected-hover: #dcecf8;
+}
