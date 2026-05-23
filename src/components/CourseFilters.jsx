@@ -1,0 +1,140 @@
+import { BID_FILTER_OPTIONS, WEEKDAYS } from '../lib/courseDisplay'
+import {
+  SESSION_FULL_TERM_FOOTNOTE,
+  formatSessionLabel,
+  hasSelectedFullTermSession,
+  isFullTermSession,
+} from '../lib/sessionDisplay'
+import {
+  REQUIREMENT_TAG_CODES,
+  REQUIREMENT_TAG_LABELS,
+} from '../lib/requirementTags'
+import FilterCheckboxGroup from './FilterCheckboxGroup'
+import TimeRangeSelect from './TimeRangeSelect'
+
+function formatUnits(units) {
+  if (units === 0) return '0 units'
+  if (units === 1) return '1 unit'
+  return `${units} units`
+}
+
+export default function CourseFilters({
+  sessions,
+  categories,
+  unitValues,
+  filters,
+  onSearchChange,
+  onTimeFromChange,
+  onTimeToChange,
+  onToggle,
+  onClear,
+  hasFilters,
+}) {
+  const sessionOptions = sessions.map((s) => ({
+    id: s,
+    label: formatSessionLabel(s, {
+      showAsterisk: filters.sessions.has(s) && isFullTermSession(s),
+    }),
+  }))
+  const showSessionFootnote = hasSelectedFullTermSession(filters.sessions)
+  const dayOptions = WEEKDAYS.map((d) => ({ id: d, label: d }))
+  const unitOptions = unitValues.map((u) => ({
+    id: String(u),
+    label: formatUnits(u),
+  }))
+  const categoryOptions = categories.map((c) => ({ id: c, label: c }))
+  const tagOptions = REQUIREMENT_TAG_CODES.map((code) => ({
+    id: code,
+    label: REQUIREMENT_TAG_LABELS[code] ?? code,
+  }))
+
+  return (
+    <aside className="w-full shrink-0 space-y-5 border-b border-gray-200 bg-white p-4 lg:w-80 lg:border-b-0 lg:border-r xl:w-96">
+      <div>
+        <label
+          htmlFor="course-search"
+          className="text-xs font-semibold uppercase tracking-wide text-gray-500"
+        >
+          Search
+        </label>
+        <input
+          id="course-search"
+          type="search"
+          placeholder="Number, title, faculty…"
+          value={filters.search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          className="mt-1.5 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-800 focus:outline-none focus:ring-1 focus:ring-blue-800"
+        />
+      </div>
+
+      <FilterCheckboxGroup
+        legend="Session"
+        layout="wrap"
+        footer={showSessionFootnote ? SESSION_FULL_TERM_FOOTNOTE : undefined}
+        options={sessionOptions}
+        selected={filters.sessions}
+        onToggle={(id) => onToggle('sessions', id)}
+      />
+
+      <FilterCheckboxGroup
+        legend="Day of week"
+        hint="Timed courses only"
+        layout="inline"
+        options={dayOptions}
+        selected={filters.days}
+        onToggle={(id) => onToggle('days', id)}
+      />
+
+      <TimeRangeSelect
+        timeFrom={filters.timeFrom}
+        timeTo={filters.timeTo}
+        onTimeFromChange={onTimeFromChange}
+        onTimeToChange={onTimeToChange}
+      />
+
+      <FilterCheckboxGroup
+        legend="Units"
+        layout="wrap"
+        options={unitOptions}
+        selected={
+          new Set([...filters.units].map((u) => String(u)))
+        }
+        onToggle={(id) => onToggle('units', Number(id))}
+      />
+
+      <FilterCheckboxGroup
+        legend="Bid or permission"
+        layout="wrap"
+        options={BID_FILTER_OPTIONS}
+        selected={filters.bidTypes}
+        onToggle={(id) => onToggle('bidTypes', id)}
+      />
+
+      <FilterCheckboxGroup
+        legend="Category"
+        options={categoryOptions}
+        selected={filters.categories}
+        onToggle={(id) => onToggle('categories', id)}
+      />
+
+      <FilterCheckboxGroup
+        legend="Requirement tag"
+        hint="Student-maintained tags"
+        layout="wrap"
+        options={tagOptions}
+        selected={filters.tagCodes}
+        onToggle={(id) => onToggle('tagCodes', id)}
+      />
+
+      {hasFilters && (
+        <button
+          type="button"
+          onClick={onClear}
+          className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          Clear all filters
+        </button>
+      )}
+    </aside>
+  )
+}

@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react'
+import CourseBrowser from './components/CourseBrowser'
 import { loadAppData } from './lib/loadData'
-import { formatSchedule, hasMeetingTime } from './lib/parseCourses'
 
 function App() {
   const [courses, setCourses] = useState([])
-  const [tagCount, setTagCount] = useState(0)
+  const [tags, setTags] = useState([])
   const [dataSource, setDataSource] = useState('local')
   const [status, setStatus] = useState('loading')
   const [error, setError] = useState(null)
 
   useEffect(() => {
     loadAppData()
-      .then(({ courses: loadedCourses, tags, source }) => {
+      .then(({ courses: loadedCourses, tags: loadedTags, source }) => {
         setCourses(loadedCourses)
-        setTagCount(tags.length)
+        setTags(loadedTags)
         setDataSource(source)
         setStatus('ready')
       })
@@ -47,7 +47,7 @@ function App() {
           Yale SOM Course Planner
         </h1>
         <p className="mt-1 text-sm text-gray-600">
-          {courses.length} courses loaded · {tagCount} tag mappings loaded
+          {courses.length} courses loaded · {tags.length} tag mappings loaded
         </p>
         <p className="mt-0.5 text-xs text-gray-500">
           Data source:{' '}
@@ -55,31 +55,8 @@ function App() {
         </p>
       </header>
 
-      <main className="px-6 py-4">
-        <ul className="divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white">
-          {courses.map((course) => (
-            <li
-              key={course.courseId}
-              className="px-4 py-3 text-sm"
-            >
-              <div className="font-medium text-gray-900">
-                {course.courseNumber} — {course.title}
-              </div>
-              <div className="mt-1 text-gray-600">
-                {course.faculty || 'Faculty TBA'}
-              </div>
-              <div className="mt-1 text-gray-500">
-                {formatSchedule(course)} · {course.units} unit
-                {course.units === 1 ? '' : 's'} · {course.session}
-              </div>
-              {!hasMeetingTime(course) && (
-                <p className="mt-1 text-xs text-amber-700">
-                  No time defined — won&apos;t show on calendar
-                </p>
-              )}
-            </li>
-          ))}
-        </ul>
+      <main className="overflow-hidden rounded-lg border border-gray-200 bg-white lg:mx-6 lg:my-4">
+        <CourseBrowser courses={courses} tags={tags} />
       </main>
     </div>
   )
