@@ -1,8 +1,19 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import CourseBrowser from './components/CourseBrowser'
 import PlanningPanel from './components/PlanningPanel'
 import { getAcademicYearLabel } from './lib/academicYear'
 import { loadAppData } from './lib/loadData'
+import {
+  courseIdSetFromArray,
+  deletePlanFromStore,
+  getPlanById,
+  loadPlanStore,
+  persistPlanStore,
+  sanitizeCourseIds,
+  setActivePlanId,
+  setsEqual,
+  upsertPlan,
+} from './lib/planStorage'
 
 const YALE_COURSE_LIST_URL = 'https://som.yale.edu/elective-core-courses'
 
@@ -11,7 +22,14 @@ function App() {
   const [tags, setTags] = useState([])
   const [status, setStatus] = useState('loading')
   const [error, setError] = useState(null)
+  const [planStore, setPlanStore] = useState(() => loadPlanStore())
   const [selectedIds, setSelectedIds] = useState(() => new Set())
+  const planHydratedRef = useRef(false)
+
+  const validCourseIds = useMemo(
+    () => new Set(courses.map((c) => c.courseId)),
+    [courses],
+  )
 
   useEffect(() => {
     loadAppData()
@@ -25,6 +43,44 @@ function App() {
         setStatus('error')
       })
   }, [])
+
+  useEffect(() => {
+    if (status !== 'ready' || courses.length === 0 || planHydratedRef.current) {
+      return
+    }
+    planHydratedRef.current = true
+
+    const active = planStore.activePlanId
+      ? getPlanById(planStore, planStore.activePlanId)
+      : null
+    if (active) {
+      const ids = sanitizeCourseIds(active.courseIds, validCourseIds)
+      setSelectedIds(new Set(ids))
+    }
+  }, [status, courses.length, planStore, validCourseIds])
+
+  const persist = useCallback((nextStore) => {
+    setPlanStore(nextStore)
+    persistPlanStore(nextStore)
+  }, [])
+
+  const activePlan = useMemo(
+    () =>
+      planStore.activePlanId
+        ? getPlanById(planStore, planStore.activePlanId)
+        : null,
+    [planStore],
+  )
+
+  const savedCourseIds = useMemo(
+    () => courseIdSetFromArray(activePlan?.courseIds ?? []),
+    [activePlan],
+  )
+
+  const isDirty = useMemo(
+    () => !setsEqual(selectedIds, savedCourseIds),
+    [selectedIds, savedCourseIds],
+  )
 
   const selectedCourses = useMemo(
     () => courses.filter((c) => selectedIds.has(c.courseId)),
@@ -54,6 +110,103 @@ function App() {
   const clearPlan = useCallback(() => {
     setSelectedIds(new Set())
   }, [])
+
+  const handleNewPlan = useCallback(() => {
+    if (isDirty) {
+      const ok = window.confirm(
+        'Start a new plan? Unsaved changes to the current plan will stay there when you open it again from the list.',
+      )
+      if (!ok) return
+    }
+    persist(setActivePlanId(planStore, null))
+    setSelectedIds(new Set())
+  }, [isDirty, persist, planStore])
+
+  const handleSelectPlan = useCallback(
+    (planId) => {
+      if (planId === planStore.activePlanId) return
+
+      if (
+        isDirty &&
+        !window.confirm(
+          'Switch plans? Unsaved changes to the current plan will be lost.',
+        )
+      ) {
+        return
+      }
+
+      const plan = getPlanById(planStore, planId)
+      if (!plan) return
+
+      const ids = sanitizeCourseIds(plan.courseIds, validCourseIds)
+      setSelectedIds(new Set(ids))
+      persist(setActivePlanId(planStore, planId))
+    },
+    [isDirty, persist, planStore, validCourseIds],
+  )
+
+  const handleSavePlan = useCallback(() => {
+    if (!planStore.activePlanId) {
+      const name = window.prompt('Name this plan:', 'My plan')
+      if (name === null) return
+      const trimmed = name.trim()
+      if (!trimmed) return
+
+      const next = upsertPlan(planStore, {
+        id: null,
+        name: trimmed,
+        courseIds: [...selectedIds],
+      })
+      persist(next)
+      return
+    }
+
+    const plan = getPlanById(planStore, planStore.activePlanId)
+    if (!plan) return
+
+    const next = upsertPlan(planStore, {
+      id: plan.id,
+      name: plan.name,
+      courseIds: [...selectedIds],
+    })
+    persist(next)
+  }, [persist, planStore, selectedIds])
+
+  const handleRenamePlan = useCallback(() => {
+    const plan = planStore.activePlanId
+      ? getPlanById(planStore, planStore.activePlanId)
+      : null
+    if (!plan) return
+
+    const name = window.prompt('Rename plan:', plan.name)
+    if (name === null) return
+    const trimmed = name.trim()
+    if (!trimmed || trimmed === plan.name) return
+
+    const next = upsertPlan(planStore, {
+      id: plan.id,
+      name: trimmed,
+      courseIds: [...selectedIds],
+    })
+    persist(next)
+  }, [persist, planStore, selectedIds])
+
+  const handleDeletePlan = useCallback(() => {
+    const plan = planStore.activePlanId
+      ? getPlanById(planStore, planStore.activePlanId)
+      : null
+    if (!plan) return
+
+    if (
+      !window.confirm(`Delete "${plan.name}"? This cannot be undone.`)
+    ) {
+      return
+    }
+
+    const next = deletePlanFromStore(planStore, plan.id)
+    persist(next)
+    setSelectedIds(new Set())
+  }, [persist, planStore])
 
   if (status === 'loading') {
     return (
@@ -111,6 +264,15 @@ function App() {
           selectedCourses={selectedCourses}
           hasSelection={selectedIds.size > 0}
           tags={tags}
+          plans={planStore.plans}
+          activePlanId={planStore.activePlanId}
+          activePlanName={activePlan?.name ?? null}
+          isDirty={isDirty}
+          onNewPlan={handleNewPlan}
+          onSelectPlan={handleSelectPlan}
+          onSavePlan={handleSavePlan}
+          onRenamePlan={handleRenamePlan}
+          onDeletePlan={handleDeletePlan}
           onRemoveCourse={removeCourse}
           onClearPlan={clearPlan}
         />

@@ -44,16 +44,31 @@
 - **Your plan** panel (working list only — no save/load until Milestone 6)
 - Untimed courses in plan but not on grid
 - Deferred (optional PRD): “view by session” calendar toggle; FullCalendar vs custom (used custom grid)
+- **Layout (May 2026):** Single full-width column on all screen sizes — calendar (placeholder until first course) → requirements → your plan → collapsible search & filters → course catalog. Yale navy/grey section styling.
+
+### Milestone 5 — Tag unit tracker ✅
+
+- **Requirements** panel: all seven Yale requirement tags always shown; sums **units** (not course count)
+- Live update as courses are added/removed from the working plan
+- Hover tooltip lists contributing courses and units per tag
+- Student-maintained disclaimer (§7.3)
+- Code: `src/components/TagUnitTracker.jsx`, `src/lib/tagUnitTracker.js`
 
 ---
 
-## Next up
+## Next up (pending your approval)
 
-### Milestone 5 — Tag unit tracker ⏭️
+### Milestone 6 — Named plans + polish 🧪
 
-Per PRD §7.3: live units per requirement tag for courses in the active plan (all seven tags, no thresholds).
+Implemented (May 2026):
 
-**Stop after Milestone 5** for user review; do not start Milestone 6 until they reply **approve**.
+- **Saved plans** bar between Requirements and Your plan: switch plans, save/update, duplicate, download CSV, delete
+- Plans stored in browser `localStorage` (`src/lib/planStorage.js`); reload restores last active plan
+- Unsaved-changes warning when switching plans or starting a new plan
+- Shared disclaimer copy (`src/components/Disclaimer.jsx`) in Requirements + plan save area
+- Removed “saving comes later” placeholder in Your plan footer
+
+Reply **`approve`** in chat when this looks good; then we move to Milestone 7 (beta).
 
 ---
 
@@ -61,7 +76,6 @@ Per PRD §7.3: live units per requirement tag for courses in the active plan (al
 
 | Milestone | Summary |
 |-----------|---------|
-| 6 | Named plans (localStorage), save/load/duplicate/export JSON, plan UI polish |
 | 7 | Beta |
 | 8 | Launch |
 
@@ -69,8 +83,8 @@ Per PRD §7.3: live units per requirement tag for courses in the active plan (al
 
 ## Open product decisions (defer unless blocking)
 
-- Calendar library: FullCalendar vs custom grid (decide at Milestone 4)
-- GitHub + Vercel: not wired yet
+- Calendar library: FullCalendar vs custom grid — **resolved** (custom grid at M4)
+- Vercel deploy: not wired yet (GitHub repo exists)
 - Yale policy email: user handling separately
 
 ---
@@ -81,9 +95,9 @@ Per PRD §7.3: live units per requirement tag for courses in the active plan (al
 npm run dev
 ```
 
-- Header: course count, tag count, data source (Supabase or local)
-- Left: search + filters; click a course to add/remove from plan
-- Right top: **Your plan** list; below: weekly calendar (timed courses only)
+- Header: academic year (from CSV `TermCode`), course/tag counts, link to [Yale SOM Course List](https://som.yale.edu/elective-core-courses)
+- Top → bottom: **Weekly calendar** (empty prompt until you add a course) → **Requirements** (tag units) → **Your plan** → **Search & filters** (collapsible) → **Course catalog**
+- Click a catalog row to add/remove from plan; selected rows show light blue “In plan” styling
 - Rows that would overlap your plan show a red **Conflict** badge (still clickable)
 - Most rows: `Mo,We · 13:00–16:00` style times
 - Some rows: semester date range + **No time defined — won't show on calendar**
@@ -102,3 +116,5 @@ npm run import:data
 |------|--------|
 | May 2026 | Initial scaffold; Supabase; `courses_master_new.csv`; no-time warning in list |
 | May 2026 | Milestone 3 course browser; Milestone 4 calendar + session-aware conflicts |
+| May 2026 | Milestone 5 tag unit tracker; single-column Yale-themed UI; M6 next |
+| May 2026 | Milestone 6 named plans + localStorage + CSV export (pending approve) |

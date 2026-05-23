@@ -7,6 +7,15 @@ export default function PlanningPanel({
   selectedCourses,
   hasSelection,
   tags,
+  plans,
+  activePlanId,
+  activePlanName,
+  isDirty,
+  onNewPlan,
+  onSelectPlan,
+  onSavePlan,
+  onRenamePlan,
+  onDeletePlan,
   onRemoveCourse,
   onClearPlan,
 }) {
@@ -20,6 +29,15 @@ export default function PlanningPanel({
       <TagUnitTracker selectedCourses={selectedCourses} tags={tags} />
       <PlanPanel
         selectedCourses={selectedCourses}
+        plans={plans}
+        activePlanId={activePlanId}
+        activePlanName={activePlanName}
+        isDirty={isDirty}
+        onNewPlan={onNewPlan}
+        onSelectPlan={onSelectPlan}
+        onSavePlan={onSavePlan}
+        onRenamePlan={onRenamePlan}
+        onDeletePlan={onDeletePlan}
         onRemoveCourse={onRemoveCourse}
         onClearPlan={onClearPlan}
       />

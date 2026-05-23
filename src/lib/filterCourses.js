@@ -1,3 +1,4 @@
+import { normalizeCategory } from './categoryDisplay'
 import { hasMeetingTime } from './parseCourses'
 import { normalizeBidType, parseTimeToMinutes } from './courseDisplay'
 
@@ -90,7 +91,10 @@ export function courseMatchesFilters(course, filters, tagsByCourseNumber) {
     return false
   }
 
-  if (filters.categories.size > 0 && !filters.categories.has(course.category)) {
+  if (
+    filters.categories.size > 0 &&
+    !filters.categories.has(normalizeCategory(course.category))
+  ) {
     return false
   }
 
@@ -154,10 +158,13 @@ export function uniqueSessions(courses) {
 }
 
 /** @param {import('./parseCourses').Course[]} courses */
+/** Distinct categories from loaded courses (dynamic; not a fixed taxonomy). */
 export function uniqueCategories(courses) {
-  return [...new Set(courses.map((c) => c.category).filter(Boolean))].sort(
-    (a, b) => a.localeCompare(b),
-  )
+  return [
+    ...new Set(
+      courses.map((c) => normalizeCategory(c.category)).filter(Boolean),
+    ),
+  ].sort((a, b) => a.localeCompare(b))
 }
 
 /** @param {import('./parseCourses').Course[]} courses */

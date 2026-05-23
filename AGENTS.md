@@ -23,8 +23,9 @@ The user is a non-technical student. Explain clearly; ask explicitly when a prod
 | Course data fix (`courses_master_new.csv`) | ✅ Done |
 | Milestone 3 — Search + filters | ✅ Done |
 | Milestone 4 — Calendar + conflicts | ✅ Done |
-| Milestone 5 — Tag unit tracker | ⏭️ **Next** (after user approves) |
-| Milestones 6–8 | Not started |
+| Milestone 5 — Tag unit tracker | ✅ Done |
+| Milestone 6 — Named plans + polish | ⏭️ **Next** (pending your `approve` after testing) |
+| Milestones 7–8 | Not started |
 
 Full detail: **`docs/PROJECT_STATUS.md`**.
 
@@ -65,19 +66,26 @@ npm run build
 | Area | Path |
 |------|------|
 | App shell / plan state | `src/App.jsx` |
+| Planning stack (calendar → requirements → plan) | `src/components/PlanningPanel.jsx` |
 | Course browser + filters | `src/components/CourseBrowser.jsx` |
 | Weekly calendar | `src/components/WeeklyCalendar.jsx` |
+| Requirement tag units | `src/components/TagUnitTracker.jsx`, `src/lib/tagUnitTracker.js` |
+| Saved plans UI + localStorage | `src/components/PlanManager.jsx`, `src/lib/planStorage.js` |
+| Plan CSV export | `src/lib/planExport.js` |
+| Section colors / in-plan highlight | `src/lib/sectionTheme.js` |
+| Academic year from TermCode | `src/lib/academicYear.js` |
 | Session-aware conflicts | `src/lib/scheduleConflicts.js` |
 | Load data (Supabase or bundled CSV) | `src/lib/loadData.js` |
 | Parse courses + `hasMeetingTime` | `src/lib/parseCourses.js` |
+| Category typo aliases only (new CSV values pass through) | `src/lib/categoryDisplay.js` |
 | Parse tags | `src/lib/parseTags.js` |
 | CSV column validation | `src/lib/csvColumns.js` |
 | Supabase import CLI | `scripts/import_courses.js` |
 
 ## Tech stack
 
-Vite + React + Tailwind + Supabase (`@supabase/supabase-js`). No custom backend. Plans in `localStorage` (not built yet).
+Vite + React + Tailwind + Supabase (`@supabase/supabase-js`). No custom backend. Saved plans in `localStorage` — `src/lib/planStorage.js`, `src/components/PlanManager.jsx`.
 
 ## Git / deploy
 
-GitHub and Vercel are not set up yet. Do not commit `.env`. Only create git commits when the user asks.
+GitHub: `benjaminpascu/yale-som-course-planner`. Vercel deploy not wired yet. Do not commit `.env`. Only create git commits when the user asks.

@@ -115,6 +115,7 @@ export default function CourseFilters({
       <div className={FILTER_CARD}>
         <FilterCheckboxGroup
           legend="Category"
+          layout="columns"
           options={categoryOptions}
           selected={filters.categories}
           onToggle={(id) => onToggle('categories', id)}

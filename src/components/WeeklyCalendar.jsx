@@ -1,5 +1,10 @@
 import { useMemo } from 'react'
-import { parseTimeToMinutes } from '../lib/courseDisplay'
+import { normalizeCategory } from '../lib/categoryDisplay'
+import {
+  formatCourseHeading,
+  formatCourseUnits,
+  parseTimeToMinutes,
+} from '../lib/courseDisplay'
 import { hasMeetingTime } from '../lib/parseCourses'
 import { formatSessionLabel } from '../lib/sessionDisplay'
 import { sectionTone } from '../lib/sectionTheme'
@@ -162,16 +167,16 @@ export default function WeeklyCalendar({
                     <button
                       key={`${course.courseId}-${day}`}
                       type="button"
-                      title={`${course.courseNumber} — ${course.title}\n${formatSessionLabel(course.session)} · ${course.units} units · ${course.faculty || 'Faculty TBA'}${course.room ? ` · ${course.room}` : ''}`}
+                      title={`${formatCourseHeading(course)}\n${formatSessionLabel(course.session)} · ${course.faculty || 'Faculty TBA'}${course.room ? ` · ${course.room}` : ''}`}
                       onClick={() => onRemoveCourse(course.courseId)}
-                      className={`absolute inset-x-0.5 z-10 overflow-hidden rounded px-1 py-0.5 text-left text-[10px] leading-tight text-white shadow-sm hover:ring-2 hover:ring-white/80 ${blockColor(course.category)}`}
+                      className={`absolute inset-x-0.5 z-10 overflow-hidden rounded px-1 py-0.5 text-left text-[10px] leading-tight text-white shadow-sm hover:ring-2 hover:ring-white/80 ${blockColor(normalizeCategory(course.category))}`}
                       style={{
                         top: topPx(course.startTime),
                         height: heightPx(course.startTime, course.endTime),
                       }}
                     >
                       <span className="block truncate font-semibold">
-                        {course.courseNumber}
+                        {course.courseNumber} ({formatCourseUnits(course.units)})
                       </span>
                       <span className="block truncate opacity-90">
                         {course.startTime}–{course.endTime}

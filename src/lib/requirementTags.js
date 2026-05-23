@@ -1,3 +1,5 @@
+export { REQUIREMENT_TAG_LABELS } from './requirementTagTheme.js'
+
 /** Yale SOM requirement tag codes (PRD §6.2). */
 export const REQUIREMENT_TAG_CODES = [
   'MGAM',
@@ -9,13 +11,14 @@ export const REQUIREMENT_TAG_CODES = [
   'MGSR',
 ]
 
-/** Short labels for filter UI. */
-export const REQUIREMENT_TAG_LABELS = {
-  MGAM: 'MAM Req',
-  MGBA: 'Asset Management Req',
-  MGGB: 'Global Business & Society Req',
-  MGGS: 'Global Studies Req',
-  MGLD: 'Leadership Dist Req',
-  MGMS: 'Management Science Req',
-  MGSR: 'Systemic Risk Req',
+/**
+ * Requirement tags on a course, in canonical display order.
+ *
+ * @param {string} courseNumber
+ * @param {Map<string, Set<string>>} tagsByCourseNumber
+ */
+export function getCourseRequirementTags(courseNumber, tagsByCourseNumber) {
+  const courseTags = tagsByCourseNumber.get(courseNumber)
+  if (!courseTags) return []
+  return REQUIREMENT_TAG_CODES.filter((code) => courseTags.has(code))
 }

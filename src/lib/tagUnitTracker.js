@@ -1,15 +1,11 @@
+import { formatCourseUnits } from './courseDisplay.js'
 import {
   REQUIREMENT_TAG_CODES,
   REQUIREMENT_TAG_LABELS,
 } from './requirementTags.js'
 
-/**
- * @param {number} units
- */
-export function formatTagUnits(units) {
-  if (units === 1) return '1 unit'
-  return `${units} units`
-}
+/** @param {number} units */
+export const formatTagUnits = formatCourseUnits
 
 /**
  * Live units per Yale requirement tag for courses in the active plan.

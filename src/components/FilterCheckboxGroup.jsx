@@ -1,8 +1,9 @@
 /**
- * @param {'stack' | 'inline' | 'wrap'} [layout]
+ * @param {'stack' | 'inline' | 'wrap' | 'columns'} [layout]
  * - stack: vertical list (default)
  * - inline: single horizontal row (e.g. weekdays)
  * - wrap: flowing chips (e.g. sessions, units)
+ * - columns: two-column grid (e.g. categories)
  */
 export default function FilterCheckboxGroup({
   legend,
@@ -18,14 +19,18 @@ export default function FilterCheckboxGroup({
       ? 'flex flex-wrap justify-between gap-1'
       : layout === 'wrap'
         ? 'flex flex-wrap gap-1.5'
-        : 'space-y-1'
+        : layout === 'columns'
+          ? 'grid grid-cols-2 gap-x-3 gap-y-1'
+          : 'space-y-1'
 
   const labelBaseClassName =
     layout === 'inline'
       ? 'flex min-w-0 flex-1 cursor-pointer flex-col items-center gap-1 rounded-md border px-1 py-2 text-xs'
       : layout === 'wrap'
         ? 'inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs'
-        : 'flex cursor-pointer items-center gap-2 text-sm text-gray-700'
+        : layout === 'columns'
+          ? 'flex cursor-pointer items-start gap-1.5 text-xs leading-snug text-gray-700'
+          : 'flex cursor-pointer items-center gap-2 text-sm text-gray-700'
 
   const labelIdleClassName =
     layout === 'stack'

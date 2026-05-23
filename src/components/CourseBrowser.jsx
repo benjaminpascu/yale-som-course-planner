@@ -9,6 +9,7 @@ import {
   uniqueSessions,
   uniqueUnits,
 } from '../lib/filterCourses'
+import { getCourseRequirementTags } from '../lib/requirementTags'
 import { getConflictingCourseIds } from '../lib/scheduleConflicts'
 import { sectionTone } from '../lib/sectionTheme'
 import CollapseChevron from './CollapseChevron'
@@ -119,6 +120,10 @@ export default function CourseBrowser({
               <CourseRow
                 key={course.courseId}
                 course={course}
+                requirementTagCodes={getCourseRequirementTags(
+                  course.courseNumber,
+                  tagsByCourseNumber,
+                )}
                 isSelected={selectedIds.has(course.courseId)}
                 hasConflict={conflictingIds.has(course.courseId)}
                 onToggle={() => onToggleCourse(course.courseId)}

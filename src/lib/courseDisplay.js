@@ -51,6 +51,22 @@ export function parseTimeToMinutes(time) {
   return hours * 60 + minutes
 }
 
+/** @param {number} units */
+export function formatCourseUnits(units) {
+  if (units === 1) return '1 unit'
+  if (units === 0) return '0 units'
+  return `${units} units`
+}
+
+/**
+ * Course number, title, and units — e.g. `MGT 403 — Title (2 units)`.
+ *
+ * @param {{ courseNumber: string, title: string, units: number }} course
+ */
+export function formatCourseHeading(course) {
+  return `${course.courseNumber} — ${course.title} (${formatCourseUnits(course.units)})`
+}
+
 /**
  * Normalize messy CSV values for filtering and badges.
  * @returns {'bid' | 'permission' | 'core' | 'open' | 'other'}
@@ -65,32 +81,67 @@ export function normalizeBidType(value) {
   return 'other'
 }
 
-const BID_BADGE = {
-  bid: { label: 'Bid required', className: 'bg-amber-100 text-amber-900' },
-  permission: {
-    label: 'Permission required',
-    className: 'bg-yale-100 text-yale-900',
+/**
+ * Single source for bid/permission types: filter checkboxes, row tags, CSV export.
+ * `id` must match `normalizeBidType()` return values.
+ */
+export const BID_TYPE_CONFIG = {
+  bid: {
+    tagLabel: 'Bid required',
+    filterLabel: 'Bid required',
+    theme: { bg: '#874848', fg: '#f8ecec' },
   },
-  core: { label: 'Core', className: 'bg-yale-800 text-white' },
-  open: { label: 'Open', className: 'bg-gray-100 text-gray-800' },
-  other: { label: null, className: 'bg-gray-100 text-gray-800' },
+  permission: {
+    tagLabel: 'Permission required',
+    filterLabel: 'Permission required',
+    theme: { bg: '#874848', fg: '#f8ecec' },
+  },
+  core: {
+    tagLabel: 'Core',
+    filterLabel: 'Core',
+    theme: { bg: '#00356b', fg: '#ffffff' },
+  },
+  open: {
+    tagLabel: 'Open',
+    filterLabel: 'Open (no bid)',
+    theme: { bg: '#3d6b52', fg: '#f0f7f2' },
+  },
+  other: {
+    tagLabel: null,
+    filterLabel: 'Other',
+    theme: { bg: '#6b7280', fg: '#f9fafb' },
+  },
 }
+
+/** @type {(keyof typeof BID_TYPE_CONFIG)[]} */
+export const BID_TYPE_IDS = Object.keys(BID_TYPE_CONFIG)
+
+/** Filter checkbox options — ids align with `filters.bidTypes` / `normalizeBidType()`. */
+export const BID_FILTER_OPTIONS = BID_TYPE_IDS.map((id) => ({
+  id,
+  label: BID_TYPE_CONFIG[id].filterLabel,
+}))
 
 /** @param {string} bidOrPermission — raw CSV value */
 export function bidBadge(bidOrPermission) {
   const type = normalizeBidType(bidOrPermission)
-  const config = BID_BADGE[type]
+  const config = BID_TYPE_CONFIG[type]
   const label =
     type === 'other'
       ? bidOrPermission.trim() || 'Other'
-      : config.label
-  return { type, label, className: config.className }
+      : config.tagLabel
+  return { type, label }
 }
 
-export const BID_FILTER_OPTIONS = [
-  { id: 'bid', label: 'Bid required' },
-  { id: 'permission', label: 'Permission required' },
-  { id: 'core', label: 'Core' },
-  { id: 'open', label: 'Open (no bid)' },
-  { id: 'other', label: 'Other' },
-]
+/**
+ * Colored tag for catalog rows — same categories as the bid/permission filter.
+ *
+ * @param {string} bidOrPermission
+ * @returns {{ label: string, bg: string, fg: string } | null}
+ */
+export function getRegistrationTag(bidOrPermission) {
+  const { type, label } = bidBadge(bidOrPermission)
+  if (!label) return null
+
+  return { label, ...BID_TYPE_CONFIG[type].theme }
+}
