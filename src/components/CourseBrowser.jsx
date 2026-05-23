@@ -107,19 +107,6 @@ export default function CourseBrowser({
 
   return (
     <div className="flex w-full flex-col">
-      <details className={`group border-b ${filterTone.section}`}>
-        <summary
-          className={`flex cursor-pointer list-none items-center gap-2 border-b px-4 py-3 text-sm font-semibold text-yale-950 marker:content-none [&::-webkit-details-marker]:hidden ${filterTone.header}`}
-        >
-          <CollapseChevron />
-          <span className="flex-1">Search &amp; filters</span>
-          {active ? (
-            <span className="font-normal text-yale-800">(active)</span>
-          ) : null}
-        </summary>
-        <CourseFilters {...filterProps} />
-      </details>
-
       <section className={`w-full ${catalogTone.section}`}>
         <SectionHeader
           tone="catalog"
@@ -130,6 +117,20 @@ export default function CourseBrowser({
               : `${rangeStart}–${rangeEnd} of ${filtered.length} (${courses.length} total) · ${selectedIds.size} in plan`
           }
         />
+
+        <details className={`group border-b ${filterTone.section}`}>
+          <summary
+            className={`flex cursor-pointer list-none items-center gap-2 border-b px-4 py-3 text-sm font-semibold text-yale-950 marker:content-none [&::-webkit-details-marker]:hidden ${filterTone.header}`}
+          >
+            <CollapseChevron />
+            <span className="flex-1">Search &amp; filters</span>
+            {active ? (
+              <span className="font-normal text-yale-800">(active)</span>
+            ) : null}
+          </summary>
+          <CourseFilters {...filterProps} />
+        </details>
+
         {filtered.length === 0 ? (
           <p
             className={`px-4 py-8 text-center text-sm ${

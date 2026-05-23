@@ -1,5 +1,8 @@
 import { useMemo } from 'react'
-import { formatCourseHeading } from '../lib/courseDisplay'
+import {
+  formatCourseHeading,
+  formatCourseUnits,
+} from '../lib/courseDisplay'
 import { formatSchedule, hasMeetingTime } from '../lib/parseCourses'
 import { IN_PLAN_SURFACE, SAVE_BUTTON, sectionTone } from '../lib/sectionTheme'
 import {
@@ -13,9 +16,13 @@ function formatTotalUnits(total) {
   return `${total} units total`
 }
 
-function formatUnitsShort(total) {
-  if (total === 1) return '1 unit'
-  return `${total} units`
+function formatCourseCount(count) {
+  if (count === 1) return '1 course'
+  return `${count} courses`
+}
+
+function formatPlanHeaderSummary(courseCount, totalUnits) {
+  return `${formatCourseCount(courseCount)} (${formatCourseUnits(totalUnits)})`
 }
 
 export default function PlanPanel({
@@ -51,16 +58,13 @@ export default function PlanPanel({
         className={`flex cursor-pointer list-none items-center gap-2 border-b px-4 py-3 text-sm font-semibold text-yale-950 marker:content-none [&::-webkit-details-marker]:hidden ${planTone.header}`}
       >
         <CollapseChevron />
-        <span className="flex-1">Current plan</span>
+        <span className="flex-1">
+          Current plan
+          {activePlanName != null ? ` (${activePlanName})` : ''}
+        </span>
         {showSummary ? (
-          <span className="font-normal text-yale-800">
-            {activePlanName != null ? (
-              <>
-                {activePlanName} ({formatUnitsShort(totalUnits)})
-              </>
-            ) : (
-              <>({formatUnitsShort(totalUnits)})</>
-            )}
+          <span className="shrink-0 font-normal text-yale-800">
+            {formatPlanHeaderSummary(courseCount, totalUnits)}
             {isDirty ? (
               <span className="text-red-700"> · unsaved</span>
             ) : null}
@@ -127,14 +131,16 @@ export default function PlanPanel({
                         <p className="font-medium text-gray-900">
                           {formatCourseHeading(course)}
                         </p>
-                        <p className="mt-0.5 text-xs text-gray-500">
-                          {formatSchedule(course)}
-                        </p>
-                        {!hasMeetingTime(course) && (
-                          <p className="mt-0.5 text-xs text-amber-700">
-                            Not on calendar (no weekly time)
+                        <div className="mt-0.5 space-y-0.5 pl-3 text-xs">
+                          <p className="text-gray-500">
+                            {formatSchedule(course)}
                           </p>
-                        )}
+                          {!hasMeetingTime(course) && (
+                            <p className="text-amber-700">
+                              Not on calendar (no weekly time)
+                            </p>
+                          )}
+                        </div>
                       </div>
                       <button
                         type="button"

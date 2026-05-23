@@ -19,12 +19,12 @@ function GitHubIcon({ className }) {
 
 export default function AppFooter() {
   return (
-    <footer className="border-t border-yale-200 bg-yale-800 px-4 py-6 text-center text-sm text-white sm:px-6">
+    <footer className="border-t border-yale-950 bg-yale-900 px-4 py-6 text-center text-sm text-white">
       <a
         href={GITHUB_PROFILE_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="mx-auto inline-flex rounded-full p-2 text-white transition-colors hover:bg-yale-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-yale-800"
+        className="mx-auto inline-flex rounded-full p-2 text-white transition-colors hover:bg-yale-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-yale-900"
         aria-label="benjaminpascu on GitHub"
       >
         <GitHubIcon className="h-8 w-8" />

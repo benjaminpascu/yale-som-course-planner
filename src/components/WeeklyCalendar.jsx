@@ -166,15 +166,19 @@ export default function WeeklyCalendar({
     return (
       <section
         id="weekly-calendar"
-        className={`flex min-h-44 shrink-0 flex-col justify-center border-b ${calendarTone.section} px-6 py-10 sm:min-h-52`}
+        className={`flex min-h-44 shrink-0 flex-col border-b ${calendarTone.section} sm:min-h-52`}
         aria-label="Weekly schedule"
       >
-        <p className="text-center text-sm text-gray-500">
-          Select courses below to plan your weekly schedule.
-        </p>
-        <p className="mt-1 text-center text-xs text-gray-400">
-          Courses with meeting times will show on this calendar.
-        </p>
+        <SectionHeader
+          tone="calendar"
+          title="Weekly calendar"
+          subtitle="Select courses below to plan your weekly schedule."
+        />
+        <div className="flex flex-1 flex-col justify-center px-4 py-10">
+          <p className="text-center text-xs text-gray-400">
+            Courses with meeting times will show on this calendar.
+          </p>
+        </div>
       </section>
     )
   }
@@ -247,7 +251,7 @@ export default function WeeklyCalendar({
           above.
         </p>
       ) : (
-        <div className="w-full px-2 py-2 sm:px-4 sm:py-3">
+        <div className="w-full px-4 py-2 sm:py-3">
           <div
             className={`grid w-full overflow-visible rounded-lg border shadow-sm ${calendarTone.inset}`}
             style={{

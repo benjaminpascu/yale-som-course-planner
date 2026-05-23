@@ -215,7 +215,7 @@ function App() {
 
   if (status === 'loading') {
     return (
-      <div className="p-6 text-gray-600">
+      <div className="px-4 py-6 text-gray-600">
         Loading course data…
       </div>
     )
@@ -223,7 +223,7 @@ function App() {
 
   if (status === 'error') {
     return (
-      <div className="p-6 text-red-700">
+      <div className="px-4 py-6 text-red-700">
         <p className="font-semibold">Could not load data</p>
         <p className="mt-1 text-sm">{error}</p>
       </div>
@@ -232,7 +232,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="border-b border-yale-200 bg-yale-800 px-4 py-3 text-white sm:px-6 sm:py-4">
+      <header className="border-b border-yale-950 bg-yale-900 px-4 py-3 text-white sm:py-4">
         <h1 className="text-xl font-semibold">
           Yale SOM Course Planner
         </h1>

@@ -1,8 +1,8 @@
-import { sectionTone } from '../lib/sectionTheme'
+import { isInverseSectionTone, sectionTone } from '../lib/sectionTheme'
 
 export default function SectionHeader({ tone, title, subtitle, children }) {
   const { header } = sectionTone(tone)
-  const inverse = tone === 'catalog'
+  const inverse = isInverseSectionTone(tone)
 
   return (
     <div className={`border-b px-4 py-2.5 ${header}`}>

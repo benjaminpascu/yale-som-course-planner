@@ -16,7 +16,7 @@ export default function CourseRow({
   const rowBg = isSelected
     ? IN_PLAN_SURFACE
     : hasConflict
-      ? 'border border-transparent bg-amber-50/70'
+      ? 'border border-transparent bg-red-100/75'
       : 'border border-transparent bg-white even:bg-gray-50/80'
 
   return (
@@ -31,22 +31,18 @@ export default function CourseRow({
         } ${hasConflict && !isSelected ? 'text-gray-600' : ''}`}
       >
       <div className="flex items-start gap-3">
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-start gap-2">
-            {requirementTagCodes.map((code) => (
-              <RequirementTag key={code} tagCode={code} />
-            ))}
-            <div
-              className={`min-w-0 flex-1 font-medium ${hasConflict && !isSelected ? 'text-gray-600' : 'text-gray-900'}`}
-            >
-              {formatCourseHeading(course)}
-            </div>
-          </div>
-        </div>
-        <div className="flex shrink-0 flex-col items-end gap-1">
+        <p
+          className={`min-w-0 flex-1 font-medium ${hasConflict && !isSelected ? 'text-gray-600' : 'text-gray-900'}`}
+        >
+          {formatCourseHeading(course)}
+        </p>
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-1">
+          {requirementTagCodes.map((code) => (
+            <RequirementTag key={code} tagCode={code} />
+          ))}
           <RegistrationTag bidOrPermission={course.bidOrPermission} />
           {hasConflict && !isSelected && (
-            <span className="rounded bg-red-100 px-1.5 py-0.5 text-xs font-medium text-red-800">
+            <span className="rounded bg-red-700 px-1.5 py-0.5 text-xs font-semibold text-white shadow-sm">
               Conflict
             </span>
           )}
@@ -57,29 +53,31 @@ export default function CourseRow({
           )}
         </div>
       </div>
-      <div className="mt-1 text-gray-600">{course.faculty || 'Faculty TBA'}</div>
-      <div className="mt-1 text-gray-500">
-        {formatSchedule(course)} · {formatSessionLabel(course.session)}
-        {course.category
-          ? ` · ${normalizeCategory(course.category)}`
-          : ''}
+      <div className="mt-1 space-y-1 pl-3 text-sm">
+        <div className="text-gray-600">{course.faculty || 'Faculty TBA'}</div>
+        <div className="text-gray-500">
+          {formatSchedule(course)} · {formatSessionLabel(course.session)}
+          {course.category
+            ? ` · ${normalizeCategory(course.category)}`
+            : ''}
+        </div>
+        {!hasMeetingTime(course) && (
+          <p className="text-xs text-amber-700">
+            No time defined — won&apos;t show on calendar
+          </p>
+        )}
+        {course.syllabusUrl && (
+          <a
+            href={course.syllabusUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="inline-block text-xs font-medium text-yale-800 underline decoration-yale-800/30 hover:decoration-yale-800"
+          >
+            Syllabus
+          </a>
+        )}
       </div>
-      {!hasMeetingTime(course) && (
-        <p className="mt-1 text-xs text-amber-700">
-          No time defined — won&apos;t show on calendar
-        </p>
-      )}
-      {course.syllabusUrl && (
-        <a
-          href={course.syllabusUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          className="mt-1 inline-block text-xs font-medium text-yale-800 underline decoration-yale-800/30 hover:decoration-yale-800"
-        >
-          Syllabus
-        </a>
-      )}
       </button>
     </li>
   )
