@@ -1,16 +1,22 @@
-import { useMemo } from 'react'
-import { normalizeCategory } from '../lib/categoryDisplay'
+import { useEffect, useMemo, useState } from 'react'
+import CalendarCourseBlock from './CalendarCourseBlock'
+import { layoutCoursesForDay } from '../lib/calendarLayout'
 import {
-  formatCourseHeading,
+  courseVisibleInCalendarView,
+  getCalendarViewOptions,
+  getDefaultCalendarView,
+  planHasNonOverlappingSessions,
+} from '../lib/calendarSessionView'
+import {
   formatCourseUnits,
   parseTimeToMinutes,
+  WEEKDAYS,
 } from '../lib/courseDisplay'
-import { hasMeetingTime } from '../lib/parseCourses'
 import { formatSessionLabel } from '../lib/sessionDisplay'
+import { hasMeetingTime } from '../lib/parseCourses'
 import { sectionTone } from '../lib/sectionTheme'
 import SectionHeader from './SectionHeader'
 
-const WEEKDAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr']
 const START_HOUR = 8
 const END_HOUR = 21
 const MINUTES_PER_SLOT = 15
@@ -18,25 +24,7 @@ const TOTAL_MINUTES = (END_HOUR - START_HOUR) * 60
 const PX_PER_MINUTE = 0.85
 const GRID_HEIGHT = TOTAL_MINUTES * PX_PER_MINUTE
 
-const CATEGORY_COLORS = [
-  'bg-yale-800',
-  'bg-yale-700',
-  'bg-yale-600',
-  'bg-slate-700',
-  'bg-slate-600',
-  'bg-gray-700',
-  'bg-gray-600',
-  'bg-yale-900',
-]
-
-function blockColor(category) {
-  const key = category || 'default'
-  let hash = 0
-  for (let i = 0; i < key.length; i++) {
-    hash = (hash + key.charCodeAt(i) * (i + 1)) % CATEGORY_COLORS.length
-  }
-  return CATEGORY_COLORS[hash]
-}
+const CALENDAR_BLOCK_COLOR = 'bg-yale-800'
 
 function topPx(startTime) {
   const minutes = parseTimeToMinutes(startTime)
@@ -57,17 +45,101 @@ function formatHourLabel(hour) {
   return `${h12} ${period}`
 }
 
+function formatCoursesInPeriod(count) {
+  if (count === 1) return '1 course in period'
+  return `${count} courses in period`
+}
+
+function blockPositionStyle(column, totalColumns) {
+  const widthPct = 100 / totalColumns
+  const leftPct = column * widthPct
+  return {
+    left: `calc(${leftPct}% + 2px)`,
+    width: `calc(${widthPct}% - 4px)`,
+  }
+}
+
 export default function WeeklyCalendar({
   selectedCourses,
   hasSelection,
-  onRemoveCourse,
+  fallYear = null,
+  springYear = null,
 }) {
   const timedCourses = useMemo(
     () => selectedCourses.filter(hasMeetingTime),
     [selectedCourses],
   )
 
-  const untimedCount = selectedCourses.length - timedCourses.length
+  const viewOptions = useMemo(
+    () => getCalendarViewOptions(timedCourses, fallYear, springYear),
+    [timedCourses, fallYear, springYear],
+  )
+
+  const defaultView = useMemo(
+    () => getDefaultCalendarView(timedCourses),
+    [timedCourses],
+  )
+
+  const [calendarView, setCalendarView] = useState(defaultView)
+  const [openDetailKey, setOpenDetailKey] = useState(null)
+
+  useEffect(() => {
+    if (!openDetailKey) return
+    const close = () => setOpenDetailKey(null)
+    const timer = window.setTimeout(() => {
+      document.addEventListener('click', close)
+    }, 0)
+    return () => {
+      window.clearTimeout(timer)
+      document.removeEventListener('click', close)
+    }
+  }, [openDetailKey])
+
+  useEffect(() => {
+    setCalendarView((prev) => {
+      if (viewOptions.some((o) => o.id === prev)) return prev
+      return defaultView
+    })
+  }, [viewOptions, defaultView])
+
+  const visibleCourses = useMemo(
+    () =>
+      timedCourses.filter((c) => courseVisibleInCalendarView(c, calendarView)),
+    [timedCourses, calendarView],
+  )
+
+  const periodCourses = useMemo(
+    () =>
+      calendarView
+        ? selectedCourses.filter((c) =>
+            courseVisibleInCalendarView(c, calendarView),
+          )
+        : selectedCourses,
+    [selectedCourses, calendarView],
+  )
+
+  const periodUnits = useMemo(
+    () => periodCourses.reduce((sum, c) => sum + c.units, 0),
+    [periodCourses],
+  )
+
+  const periodUntimedCount = useMemo(
+    () => periodCourses.filter((c) => !hasMeetingTime(c)).length,
+    [periodCourses],
+  )
+
+  const mixedNonOverlappingSessions = useMemo(
+    () => planHasNonOverlappingSessions(timedCourses),
+    [timedCourses],
+  )
+
+  const layoutByDay = useMemo(() => {
+    const byDay = {}
+    for (const day of WEEKDAYS) {
+      byDay[day] = layoutCoursesForDay(visibleCourses, day)
+    }
+    return byDay
+  }, [visibleCourses])
 
   const hourLabels = useMemo(() => {
     const labels = []
@@ -78,10 +150,22 @@ export default function WeeklyCalendar({
   }, [])
 
   const calendarTone = sectionTone('calendar')
+  const activeViewLabel = useMemo(() => {
+    const fromTab = viewOptions.find((o) => o.id === calendarView)?.label
+    if (fromTab) return fromTab
+    if (calendarView) {
+      return formatSessionLabel(calendarView, { fallYear, springYear })
+    }
+    const session = selectedCourses.find((c) => c.session)?.session
+    return session
+      ? formatSessionLabel(session, { fallYear, springYear })
+      : ''
+  }, [viewOptions, calendarView, fallYear, springYear, selectedCourses])
 
   if (!hasSelection) {
     return (
       <section
+        id="weekly-calendar"
         className={`flex min-h-44 shrink-0 flex-col justify-center border-b ${calendarTone.section} px-6 py-10 sm:min-h-52`}
         aria-label="Weekly schedule"
       >
@@ -97,6 +181,7 @@ export default function WeeklyCalendar({
 
   return (
     <section
+      id="weekly-calendar"
       className={`flex shrink-0 flex-col border-b ${calendarTone.section}`}
     >
       <SectionHeader
@@ -104,13 +189,51 @@ export default function WeeklyCalendar({
         title="Weekly calendar"
         subtitle={
           <>
-            {timedCourses.length} on calendar
-            {untimedCount > 0
-              ? ` · ${untimedCount} in plan without weekly time`
+            {activeViewLabel ? `${activeViewLabel} · ` : null}
+            {formatCoursesInPeriod(periodCourses.length)} (
+            {formatCourseUnits(periodUnits)})
+            {periodUntimedCount > 0
+              ? ` · ${periodUntimedCount} without weekly time`
               : ''}
           </>
         }
       />
+
+      {viewOptions.length > 1 ? (
+        <div
+          className="flex flex-wrap items-center gap-1.5 border-b border-yale-100/80 bg-yale-50/40 px-4 py-2"
+          role="tablist"
+          aria-label="Calendar session view"
+        >
+          {viewOptions.map((opt) => {
+            const active = calendarView === opt.id
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setCalendarView(opt.id)}
+                className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+                  active
+                    ? 'bg-yale-800 text-white shadow-sm'
+                    : 'bg-white text-yale-800 ring-1 ring-yale-200 hover:bg-yale-50'
+                }`}
+              >
+                {opt.label}
+              </button>
+            )
+          })}
+        </div>
+      ) : null}
+
+      {mixedNonOverlappingSessions && viewOptions.length > 1 ? (
+        <p className="border-b border-yale-100/60 px-4 py-1.5 text-xs text-yale-700">
+          Fall 1 and Fall 2 (or Spring 1 and 2) do not meet in the same weeks —
+          switch tabs to see each schedule. Full-term courses appear on both
+          halves.
+        </p>
+      ) : null}
 
       {timedCourses.length === 0 ? (
         <p className="px-4 py-10 text-center text-sm text-gray-600">
@@ -118,10 +241,15 @@ export default function WeeklyCalendar({
           appears on the grid. They still count in your plan and requirements
           below.
         </p>
+      ) : visibleCourses.length === 0 ? (
+        <p className="px-4 py-10 text-center text-sm text-gray-600">
+          No courses in your plan match this session view. Try another tab
+          above.
+        </p>
       ) : (
         <div className="w-full px-2 py-2 sm:px-4 sm:py-3">
           <div
-            className={`grid w-full overflow-hidden rounded-lg border shadow-sm ${calendarTone.inset}`}
+            className={`grid w-full overflow-visible rounded-lg border shadow-sm ${calendarTone.inset}`}
             style={{
               gridTemplateColumns: '2.75rem repeat(5, minmax(0, 1fr))',
             }}
@@ -136,7 +264,10 @@ export default function WeeklyCalendar({
               </div>
             ))}
 
-            <div className="relative border-r border-gray-100" style={{ height: GRID_HEIGHT }}>
+            <div
+              className="relative border-r border-gray-100"
+              style={{ height: GRID_HEIGHT }}
+            >
               {hourLabels.map(({ hour, top }) => (
                 <div
                   key={hour}
@@ -161,29 +292,35 @@ export default function WeeklyCalendar({
                     style={{ top }}
                   />
                 ))}
-                {timedCourses.flatMap((course) => {
-                  if (!course.meetingDays.includes(day)) return []
-                  return (
-                    <button
-                      key={`${course.courseId}-${day}`}
-                      type="button"
-                      title={`${formatCourseHeading(course)}\n${formatSessionLabel(course.session)} · ${course.faculty || 'Faculty TBA'}${course.room ? ` · ${course.room}` : ''}`}
-                      onClick={() => onRemoveCourse(course.courseId)}
-                      className={`absolute inset-x-0.5 z-10 overflow-hidden rounded px-1 py-0.5 text-left text-[10px] leading-tight text-white shadow-sm hover:ring-2 hover:ring-white/80 ${blockColor(normalizeCategory(course.category))}`}
-                      style={{
-                        top: topPx(course.startTime),
-                        height: heightPx(course.startTime, course.endTime),
-                      }}
-                    >
-                      <span className="block truncate font-semibold">
-                        {course.courseNumber} ({formatCourseUnits(course.units)})
-                      </span>
-                      <span className="block truncate opacity-90">
-                        {course.startTime}–{course.endTime}
-                      </span>
-                    </button>
-                  )
-                })}
+                {layoutByDay[day].map(
+                  ({ course, column, totalColumns }) => {
+                    const blockKey = `${course.courseId}-${day}`
+                    const top = topPx(course.startTime)
+                    return (
+                      <CalendarCourseBlock
+                        key={blockKey}
+                        course={course}
+                        fallYear={fallYear}
+                        springYear={springYear}
+                        colorClass={CALENDAR_BLOCK_COLOR}
+                        blockTopPx={top}
+                        gridHeight={GRID_HEIGHT}
+                        isDetailOpen={openDetailKey === blockKey}
+                        onToggleDetail={(open) =>
+                          setOpenDetailKey(open ? blockKey : null)
+                        }
+                        positionStyle={{
+                          top,
+                          height: heightPx(
+                            course.startTime,
+                            course.endTime,
+                          ),
+                          ...blockPositionStyle(column, totalColumns),
+                        }}
+                      />
+                    )
+                  },
+                )}
               </div>
             ))}
           </div>

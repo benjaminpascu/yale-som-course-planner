@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import AppFooter from './components/AppFooter'
 import CourseBrowser from './components/CourseBrowser'
 import PlanningPanel from './components/PlanningPanel'
-import { getAcademicYearLabel } from './lib/academicYear'
+import { getSemesterCalendarYears } from './lib/academicYear'
 import { loadAppData } from './lib/loadData'
 import {
   courseIdSetFromArray,
@@ -12,6 +13,8 @@ import {
   sanitizeCourseIds,
   setActivePlanId,
   setsEqual,
+  renamePlanInStore,
+  savePlanCourses,
   upsertPlan,
 } from './lib/planStorage'
 
@@ -87,7 +90,10 @@ function App() {
     [courses, selectedIds],
   )
 
-  const academicYear = useMemo(() => getAcademicYearLabel(courses), [courses])
+  const { fallYear, springYear } = useMemo(
+    () => getSemesterCalendarYears(courses),
+    [courses],
+  )
 
   const toggleCourse = useCallback((courseId) => {
     setSelectedIds((prev) => {
@@ -111,20 +117,9 @@ function App() {
     setSelectedIds(new Set())
   }, [])
 
-  const handleNewPlan = useCallback(() => {
-    if (isDirty) {
-      const ok = window.confirm(
-        'Start a new plan? Unsaved changes to the current plan will stay there when you open it again from the list.',
-      )
-      if (!ok) return
-    }
-    persist(setActivePlanId(planStore, null))
-    setSelectedIds(new Set())
-  }, [isDirty, persist, planStore])
-
   const handleSelectPlan = useCallback(
     (planId) => {
-      if (planId === planStore.activePlanId) return
+      if (planId === planStore.activePlanId) return true
 
       if (
         isDirty &&
@@ -132,81 +127,91 @@ function App() {
           'Switch plans? Unsaved changes to the current plan will be lost.',
         )
       ) {
-        return
+        return false
       }
 
       const plan = getPlanById(planStore, planId)
-      if (!plan) return
+      if (!plan) return false
 
       const ids = sanitizeCourseIds(plan.courseIds, validCourseIds)
       setSelectedIds(new Set(ids))
       persist(setActivePlanId(planStore, planId))
+      return true
     },
     [isDirty, persist, planStore, validCourseIds],
   )
 
-  const handleSavePlan = useCallback(() => {
-    if (!planStore.activePlanId) {
-      const name = window.prompt('Name this plan:', 'My plan')
-      if (name === null) return
+  const handleAddPlan = useCallback(
+    (name) => {
       const trimmed = name.trim()
       if (!trimmed) return
+
+      if (
+        isDirty &&
+        planStore.activePlanId &&
+        !window.confirm(
+          'You have unsaved changes on the current plan. Add a new plan anyway? Your previous plan keeps its last saved courses.',
+        )
+      ) {
+        return
+      }
+
+      const saveCurrentSelection =
+        selectedIds.size > 0 && (!planStore.activePlanId || isDirty)
 
       const next = upsertPlan(planStore, {
         id: null,
         name: trimmed,
-        courseIds: [...selectedIds],
+        courseIds: saveCurrentSelection ? [...selectedIds] : [],
       })
       persist(next)
-      return
-    }
 
-    const plan = getPlanById(planStore, planStore.activePlanId)
-    if (!plan) return
+      if (!saveCurrentSelection) {
+        setSelectedIds(new Set())
+      }
+    },
+    [isDirty, persist, planStore, selectedIds],
+  )
 
-    const next = upsertPlan(planStore, {
-      id: plan.id,
-      name: plan.name,
-      courseIds: [...selectedIds],
-    })
-    persist(next)
-  }, [persist, planStore, selectedIds])
+  const handleSavePlan = useCallback(
+    (planId) => {
+      if (planId !== planStore.activePlanId) return
+      const plan = getPlanById(planStore, planId)
+      if (!plan) return
 
-  const handleRenamePlan = useCallback(() => {
-    const plan = planStore.activePlanId
-      ? getPlanById(planStore, planStore.activePlanId)
-      : null
-    if (!plan) return
+      const next = savePlanCourses(planStore, plan.id, [...selectedIds])
+      persist(next)
+    },
+    [persist, planStore, selectedIds],
+  )
 
-    const name = window.prompt('Rename plan:', plan.name)
-    if (name === null) return
-    const trimmed = name.trim()
-    if (!trimmed || trimmed === plan.name) return
+  const handleRenamePlan = useCallback(
+    (planId, name) => {
+      const plan = getPlanById(planStore, planId)
+      if (!plan) return
+      const trimmed = name.trim()
+      if (!trimmed || trimmed === plan.name) return
 
-    const next = upsertPlan(planStore, {
-      id: plan.id,
-      name: trimmed,
-      courseIds: [...selectedIds],
-    })
-    persist(next)
-  }, [persist, planStore, selectedIds])
+      const next = renamePlanInStore(planStore, planId, trimmed)
+      persist(next)
+    },
+    [persist, planStore],
+  )
 
-  const handleDeletePlan = useCallback(() => {
-    const plan = planStore.activePlanId
-      ? getPlanById(planStore, planStore.activePlanId)
-      : null
-    if (!plan) return
+  const handleDeletePlan = useCallback(
+    (planId) => {
+      const plan = getPlanById(planStore, planId)
+      if (!plan) return
 
-    if (
-      !window.confirm(`Delete "${plan.name}"? This cannot be undone.`)
-    ) {
-      return
-    }
+      const next = deletePlanFromStore(planStore, planId)
+      persist(next)
 
-    const next = deletePlanFromStore(planStore, plan.id)
-    persist(next)
-    setSelectedIds(new Set())
-  }, [persist, planStore])
+      if (planStore.activePlanId === planId) {
+        setSelectedIds(new Set())
+      }
+    },
+    [persist, planStore],
+  )
 
   if (status === 'loading') {
     return (
@@ -232,19 +237,15 @@ function App() {
           Yale SOM Course Planner
         </h1>
         <p className="mt-1 text-sm text-yale-100">
-          {academicYear ? (
+          {fallYear != null && springYear != null ? (
             <>
-              Academic Year {academicYear}
+              Academic Year {fallYear}-{String(springYear).slice(-2)}
               <span aria-hidden className="px-1.5">
                 ·
               </span>
             </>
           ) : null}
           {courses.length} courses loaded
-          <span aria-hidden className="px-1.5">
-            ·
-          </span>
-          {tags.length} tag mappings loaded
         </p>
         <p className="mt-0.5 text-xs text-yale-200">
           Source:{' '}
@@ -261,14 +262,17 @@ function App() {
 
       <main className="flex w-full flex-col bg-white">
         <PlanningPanel
+          courses={courses}
           selectedCourses={selectedCourses}
           hasSelection={selectedIds.size > 0}
+          fallYear={fallYear}
+          springYear={springYear}
           tags={tags}
           plans={planStore.plans}
           activePlanId={planStore.activePlanId}
           activePlanName={activePlan?.name ?? null}
           isDirty={isDirty}
-          onNewPlan={handleNewPlan}
+          onAddPlan={handleAddPlan}
           onSelectPlan={handleSelectPlan}
           onSavePlan={handleSavePlan}
           onRenamePlan={handleRenamePlan}
@@ -283,6 +287,7 @@ function App() {
           onToggleCourse={toggleCourse}
         />
       </main>
+      <AppFooter />
     </div>
   )
 }

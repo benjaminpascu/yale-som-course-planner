@@ -139,7 +139,7 @@ The tag taxonomy comes from Yale's own filter dropdown (see §6.2). The merge sc
 - Optional "view by session" toggle: show only `fall-1`, only `fall-2`, or both overlaid with visual distinction (e.g. striped pattern for `fall-2`).
 - Color-coded by tag, category, or user choice.
 - Hovering a block shows full course info including session, units, faculty, room.
-- Click a block to remove the course.
+- Remove courses from the plan via the catalog or **Your plan** panel (calendar blocks are not clickable).
 
 ### 7.3 Tag unit tracker
 - Persistent panel (top or side) showing **accumulated units per requirement tag** for courses in the active plan.

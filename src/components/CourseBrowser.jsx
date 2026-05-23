@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   createEmptyFilters,
   buildTagsByCourseNumber,
@@ -17,6 +17,8 @@ import CourseFilters from './CourseFilters'
 import CourseRow from './CourseRow'
 import SectionHeader from './SectionHeader'
 
+const PAGE_SIZE = 25
+
 function toggleInSet(set, value) {
   const next = new Set(set)
   if (next.has(value)) next.delete(value)
@@ -31,6 +33,7 @@ export default function CourseBrowser({
   onToggleCourse,
 }) {
   const [filters, setFilters] = useState(createEmptyFilters)
+  const [page, setPage] = useState(1)
 
   const tagsByCourseNumber = useMemo(
     () => buildTagsByCourseNumber(tags),
@@ -47,6 +50,24 @@ export default function CourseBrowser({
     if (timeRangeError) return []
     return filterCourses(courses, filters, tagsByCourseNumber)
   }, [courses, filters, tagsByCourseNumber, timeRangeError])
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+
+  useEffect(() => {
+    setPage(1)
+  }, [filters, timeRangeError])
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages)
+  }, [page, totalPages])
+
+  const pageCourses = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE
+    return filtered.slice(start, start + PAGE_SIZE)
+  }, [filtered, page])
+
+  const rangeStart = filtered.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1
+  const rangeEnd = Math.min(page * PAGE_SIZE, filtered.length)
 
   const active = hasActiveFilters(filters)
 
@@ -103,7 +124,11 @@ export default function CourseBrowser({
         <SectionHeader
           tone="catalog"
           title="Course catalog"
-          subtitle={`Showing ${filtered.length} of ${courses.length} courses · ${selectedIds.size} in plan`}
+          subtitle={
+            filtered.length === 0
+              ? `${filtered.length} of ${courses.length} courses · ${selectedIds.size} in plan`
+              : `${rangeStart}–${rangeEnd} of ${filtered.length} (${courses.length} total) · ${selectedIds.size} in plan`
+          }
         />
         {filtered.length === 0 ? (
           <p
@@ -115,21 +140,53 @@ export default function CourseBrowser({
               'No courses found. Try expanding your selection criteria.'}
           </p>
         ) : (
-          <ul className="divide-y divide-gray-200/80">
-            {filtered.map((course) => (
-              <CourseRow
-                key={course.courseId}
-                course={course}
-                requirementTagCodes={getCourseRequirementTags(
-                  course.courseNumber,
-                  tagsByCourseNumber,
-                )}
-                isSelected={selectedIds.has(course.courseId)}
-                hasConflict={conflictingIds.has(course.courseId)}
-                onToggle={() => onToggleCourse(course.courseId)}
-              />
-            ))}
-          </ul>
+          <>
+            <ul className="divide-y divide-gray-200/80">
+              {pageCourses.map((course) => (
+                <CourseRow
+                  key={course.courseId}
+                  course={course}
+                  requirementTagCodes={getCourseRequirementTags(
+                    course.courseNumber,
+                    tagsByCourseNumber,
+                  )}
+                  isSelected={selectedIds.has(course.courseId)}
+                  hasConflict={conflictingIds.has(course.courseId)}
+                  onToggle={() => onToggleCourse(course.courseId)}
+                />
+              ))}
+            </ul>
+            {totalPages > 1 ? (
+              <nav
+                className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200/80 bg-gray-50/80 px-4 py-3"
+                aria-label="Course catalog pages"
+              >
+                <p className="text-sm text-gray-600">
+                  Page {page} of {totalPages}
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page <= 1}
+                    className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setPage((p) => Math.min(totalPages, p + 1))
+                    }
+                    disabled={page >= totalPages}
+                    className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              </nav>
+            ) : null}
+          </>
         )}
       </section>
     </div>

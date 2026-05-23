@@ -99,6 +99,7 @@ npm run dev
 - Top → bottom: **Weekly calendar** (empty prompt until you add a course) → **Requirements** (tag units) → **Your plan** → **Search & filters** (collapsible) → **Course catalog**
 - Click a catalog row to add/remove from plan; selected rows show light blue “In plan” styling
 - Rows that would overlap your plan show a red **Conflict** badge (still clickable)
+- **Calendar:** session tabs when your plan mixes terms (e.g. Fall 1 + Fall 2); full-term courses show on both mini-term tabs; overlapping courses render side by side
 - Most rows: `Mo,We · 13:00–16:00` style times
 - Some rows: semester date range + **No time defined — won't show on calendar**
 
@@ -118,3 +119,4 @@ npm run import:data
 | May 2026 | Milestone 3 course browser; Milestone 4 calendar + session-aware conflicts |
 | May 2026 | Milestone 5 tag unit tracker; single-column Yale-themed UI; M6 next |
 | May 2026 | Milestone 6 named plans + localStorage + CSV export (pending approve) |
+| May 2026 | Calendar: side-by-side overlaps + session view tabs (`calendarLayout.js`, `calendarSessionView.js`) |

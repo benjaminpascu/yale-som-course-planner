@@ -2,27 +2,45 @@ import { useMemo } from 'react'
 import { buildTagsByCourseNumber } from '../lib/filterCourses'
 import { sectionTone } from '../lib/sectionTheme'
 import { formatCourseHeading } from '../lib/courseDisplay'
+import { formatSessionLabel } from '../lib/sessionDisplay'
 import {
   computeTagUnitTotals,
   formatTagUnits,
+  getSemesterBreakdownLines,
 } from '../lib/tagUnitTracker'
 import CollapseChevron from './CollapseChevron'
 import { TagDisclaimer } from './Disclaimer'
 import RequirementTag from './RequirementTag'
 
-function ContributorTooltip({ contributors }) {
+function ContributorTooltip({ groups, fallYear, springYear }) {
   return (
-    <ul className="space-y-1 text-xs">
-      {contributors.map((c) => (
-        <li key={c.courseNumber} className="truncate text-gray-900">
-          {formatCourseHeading(c)}
-        </li>
+    <div className="space-y-3">
+      {groups.map((group) => (
+        <div key={group.session}>
+          <p className="text-xs font-medium text-gray-700">
+            {formatSessionLabel(group.session, { fallYear, springYear })}
+            {' — '}
+            <span className="tabular-nums">{formatTagUnits(group.units)}</span>
+          </p>
+          <ul className="mt-1.5 space-y-1 border-l-2 border-gray-200 pl-3 text-xs">
+            {group.contributors.map((c) => (
+              <li key={c.courseNumber} className="text-gray-900">
+                {formatCourseHeading(c)}
+              </li>
+            ))}
+          </ul>
+        </div>
       ))}
-    </ul>
+    </div>
   )
 }
 
-export default function TagUnitTracker({ selectedCourses, tags }) {
+export default function TagUnitTracker({
+  selectedCourses,
+  tags,
+  fallYear = null,
+  springYear = null,
+}) {
   const tagsByCourseNumber = useMemo(
     () => buildTagsByCourseNumber(tags),
     [tags],
@@ -54,6 +72,10 @@ export default function TagUnitTracker({ selectedCourses, tags }) {
         <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {totals.map((row) => {
             const hasContributors = row.contributors.length > 0
+            const semesterLines = getSemesterBreakdownLines(row.bySemester, {
+              fallYear,
+              springYear,
+            })
             return (
               <li
                 key={row.tagCode}
@@ -63,31 +85,46 @@ export default function TagUnitTracker({ selectedCourses, tags }) {
                     : ''
                 }`}
               >
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex items-start justify-between gap-2">
                   <RequirementTag
                     tagCode={row.tagCode}
                     muted={row.totalUnits <= 0}
                   />
-                  <span
-                    className={
-                      row.totalUnits > 0
-                        ? 'shrink-0 text-sm font-medium tabular-nums text-gray-900'
-                        : 'shrink-0 text-sm tabular-nums text-gray-400'
-                    }
-                  >
-                    {formatTagUnits(row.totalUnits)}
-                  </span>
+                  <div className="flex shrink-0 flex-col items-end gap-0.5">
+                    <span
+                      className={
+                        row.totalUnits > 0
+                          ? 'text-sm font-medium tabular-nums text-gray-900'
+                          : 'text-sm tabular-nums text-gray-400'
+                      }
+                    >
+                      {formatTagUnits(row.totalUnits)}
+                    </span>
+                    {semesterLines ? (
+                      <div className="flex flex-col items-end gap-0.5 text-[10px] leading-tight tabular-nums text-gray-500">
+                        {semesterLines.map((line) => (
+                          <span key={line.key} className="whitespace-nowrap">
+                            {line.text}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
 
                 {hasContributors ? (
                   <div
-                    className="pointer-events-none absolute left-0 top-full z-20 mt-1 hidden w-72 rounded-md border border-gray-200 bg-white p-3 shadow-lg group-hover/tag:block"
+                    className="pointer-events-none absolute right-0 top-full z-20 mt-1 hidden w-max min-w-[22rem] max-w-[min(36rem,calc(100vw-2rem))] rounded-md border border-gray-200 bg-white p-3 shadow-lg group-hover/tag:block"
                     role="tooltip"
                   >
-                    <p className="mb-1.5 text-xs font-medium text-gray-700">
+                    <p className="mb-2 text-xs font-medium text-gray-700">
                       Contributing courses
                     </p>
-                    <ContributorTooltip contributors={row.contributors} />
+                    <ContributorTooltip
+                      groups={row.contributorGroups}
+                      fallYear={fallYear}
+                      springYear={springYear}
+                    />
                   </div>
                 ) : null}
               </li>

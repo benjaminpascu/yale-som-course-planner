@@ -1,20 +1,24 @@
 import PlanPanel from './PlanPanel'
+import SavedPlansPanel from './SavedPlansPanel'
 import TagUnitTracker from './TagUnitTracker'
 import WeeklyCalendar from './WeeklyCalendar'
 
-/** Top stack: calendar → requirements → your plan (full width). */
+/** Top stack: calendar → requirements → saved plans → your plan (full width). */
 export default function PlanningPanel({
+  courses,
   selectedCourses,
   hasSelection,
+  fallYear,
+  springYear,
   tags,
   plans,
   activePlanId,
   activePlanName,
   isDirty,
-  onNewPlan,
+  onAddPlan,
   onSelectPlan,
-  onSavePlan,
   onRenamePlan,
+  onSavePlan,
   onDeletePlan,
   onRemoveCourse,
   onClearPlan,
@@ -24,20 +28,34 @@ export default function PlanningPanel({
       <WeeklyCalendar
         selectedCourses={selectedCourses}
         hasSelection={hasSelection}
-        onRemoveCourse={onRemoveCourse}
+        fallYear={fallYear}
+        springYear={springYear}
       />
-      <TagUnitTracker selectedCourses={selectedCourses} tags={tags} />
+      <TagUnitTracker
+        selectedCourses={selectedCourses}
+        tags={tags}
+        fallYear={fallYear}
+        springYear={springYear}
+      />
+      <SavedPlansPanel
+        plans={plans}
+        courses={courses}
+        activePlanId={activePlanId}
+        hasSelection={hasSelection}
+        isDirty={isDirty}
+        onAddPlan={onAddPlan}
+        onSelectPlan={onSelectPlan}
+        onRenamePlan={onRenamePlan}
+        onSavePlan={onSavePlan}
+        onDeletePlan={onDeletePlan}
+      />
       <PlanPanel
         selectedCourses={selectedCourses}
-        plans={plans}
-        activePlanId={activePlanId}
         activePlanName={activePlanName}
         isDirty={isDirty}
-        onNewPlan={onNewPlan}
-        onSelectPlan={onSelectPlan}
-        onSavePlan={onSavePlan}
-        onRenamePlan={onRenamePlan}
-        onDeletePlan={onDeletePlan}
+        fallYear={fallYear}
+        springYear={springYear}
+        onSavePlan={() => activePlanId && onSavePlan(activePlanId)}
         onRemoveCourse={onRemoveCourse}
         onClearPlan={onClearPlan}
       />

@@ -37,3 +37,7 @@ export function sectionTone(tone) {
 /** Course added to plan — light blue tint (catalog rows + plan cards). */
 export const IN_PLAN_SURFACE =
   'border-yale-200 bg-yale-selected ring-2 ring-inset ring-yale-200/90'
+
+/** Primary save action (plans). */
+export const SAVE_BUTTON =
+  'bg-save-800 text-white hover:bg-save-900 disabled:cursor-not-allowed disabled:opacity-50'

@@ -121,8 +121,7 @@ export default function CourseFilters({
           onToggle={(id) => onToggle('categories', id)}
         />
         <FilterCheckboxGroup
-          legend="Requirement tag"
-          hint="Student-maintained tags"
+          legend="Requirements"
           layout="wrap"
           options={tagOptions}
           selected={filters.tagCodes}

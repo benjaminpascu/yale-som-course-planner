@@ -20,8 +20,7 @@ export function TagDisclaimer({ className = '' }) {
 export function PlanDisclaimer({ className = '' }) {
   return (
     <p className={`text-xs text-gray-500 ${className}`.trim()}>
-      Saved plans stay in this browser only (no account). Clearing site data
-      removes them.
+      Saved plans stay in this browser only. Clearing cache removes them.
     </p>
   )
 }

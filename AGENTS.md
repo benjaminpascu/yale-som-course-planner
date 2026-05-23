@@ -73,7 +73,7 @@ npm run build
 | Saved plans UI + localStorage | `src/components/PlanManager.jsx`, `src/lib/planStorage.js` |
 | Plan CSV export | `src/lib/planExport.js` |
 | Section colors / in-plan highlight | `src/lib/sectionTheme.js` |
-| Academic year from TermCode | `src/lib/academicYear.js` |
+| Fall/spring catalog years + header label | `src/lib/academicYear.js`, `App.jsx` |
 | Session-aware conflicts | `src/lib/scheduleConflicts.js` |
 | Load data (Supabase or bundled CSV) | `src/lib/loadData.js` |
 | Parse courses + `hasMeetingTime` | `src/lib/parseCourses.js` |
