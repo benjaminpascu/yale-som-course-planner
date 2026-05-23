@@ -24,8 +24,9 @@ The user is a non-technical student. Explain clearly; ask explicitly when a prod
 | Milestone 3 — Search + filters | ✅ Done |
 | Milestone 4 — Calendar + conflicts | ✅ Done |
 | Milestone 5 — Tag unit tracker | ✅ Done |
-| Milestone 6 — Named plans + polish | ⏭️ **Next** (pending your `approve` after testing) |
-| Milestones 7–8 | Not started |
+| Milestones 1–6 — Core product | ✅ Done |
+| **Live** | ✅ Vercel; share link privately; fix issues as feedback comes in |
+| **Wider promo** | When you choose (not a separate dev milestone) |
 
 Full detail: **`docs/PROJECT_STATUS.md`**.
 
@@ -88,4 +89,4 @@ Vite + React + Tailwind + Supabase (`@supabase/supabase-js`). No custom backend.
 
 ## Git / deploy
 
-GitHub: `benjaminpascu/yale-som-course-planner`. Vercel deploy not wired yet. Do not commit `.env`. Only create git commits when the user asks.
+GitHub: `benjaminpascu/yale-som-course-planner`. **Production:** Vercel (link shared directly; no separate beta vs launch deploy). Do not commit `.env`. Only create git commits when the user asks.

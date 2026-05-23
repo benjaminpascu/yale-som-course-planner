@@ -285,6 +285,8 @@ function App() {
           tags={tags}
           selectedIds={selectedIds}
           onToggleCourse={toggleCourse}
+          fallYear={fallYear}
+          springYear={springYear}
         />
       </main>
       <AppFooter />

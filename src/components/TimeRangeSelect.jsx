@@ -1,7 +1,7 @@
 import { TIME_PICKER_OPTIONS } from '../lib/courseDisplay'
 
 const selectClassName =
-  'mt-0.5 w-full rounded-md border border-yale-200 bg-yale-50/80 px-2 py-2 text-sm focus:border-yale-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-yale-800'
+  'mt-0.5 w-full max-w-40 rounded-md border border-yale-200 bg-yale-50/80 px-2 py-2 text-sm focus:border-yale-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-yale-800'
 
 export default function TimeRangeSelect({
   timeFrom,
@@ -17,7 +17,7 @@ export default function TimeRangeSelect({
       <p className="text-xs text-gray-500">
         Pick begin and/or end. Timed courses only.
       </p>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
         <div>
           <label htmlFor="time-from" className="text-xs text-gray-600">
             Begin

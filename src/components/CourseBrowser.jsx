@@ -31,6 +31,8 @@ export default function CourseBrowser({
   tags,
   selectedIds,
   onToggleCourse,
+  fallYear = null,
+  springYear = null,
 }) {
   const [filters, setFilters] = useState(createEmptyFilters)
   const [page, setPage] = useState(1)
@@ -92,6 +94,8 @@ export default function CourseBrowser({
     categories,
     unitValues,
     filters,
+    fallYear,
+    springYear,
     onSearchChange: (search) =>
       setFilters((prev) => ({ ...prev, search })),
     onTimeFromChange: (timeFrom) =>
@@ -113,8 +117,8 @@ export default function CourseBrowser({
           title="Course catalog"
           subtitle={
             filtered.length === 0
-              ? `${filtered.length} of ${courses.length} courses · ${selectedIds.size} in plan`
-              : `${rangeStart}–${rangeEnd} of ${filtered.length} (${courses.length} total) · ${selectedIds.size} in plan`
+              ? `${filtered.length} of ${courses.length} courses`
+              : `${rangeStart}–${rangeEnd} of ${filtered.length} (${courses.length} total)`
           }
         />
 

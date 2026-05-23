@@ -1,7 +1,7 @@
 # Yale SOM Course Planner — PRD
 
 **Author:** [Your name], incoming Yale SOM student
-**Status:** Draft v5 — in development (Milestones 1–5 done; **Milestone 6 next**)
+**Status:** Draft v5 — **live on Vercel** (Milestones 1–6 done). Private link sharing now; wider promo when the owner chooses.
 **Last updated:** May 2026
 
 **Agent handoff:** New Cursor chats should read `AGENTS.md` and `docs/PROJECT_STATUS.md` before coding.
@@ -209,9 +209,9 @@ Status detail: `docs/PROJECT_STATUS.md`.
 3. **Course browser:** ✅ Search + filters (session, day, time, units, bid/permission, category, requirement tag).
 4. **Calendar:** ✅ Weekly grid + add/remove + **session-aware** conflict detection. Single-column layout: calendar → requirements → plan → collapsible filters → catalog (see `docs/PROJECT_STATUS.md`).
 5. **Tag unit tracker:** ✅ Live units per requirement tag for courses in the active plan (all seven tags, no thresholds; §7.3).
-6. **Plans + polish:** ⏭️ **Next.** Save/load/duplicate/export JSON in `localStorage`. Plan UI polish. Disclaimer copy where not yet surfaced.
-7. **Beta:** Internal test with 5–10 SOM friends. Fix what breaks.
-8. **Launch:** Public release via student gov channels.
+6. **Plans + polish:** ✅ Save/load/duplicate/CSV export in `localStorage`. Plan UI polish. Disclaimer copy surfaced.
+
+**After milestone 6:** App is **deployed on Vercel** and treated as launched. Share the production URL with friends for feedback; fix bugs in follow-up tasks. **Public promotion** (student channels, demo video, shopping-period push) is a separate **marketing** step when ready — not milestones 7–8 in the build plan.
 
 ## 12. Development workflow (Cursor)
 

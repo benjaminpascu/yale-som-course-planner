@@ -29,6 +29,13 @@ export default function AppFooter() {
       >
         <GitHubIcon className="h-8 w-8" />
       </a>
+      <p className="mx-auto mt-4 max-w-2xl text-xs leading-relaxed text-yale-200">
+        This tool is not affiliated with, endorsed by, or operated by Yale
+        University or Yale School of Management. Course data and scheduling
+        information may be incomplete or inaccurate. Use at your own risk —
+        always confirm details on official Yale sources before enrolling or
+        planning your schedule.
+      </p>
       <p className="mt-3 text-yale-100">
         Made with love by{' '}
         <a
