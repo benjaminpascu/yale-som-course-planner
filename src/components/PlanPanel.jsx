@@ -53,7 +53,7 @@ export default function PlanPanel({
     activePlanName != null || courseCount > 0
 
   return (
-    <details className={`group border-b ${planTone.section}`} open>
+    <details className={`group border-b ${planTone.section}`}>
       <summary
         className={`flex cursor-pointer list-none items-center gap-2 border-b px-4 py-3 text-sm font-semibold text-yale-950 marker:content-none [&::-webkit-details-marker]:hidden ${planTone.header}`}
       >

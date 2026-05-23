@@ -54,7 +54,7 @@ export default function TagUnitTracker({
   const reqTone = sectionTone('requirements')
 
   return (
-    <details className={`group shrink-0 border-b ${reqTone.section}`} open>
+    <details className={`group shrink-0 border-b ${reqTone.section}`}>
       <summary
         className={`flex cursor-pointer list-none items-center gap-2 border-b px-4 py-3 text-sm font-semibold text-yale-950 marker:content-none [&::-webkit-details-marker]:hidden ${reqTone.header}`}
       >

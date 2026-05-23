@@ -7,6 +7,7 @@ Student-run web app for browsing Yale SOM courses, building a weekly schedule, a
 1. Copy `.env.example` → `.env` and add Supabase keys (optional for local-only dev).
 2. `npm install && npm run dev`
 3. See [docs/supabase-setup.md](docs/supabase-setup.md) for database setup.
+4. See [docs/vercel-setup.md](docs/vercel-setup.md) to deploy on Vercel.
 
 ## For Cursor agents (new chat)
 

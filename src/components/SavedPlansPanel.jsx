@@ -106,7 +106,7 @@ export default function SavedPlansPanel({
   }
 
   return (
-    <details className={`group border-b ${tone.section}`} open>
+    <details className={`group border-b ${tone.section}`}>
       <summary
         className={`flex cursor-pointer list-none items-center gap-2 border-b px-4 py-3 text-sm font-semibold text-yale-950 marker:content-none [&::-webkit-details-marker]:hidden ${tone.header}`}
       >

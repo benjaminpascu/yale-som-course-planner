@@ -40,6 +40,7 @@ Full detail: **`docs/PROJECT_STATUS.md`**.
 | Tag merge script (reference) | `scripts/build_tags.py` — do not modify unless asked |
 | Supabase schema | `supabase/migrations/001_initial_schema.sql`, `002_api_grants.sql` |
 | Supabase setup steps | `docs/supabase-setup.md` |
+| Vercel deploy steps | `docs/vercel-setup.md` |
 
 **Do not use** `courses_master.csv` — it was removed; timing columns were unreliable.
 
