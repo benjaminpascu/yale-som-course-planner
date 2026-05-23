@@ -1,0 +1,173 @@
+course_number,tag_code,tag_label
+MGMT 7210,MGBA,SOM MMS Asset Management Req
+MGT 403,MGMS,SOM Management Science Req
+MGT 405,MGMS,SOM Management Science Req
+MGT 416,MGGS,SOM MBA Global Studies Req
+MGT 422,MGMS,SOM Management Science Req
+MGT 510,MGBA,SOM MMS Asset Management Req
+MGT 510,MGMS,SOM Management Science Req
+MGT 523,MGBA,SOM MMS Asset Management Req
+MGT 523,MGSR,SOM MMS Systemic Risk Req
+MGT 526,MGBA,SOM MMS Asset Management Req
+MGT 526,MGLD,SOM MBA Leadership Dist Req
+MGT 527,MGLD,SOM MBA Leadership Dist Req
+MGT 529,MGGS,SOM MBA Global Studies Req
+MGT 532,MGBA,SOM MMS Asset Management Req
+MGT 532,MGGB,SOM MMS Global Business & Society Req
+MGT 532,MGLD,SOM MBA Leadership Dist Req
+MGT 536,MGLD,SOM MBA Leadership Dist Req
+MGT 538,MGBA,SOM MMS Asset Management Req
+MGT 540,MGBA,SOM MMS Asset Management Req
+MGT 541,MGBA,SOM MMS Asset Management Req
+MGT 544,MGMS,SOM Management Science Req
+MGT 554,MGMS,SOM Management Science Req
+MGT 555,MGMS,SOM Management Science Req
+MGT 556,MGBA,SOM MMS Asset Management Req
+MGT 556,MGMS,SOM Management Science Req
+MGT 561,MGMS,SOM Management Science Req
+MGT 563,MGBA,SOM MMS Asset Management Req
+MGT 566,MGBA,SOM MMS Asset Management Req
+MGT 575,MGBA,SOM MMS Asset Management Req
+MGT 575,MGMS,SOM Management Science Req
+MGT 581,MGLD,SOM MBA Leadership Dist Req
+MGT 582,MGBA,SOM MMS Asset Management Req
+MGT 582,MGGB,SOM MMS Global Business & Society Req
+MGT 595,MGBA,SOM MMS Asset Management Req
+MGT 595,MGMS,SOM Management Science Req
+MGT 600,MGGS,SOM MBA Global Studies Req
+MGT 611,MGBA,SOM MMS Asset Management Req
+MGT 611,MGGB,SOM MMS Global Business & Society Req
+MGT 611,MGMS,SOM Management Science Req
+MGT 620,MGBA,SOM MMS Asset Management Req
+MGT 620,MGMS,SOM Management Science Req
+MGT 622,MGBA,SOM MMS Asset Management Req
+MGT 622,MGMS,SOM Management Science Req
+MGT 623,MGLD,SOM MBA Leadership Dist Req
+MGT 626,MGLD,SOM MBA Leadership Dist Req
+MGT 628,MGBA,SOM MMS Asset Management Req
+MGT 628,MGSR,SOM MMS Systemic Risk Req
+MGT 629,MGLD,SOM MBA Leadership Dist Req
+MGT 630,MGBA,SOM MMS Asset Management Req
+MGT 630,MGMS,SOM Management Science Req
+MGT 633,MGAM,SOM MAM Req
+MGT 636,MGAM,SOM MAM Req
+MGT 641,MGBA,SOM MMS Asset Management Req
+MGT 649,MGBA,SOM MMS Asset Management Req
+MGT 656,MGMS,SOM Management Science Req
+MGT 671,MGBA,SOM MMS Asset Management Req
+MGT 674,MGBA,SOM MMS Asset Management Req
+MGT 674,MGGB,SOM MMS Global Business & Society Req
+MGT 674,MGLD,SOM MBA Leadership Dist Req
+MGT 679,MGLD,SOM MBA Leadership Dist Req
+MGT 683,MGBA,SOM MMS Asset Management Req
+MGT 688,MGLD,SOM MBA Leadership Dist Req
+MGT 695 ,MGMS,SOM Management Science Req
+MGT 698,MGBA,SOM MMS Asset Management Req
+MGT 699,MGLD,SOM MBA Leadership Dist Req
+MGT 801,MGLD,SOM MBA Leadership Dist Req
+MGT 802,MGBA,SOM MMS Asset Management Req
+MGT 802,MGMS,SOM Management Science Req
+MGT 803,MGGB,SOM MMS Global Business & Society Req
+MGT 803,MGMS,SOM Management Science Req
+MGT 805,MGBA,SOM MMS Asset Management Req
+MGT 805,MGMS,SOM Management Science Req
+MGT 809,MGBA,SOM MMS Asset Management Req
+MGT 809,MGMS,SOM Management Science Req
+MGT 811,MGBA,SOM MMS Asset Management Req
+MGT 812,MGBA,SOM MMS Asset Management Req
+MGT 812,MGGB,SOM MMS Global Business & Society Req
+MGT 813,MGMS,SOM Management Science Req
+MGT 815,MGGB,SOM MMS Global Business & Society Req
+MGT 817,MGMS,SOM Management Science Req
+MGT 819,MGBA,SOM MMS Asset Management Req
+MGT 819,MGGB,SOM MMS Global Business & Society Req
+MGT 819,MGMS,SOM Management Science Req
+MGT 822,MGBA,SOM MMS Asset Management Req
+MGT 822,MGGB,SOM MMS Global Business & Society Req
+MGT 822,MGMS,SOM Management Science Req
+MGT 832,MGGB,SOM MMS Global Business & Society Req
+MGT 836,MGGB,SOM MMS Global Business & Society Req
+MGT 838,MGBA,SOM MMS Asset Management Req
+MGT 840,MGLD,SOM MBA Leadership Dist Req
+MGT 841,MGBA,SOM MMS Asset Management Req
+MGT 842,MGBA,SOM MMS Asset Management Req
+MGT 844,MGBA,SOM MMS Asset Management Req
+MGT 845,MGBA,SOM MMS Asset Management Req
+MGT 846,MGBA,SOM MMS Asset Management Req
+MGT 847,MGBA,SOM MMS Asset Management Req
+MGT 848,MGBA,SOM MMS Asset Management Req
+MGT 850,MGGB,SOM MMS Global Business & Society Req
+MGT 851,MGBA,SOM MMS Asset Management Req
+MGT 851,MGMS,SOM Management Science Req
+MGT 852,MGMS,SOM Management Science Req
+MGT 853,MGMS,SOM Management Science Req
+MGT 854,MGBA,SOM MMS Asset Management Req
+MGT 855,MGMS,SOM Management Science Req
+MGT 857,MGGB,SOM MMS Global Business & Society Req
+MGT 858,MGMS,SOM Management Science Req
+MGT 863,MGLD,SOM MBA Leadership Dist Req
+MGT 864,MGGB,SOM MMS Global Business & Society Req
+MGT 865,MGGS,SOM MBA Global Studies Req
+MGT 866,MGBA,SOM MMS Asset Management Req
+MGT 867,MGLD,SOM MBA Leadership Dist Req
+MGT 871,MGBA,SOM MMS Asset Management Req
+MGT 873,MGMS,SOM Management Science Req
+MGT 879,MGMS,SOM Management Science Req
+MGT 880,MGGB,SOM MMS Global Business & Society Req
+MGT 883,MGBA,SOM MMS Asset Management Req
+MGT 884,MGGB,SOM MMS Global Business & Society Req
+MGT 885,MGBA,SOM MMS Asset Management Req
+MGT 887,MGBA,SOM MMS Asset Management Req
+MGT 887,MGGB,SOM MMS Global Business & Society Req
+MGT 889,MGGB,SOM MMS Global Business & Society Req
+MGT 890,MGBA,SOM MMS Asset Management Req
+MGT 890,MGLD,SOM MBA Leadership Dist Req
+MGT 890,MGSR,SOM MMS Systemic Risk Req
+MGT 892,MGSR,SOM MMS Systemic Risk Req
+MGT 895,MGBA,SOM MMS Asset Management Req
+MGT 896,MGBA,SOM MMS Asset Management Req
+MGT 896,MGLD,SOM MBA Leadership Dist Req
+MGT 897,MGBA,SOM MMS Asset Management Req
+MGT 900,MGBA,SOM MMS Asset Management Req
+MGT 900,MGMS,SOM Management Science Req
+MGT 901,MGBA,SOM MMS Asset Management Req
+MGT 901,MGMS,SOM Management Science Req
+MGT 920,MGGS,SOM MBA Global Studies Req
+MGT 921,MGBA,SOM MMS Asset Management Req
+MGT 923,MGBA,SOM MMS Asset Management Req
+MGT 923,MGMS,SOM Management Science Req
+MGT 924,MGBA,SOM MMS Asset Management Req
+MGT 924,MGMS,SOM Management Science Req
+MGT 926,MGBA,SOM MMS Asset Management Req
+MGT 927,MGBA,SOM MMS Asset Management Req
+MGT 927,MGMS,SOM Management Science Req
+MGT 928,MGBA,SOM MMS Asset Management Req
+MGT 929,MGBA,SOM MMS Asset Management Req
+MGT 932,MGBA,SOM MMS Asset Management Req
+MGT 936,MGBA,SOM MMS Asset Management Req
+MGT 936,MGMS,SOM Management Science Req
+MGT 937,MGBA,SOM MMS Asset Management Req
+MGT 937,MGMS,SOM Management Science Req
+MGT 938,MGBA,SOM MMS Asset Management Req
+MGT 943,MGBA,SOM MMS Asset Management Req
+MGT 943,MGSR,SOM MMS Systemic Risk Req
+MGT 945,MGBA,SOM MMS Asset Management Req
+MGT 945,MGSR,SOM MMS Systemic Risk Req
+MGT 946,MGSR,SOM MMS Systemic Risk Req
+MGT 948,MGBA,SOM MMS Asset Management Req
+MGT 949,MGSR,SOM MMS Systemic Risk Req
+MGT 950,MGGS,SOM MBA Global Studies Req
+MGT 952,MGGS,SOM MBA Global Studies Req
+MGT 953,MGGS,SOM MBA Global Studies Req
+MGT 954,MGGS,SOM MBA Global Studies Req
+MGT 960,MGBA,SOM MMS Asset Management Req
+MGT 961,MGGS,SOM MBA Global Studies Req
+MGT 964,MGGS,SOM MBA Global Studies Req
+MGT 965,MGGS,SOM MBA Global Studies Req
+MGT 970,MGGS,SOM MBA Global Studies Req
+MGT 973,MGGS,SOM MBA Global Studies Req
+MGT 975,MGGS,SOM MBA Global Studies Req
+MGT 979,MGGS,SOM MBA Global Studies Req
+MGT 981,MGGS,SOM MBA Global Studies Req
+MGT 983,MGGS,SOM MBA Global Studies Req
+MGT 997,MGBA,SOM MMS Asset Management Req

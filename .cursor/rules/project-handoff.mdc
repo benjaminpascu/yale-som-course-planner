@@ -1,0 +1,21 @@
+---
+description: Read project handoff docs and follow milestone workflow
+alwaysApply: true
+---
+
+# Yale SOM Course Planner — agent context
+
+Before coding, read in order:
+
+1. `AGENTS.md`
+2. `docs/PROJECT_STATUS.md`
+3. `docs/PRD.md` (at least §6, §7, §11, §12)
+
+## Workflow
+
+- **One milestone or task = start a new Cursor agent** (new chat). Do not drag unrelated work across long threads.
+- Work one PRD milestone at a time; stop after each for user approval (`approve` before continuing).
+- Course data: only `docs/data-samples/courses_master_new.csv` (`days_clean`, `start_24h`, `end_24h`).
+- Use `hasMeetingTime()` for calendar/conflict logic; untimed courses stay in the list but not on the calendar.
+
+Do not commit unless the user asks. Never commit `.env`.
