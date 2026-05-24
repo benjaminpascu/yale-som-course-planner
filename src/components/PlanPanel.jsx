@@ -3,7 +3,11 @@ import {
   formatCourseHeading,
   formatCourseUnits,
 } from '../lib/courseDisplay'
-import { formatSchedule, hasMeetingTime } from '../lib/parseCourses'
+import {
+  formatSchedule,
+  hasMeetingTime,
+  NO_MEETING_TIME_MESSAGE,
+} from '../lib/parseCourses'
 import { IN_PLAN_SURFACE, SAVE_BUTTON, sectionTone } from '../lib/sectionTheme'
 import {
   formatSessionLabel,
@@ -146,20 +150,20 @@ export default function PlanPanel({
                                 <p className="text-gray-500">
                                   {formatSchedule(course)}
                                 </p>
-                                {!hasMeetingTime(course) && (
-                                  <p className="text-amber-700">
-                                    Not on calendar (no weekly time)
+                                {!hasMeetingTime(course) ? (
+                                  <p className="font-medium text-amber-700">
+                                    {NO_MEETING_TIME_MESSAGE}
                                   </p>
-                                )}
+                                ) : null}
                               </div>
                             </div>
                             <button
                               type="button"
                               onClick={() => onRemoveCourse(course.courseId)}
-                              className="shrink-0 rounded px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                              className="-mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-lg leading-none text-gray-400 hover:bg-red-50 hover:text-red-700"
                               aria-label={`Remove ${course.courseNumber} from plan`}
                             >
-                              Remove
+                              <span aria-hidden>×</span>
                             </button>
                           </li>
                         ))}

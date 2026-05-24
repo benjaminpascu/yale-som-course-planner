@@ -50,6 +50,9 @@ export function hasMeetingTime(course) {
   return hasDays && Boolean(course.startTime) && Boolean(course.endTime)
 }
 
+/** Shown in catalog/plan when a course has no weekly meeting time (PRD §6.1). */
+export const NO_MEETING_TIME_MESSAGE = 'No time defined'
+
 /** @param {import('papaparse').ParseResult<Record<string, string>>['data'][number]} row */
 function rowToCourse(row) {
   const syllabus =

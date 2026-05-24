@@ -52,13 +52,27 @@ export default function FilterCheckboxGroup({
         {options.map((opt) => {
           const id = String(opt.id)
           const checked = selected.has(id)
+          const customLabel =
+            typeof opt.renderLabel === 'function'
+              ? opt.renderLabel(checked)
+              : null
+          const chipClassName =
+            layout === 'stack'
+              ? ''
+              : customLabel
+                ? checked
+                  ? 'border-yale-700 ring-2 ring-yale-700/30'
+                  : 'border-yale-200/80 bg-white'
+                : checked
+                  ? labelActiveClassName
+                  : labelIdleClassName
           return (
             <li
               key={id}
               className={layout === 'inline' ? 'min-w-0 flex-1' : undefined}
             >
               <label
-                className={`${labelBaseClassName} ${layout === 'stack' ? '' : checked ? labelActiveClassName : labelIdleClassName}`}
+                className={`${labelBaseClassName} ${chipClassName}`}
               >
                 <input
                   type="checkbox"
@@ -73,7 +87,7 @@ export default function FilterCheckboxGroup({
                   onChange={() => onToggle(id)}
                 />
                 <span className={layout === 'inline' ? 'font-medium' : ''}>
-                  {opt.label}
+                  {customLabel ?? opt.label}
                 </span>
               </label>
             </li>

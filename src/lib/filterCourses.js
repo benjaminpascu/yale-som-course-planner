@@ -1,6 +1,6 @@
 import { normalizeCategory } from './categoryDisplay'
 import { hasMeetingTime } from './parseCourses'
-import { normalizeBidType, parseTimeToMinutes } from './courseDisplay'
+import { parseTimeToMinutes } from './courseDisplay'
 
 /**
  * Both bounds set: course must fit entirely inside the window (start/end inclusive).
@@ -99,8 +99,7 @@ export function courseMatchesFilters(course, filters, tagsByCourseNumber) {
   }
 
   if (filters.bidTypes.size > 0) {
-    const bidType = normalizeBidType(course.bidOrPermission)
-    if (!filters.bidTypes.has(bidType)) return false
+    if (!filters.bidTypes.has(bidFilterKey(course.bidOrPermission))) return false
   }
 
   if (filters.tagCodes.size > 0) {
@@ -170,6 +169,72 @@ export function uniqueCategories(courses) {
 /** @param {import('./parseCourses').Course[]} courses */
 export function uniqueUnits(courses) {
   return [...new Set(courses.map((c) => c.units))].sort((a, b) => a - b)
+}
+
+/** Preferred order for bid/permission filter chips (ids from `bidFilterKey`). */
+const BID_FILTER_PRIORITY = [
+  'bid',
+  'core',
+  'permission',
+  'no',
+  'mam required',
+  'mms required',
+  'am required',
+  'emba',
+  'phd',
+]
+
+/** Display label when several raw CSV values share one filter id. */
+const BID_FILTER_CANONICAL_LABEL = {
+  bid: 'bid',
+  permission: 'permission',
+  no: 'No',
+}
+
+function bidFilterSort(a, b) {
+  const ai = BID_FILTER_PRIORITY.indexOf(a.id)
+  const bi = BID_FILTER_PRIORITY.indexOf(b.id)
+  if (ai !== -1 || bi !== -1) {
+    if (ai === -1) return 1
+    if (bi === -1) return -1
+    if (ai !== bi) return ai - bi
+  }
+  return a.label.localeCompare(b.label, undefined, { sensitivity: 'base' })
+}
+
+/**
+ * Case-insensitive filter id; merges obvious CSV variants (bid/Bid, permission?,
+ * blank with No).
+ */
+export function bidFilterKey(value) {
+  const v = (value ?? '').trim().toLowerCase()
+  if (v === '') return 'no'
+  if (v === 'permission?') return 'permission'
+  return v
+}
+
+function bidFilterDisplayLabel(key, raw) {
+  return BID_FILTER_CANONICAL_LABEL[key] ?? raw
+}
+
+/**
+ * Distinct bid/permission filter options (merged variants; no blank chip).
+ * @returns {{ id: string, label: string }[]}
+ */
+export function uniqueBidOrPermission(courses) {
+  const byKey = new Map()
+
+  for (const course of courses) {
+    const raw = (course.bidOrPermission ?? '').trim()
+    const key = bidFilterKey(raw)
+    if (!byKey.has(key)) {
+      byKey.set(key, bidFilterDisplayLabel(key, raw))
+    }
+  }
+
+  return [...byKey.entries()]
+    .map(([id, label]) => ({ id, label }))
+    .sort(bidFilterSort)
 }
 
 function sessionSort(a, b) {

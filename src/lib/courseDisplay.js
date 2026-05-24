@@ -116,12 +116,6 @@ export const BID_TYPE_CONFIG = {
 /** @type {(keyof typeof BID_TYPE_CONFIG)[]} */
 export const BID_TYPE_IDS = Object.keys(BID_TYPE_CONFIG)
 
-/** Filter checkbox options — ids align with `filters.bidTypes` / `normalizeBidType()`. */
-export const BID_FILTER_OPTIONS = BID_TYPE_IDS.map((id) => ({
-  id,
-  label: BID_TYPE_CONFIG[id].filterLabel,
-}))
-
 /** @param {string} bidOrPermission — raw CSV value */
 export function bidBadge(bidOrPermission) {
   const type = normalizeBidType(bidOrPermission)

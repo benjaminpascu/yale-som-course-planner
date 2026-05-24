@@ -1,15 +1,13 @@
-import { BID_FILTER_OPTIONS, WEEKDAYS } from '../lib/courseDisplay'
+import { WEEKDAYS } from '../lib/courseDisplay'
 import {
   SESSION_FULL_TERM_FOOTNOTE,
   formatSessionLabel,
   hasSelectedFullTermSession,
   isFullTermSession,
 } from '../lib/sessionDisplay'
-import {
-  REQUIREMENT_TAG_CODES,
-  REQUIREMENT_TAG_LABELS,
-} from '../lib/requirementTags'
+import { REQUIREMENT_TAG_CODES } from '../lib/requirementTags'
 import FilterCheckboxGroup from './FilterCheckboxGroup'
+import RequirementTag from './RequirementTag'
 import TimeRangeSelect from './TimeRangeSelect'
 
 function formatUnits(units) {
@@ -25,10 +23,10 @@ export default function CourseFilters({
   sessions,
   categories,
   unitValues,
+  bidValues,
   filters,
   fallYear = null,
   springYear = null,
-  onSearchChange,
   onTimeFromChange,
   onTimeToChange,
   onToggle,
@@ -50,31 +48,16 @@ export default function CourseFilters({
     label: formatUnits(u),
   }))
   const categoryOptions = categories.map((c) => ({ id: c, label: c }))
+  const bidOptions = bidValues
   const tagOptions = REQUIREMENT_TAG_CODES.map((code) => ({
     id: code,
-    label: REQUIREMENT_TAG_LABELS[code] ?? code,
+    label: code,
+    renderLabel: () => <RequirementTag tagCode={code} />,
   }))
 
   return (
     <aside className="mx-auto w-full max-w-5xl p-4">
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className={`${FILTER_CARD} sm:col-span-2`}>
-          <label
-            htmlFor="course-search"
-            className="text-xs font-semibold uppercase tracking-wide text-gray-500"
-          >
-            Search
-          </label>
-          <input
-            id="course-search"
-            type="search"
-            placeholder="Number, title, faculty…"
-            value={filters.search}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="mt-1.5 w-full rounded-md border border-yale-200 bg-yale-50/80 px-3 py-2 text-sm focus:border-yale-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-yale-800"
-          />
-        </div>
-
         <div className={FILTER_CARD}>
           <FilterCheckboxGroup
             legend="Session"
@@ -113,7 +96,7 @@ export default function CourseFilters({
           <FilterCheckboxGroup
             legend="Bid or permission"
             layout="wrap"
-            options={BID_FILTER_OPTIONS}
+            options={bidOptions}
             selected={filters.bidTypes}
             onToggle={(id) => onToggle('bidTypes', id)}
           />

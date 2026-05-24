@@ -7,8 +7,8 @@ import {
 } from '../lib/courseDisplay'
 import { formatSessionLabel } from '../lib/sessionDisplay'
 import {
+  CALENDAR_DESCRIPTION_LINE_COUNT,
   TOOLTIP_HIDE_DELAY_MS,
-  balanceCalendarCourseTooltipWidth,
   calendarCourseTooltipStyle,
   clampPortaledTooltipLeft,
 } from '../lib/portaledTooltip'
@@ -94,8 +94,17 @@ export function CalendarCourseDetail({
             data-tooltip-description
             className="min-w-0 border-l border-gray-100 pl-3 sm:pl-4"
           >
-            <p className="text-xs font-medium text-gray-500">Description</p>
-            <p className="mt-1 max-h-48 overflow-y-auto text-xs leading-relaxed text-gray-600">
+            <p
+              data-tooltip-description-label
+              className="text-xs font-medium text-gray-500"
+            >
+              Description
+            </p>
+            <p
+              data-tooltip-description-body
+              className="mt-1 overflow-y-auto text-xs leading-relaxed text-gray-600"
+              style={{ maxHeight: `${CALENDAR_DESCRIPTION_LINE_COUNT}lh` }}
+            >
               {course.description}
             </p>
           </div>
@@ -183,21 +192,13 @@ export default function CalendarCourseBlock({
   useLayoutEffect(() => {
     if (!desktopTooltipOpen || !buttonRef.current || !tooltipRef.current) return
 
-    const tooltipEl = tooltipRef.current
-    let balancedWidth = null
-    if (course.description) {
-      balancedWidth = balanceCalendarCourseTooltipWidth(
-        tooltipEl,
-        buttonRef.current,
-      )
-    }
-
-    const left = clampPortaledTooltipLeft(buttonRef.current, tooltipEl)
+    const left = clampPortaledTooltipLeft(
+      buttonRef.current,
+      tooltipRef.current,
+    )
     setTooltipStyle((prev) => {
-      if (!prev) return prev
-      const width = balancedWidth ?? prev.width
-      if (prev.left === left && prev.width === width) return prev
-      return { ...prev, left, width }
+      if (!prev || prev.left === left) return prev
+      return { ...prev, left }
     })
   }, [desktopTooltipOpen, course, preferAbove])
 
@@ -266,7 +267,7 @@ export default function CalendarCourseBlock({
               ref={tooltipRef}
               id={tooltipId}
               role="tooltip"
-              className="overflow-y-auto rounded-lg border border-gray-200 bg-white p-3 text-left shadow-xl max-md:hidden"
+              className="rounded-lg border border-gray-200 bg-white p-3 text-left shadow-xl max-md:hidden"
               style={tooltipStyle}
               onMouseEnter={openDesktopTooltip}
               onMouseLeave={scheduleHideDesktopTooltip}

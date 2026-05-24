@@ -2,7 +2,6 @@ import { getRegistrationTag } from '../lib/courseDisplay'
 
 /**
  * Bid / permission / enrollment indicator from CSV `Bid Or Permission`.
- * Shown in the top-right of catalog rows (color by type).
  *
  * @param {{ bidOrPermission: string, className?: string }} props
  */

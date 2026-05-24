@@ -279,7 +279,7 @@ function App() {
       </header>
 
       <main className="grid min-h-0 w-full flex-1 grid-cols-1 bg-white lg:grid-cols-[22rem_minmax(0,1fr)] lg:overflow-hidden">
-        <aside className="order-2 min-h-0 border-t border-gray-200 lg:order-1 lg:flex lg:flex-col lg:overflow-hidden lg:border-r lg:border-t-0">
+        <aside className="order-2 min-h-0 border-t-2 border-yale-600 lg:order-1 lg:flex lg:flex-col lg:overflow-hidden lg:border-r-2 lg:border-t-0 lg:border-yale-600">
           <CourseBrowser
             courses={courses}
             tags={tags}
