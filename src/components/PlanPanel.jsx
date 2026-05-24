@@ -35,6 +35,7 @@ export default function PlanPanel({
   isDirty,
   fallYear,
   springYear,
+  compact = false,
   collapsible = true,
   expanded,
   onToggle,
@@ -57,6 +58,11 @@ export default function PlanPanel({
   )
 
   const planTone = sectionTone('plan')
+  const headerPad = compact ? 'px-3 py-1.5' : 'px-4 py-2'
+  const toolbarPad = compact ? 'px-3 py-1.5' : 'px-4 py-2'
+  const listWrapClass = compact
+    ? 'space-y-0 border-l-2 border-yale-200 pb-2 pl-3 pr-3 pt-0.5'
+    : 'space-y-0 border-l-2 border-yale-200 pb-3 pl-5 pr-4 pt-1 sm:pl-6'
 
   const showSummary =
     activePlanName != null || courseCount > 0
@@ -81,7 +87,7 @@ export default function PlanPanel({
           type="button"
           onClick={onToggle}
           aria-expanded={expanded}
-          className={`flex w-full shrink-0 cursor-pointer items-center gap-2 border-b px-4 py-2 text-left text-xs font-semibold text-yale-950 ${planTone.header}`}
+          className={`flex w-full shrink-0 cursor-pointer items-center gap-2 border-b text-left text-xs font-semibold text-yale-950 ${headerPad} ${planTone.header}`}
         >
           <CollapseChevron open={expanded} />
           <span className="flex-1">Your plan</span>
@@ -89,7 +95,7 @@ export default function PlanPanel({
         </button>
       ) : (
         <div
-          className={`flex w-full shrink-0 items-center gap-2 border-b px-4 py-2 text-xs font-semibold text-yale-950 ${planTone.header}`}
+          className={`flex w-full shrink-0 items-center gap-2 border-b text-xs font-semibold text-yale-950 ${headerPad} ${planTone.header}`}
         >
           <span className="flex-1">Your plan</span>
           {summaryEl}
@@ -105,7 +111,9 @@ export default function PlanPanel({
           }
         >
           {!activePlanName || isDirty ? (
-            <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-yale-150 px-4 py-2">
+            <div
+              className={`flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-yale-150 ${toolbarPad}`}
+            >
               <p className="text-xs text-yale-700">
                 {!activePlanName ? planEmptyHint : (
                   <>
@@ -128,7 +136,13 @@ export default function PlanPanel({
           ) : null}
 
           {courseCount === 0 ? (
-            <p className="shrink-0 border-l-2 border-yale-200 py-6 pl-5 pr-4 text-center text-sm text-gray-500 sm:pl-6">
+            <p
+              className={`shrink-0 border-l-2 border-yale-200 text-center text-gray-500 ${
+                compact
+                  ? 'py-4 pl-3 pr-3 text-xs'
+                  : 'py-6 pl-5 pr-4 text-sm sm:pl-6'
+              }`}
+            >
               No courses in your plan yet. Select courses from {catalogSelectHint}{' '}
               — they appear here and on the calendar when they have a weekly
               time.
@@ -136,17 +150,25 @@ export default function PlanPanel({
           ) : (
             <>
               <div className="min-h-0 flex-1 overflow-y-auto">
-                <div className="space-y-0 border-l-2 border-yale-200 pb-3 pl-5 pr-4 pt-1 sm:pl-6">
+                <div className={listWrapClass}>
                   {grouped.map((group, groupIndex) => (
                     <section
                       key={group.session}
                       className={
                         groupIndex > 0
-                          ? 'mt-5 border-t border-yale-150 pt-4'
+                          ? compact
+                            ? 'mt-3 border-t border-yale-150 pt-2'
+                            : 'mt-5 border-t border-yale-150 pt-4'
                           : ''
                       }
                     >
-                      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-yale-800">
+                      <h3
+                        className={`font-semibold uppercase tracking-wide text-yale-800 ${
+                          compact
+                            ? 'mb-1 text-[10px]'
+                            : 'mb-2 text-xs'
+                        }`}
+                      >
                         {group.session === 'Other'
                           ? 'Other'
                           : formatSessionLabel(group.session, {
@@ -158,13 +180,21 @@ export default function PlanPanel({
                         {group.courses.map((course) => (
                           <li
                             key={course.courseId}
-                            className={`mb-2 flex items-start gap-2 rounded-md px-3 py-2 text-sm shadow-sm ${IN_PLAN_SURFACE}`}
+                            className={`flex items-start rounded-md shadow-sm ${IN_PLAN_SURFACE} ${
+                              compact
+                                ? 'mb-1 gap-1.5 px-2 py-1.5 text-xs'
+                                : 'mb-2 gap-2 px-3 py-2 text-sm'
+                            }`}
                           >
                             <div className="min-w-0 flex-1">
-                              <p className="font-medium text-gray-900">
+                              <p className="font-medium leading-snug text-gray-900">
                                 {formatCourseHeading(course)}
                               </p>
-                              <div className="mt-0.5 space-y-0.5 pl-3 text-xs">
+                              <div
+                                className={`mt-0.5 space-y-0.5 ${
+                                  compact ? 'pl-2 text-[10px]' : 'pl-3 text-xs'
+                                }`}
+                              >
                                 <p className="text-gray-500">
                                   {formatSchedule(course)}
                                 </p>
@@ -178,7 +208,11 @@ export default function PlanPanel({
                             <button
                               type="button"
                               onClick={() => onRemoveCourse(course.courseId)}
-                              className="-mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-lg leading-none text-gray-400 hover:bg-red-50 hover:text-red-700"
+                              className={`-mr-1 flex shrink-0 items-center justify-center rounded-md leading-none text-gray-400 hover:bg-red-50 hover:text-red-700 ${
+                                compact
+                                  ? 'h-6 w-6 text-base'
+                                  : 'h-7 w-7 text-lg'
+                              }`}
                               aria-label={`Remove ${course.courseNumber} from plan`}
                             >
                               <span aria-hidden>×</span>
@@ -190,7 +224,9 @@ export default function PlanPanel({
                   ))}
                 </div>
               </div>
-              <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-yale-150 bg-yale-50 px-4 py-2">
+              <div
+                className={`flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-yale-150 bg-yale-50 ${toolbarPad}`}
+              >
                 <p className="text-xs text-yale-900">
                   {courseCount} course{courseCount === 1 ? '' : 's'} ·{' '}
                   {formatTotalUnits(totalUnits)}

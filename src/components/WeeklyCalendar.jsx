@@ -462,14 +462,25 @@ export default function WeeklyCalendar({
     >
       <div className={`border-b ${calendarTone.header}`}>
         <div className="flex flex-col gap-2 px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
-          {collapsible ? (
-            <button
-              type="button"
-              onClick={onToggle}
-              aria-expanded={expanded}
-              className="flex min-w-0 cursor-pointer items-start gap-2 text-left sm:flex-1 sm:items-center"
-            >
-              <CollapseChevron open={expanded} />
+          <div className="flex min-w-0 items-center justify-between gap-2 sm:flex-1 sm:justify-start">
+            {collapsible ? (
+              <button
+                type="button"
+                onClick={onToggle}
+                aria-expanded={expanded}
+                className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-left"
+              >
+                <CollapseChevron open={expanded} />
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-sm font-semibold text-yale-950">
+                    Weekly calendar
+                  </h2>
+                  <p className="mt-0.5 text-xs leading-snug text-yale-700">
+                    {periodSubtitle}
+                  </p>
+                </div>
+              </button>
+            ) : (
               <div className="min-w-0 flex-1">
                 <h2 className="text-sm font-semibold text-yale-950">
                   Weekly calendar
@@ -478,19 +489,9 @@ export default function WeeklyCalendar({
                   {periodSubtitle}
                 </p>
               </div>
-            </button>
-          ) : (
-            <div className="flex min-w-0 flex-1 items-start gap-2 sm:items-center">
-              <div className="min-w-0 flex-1">
-                <h2 className="text-sm font-semibold text-yale-950">
-                  Weekly calendar
-                </h2>
-                <p className="mt-0.5 text-xs leading-snug text-yale-700">
-                  {periodSubtitle}
-                </p>
-              </div>
-            </div>
-          )}
+            )}
+            {mixedNonOverlappingSessions ? <SessionTabHint /> : null}
+          </div>
           {sessionTabs ? (
             <div
               className={`flex shrink-0 flex-wrap items-center justify-end gap-1.5 ${
@@ -498,7 +499,6 @@ export default function WeeklyCalendar({
               }`}
             >
               {sessionTabs}
-              {mixedNonOverlappingSessions ? <SessionTabHint /> : null}
             </div>
           ) : null}
         </div>

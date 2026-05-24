@@ -18,10 +18,11 @@ export function TagDisclaimer({ className = '' }) {
   )
 }
 
-export function PlanDisclaimer({ className = '' }) {
+export function PlanDisclaimer({ className = '', children }) {
   return (
     <p className={`text-xs text-gray-500 ${className}`.trim()}>
-      Saved plans stay in this browser only. Clearing cache removes them.
+      {children ??
+        'Saved plans stay in this browser only. Clearing cache removes them.'}
     </p>
   )
 }

@@ -1,4 +1,5 @@
 export const TOOLTIP_Z_INDEX = 100
+export const MOBILE_BOTTOM_NAV_ID = 'app-mobile-bottom-nav'
 export const TOOLTIP_HIDE_DELAY_MS = 80
 export const CALENDAR_TOOLTIP_MIN_WIDTH = 288
 export const CALENDAR_TOOLTIP_MAX_WIDTH = 448
@@ -6,6 +7,15 @@ export const CALENDAR_TOOLTIP_MAX_WIDTH = 448
 export const CALENDAR_DESCRIPTION_LINE_COUNT = 13
 
 const VIEWPORT_MARGIN = 16
+const TOOLTIP_MAX_HEIGHT_PX = 320
+
+/** Height of fixed mobile bottom nav (3rem row + safe area), or 0 on desktop. */
+export function getViewportBottomInsetPx() {
+  if (typeof window === 'undefined') return 0
+  if (window.matchMedia('(min-width: 1024px)').matches) return 0
+  const nav = document.getElementById(MOBILE_BOTTOM_NAV_ID)
+  return nav?.getBoundingClientRect().height ?? 48
+}
 
 /** Max tooltip width that fits for this anchor (left- or right-aligned). */
 export function maxTooltipWidthForAnchor(anchorEl) {
@@ -38,10 +48,38 @@ export function computePortaledTooltipLeft(anchorRect, width) {
 }
 
 /** Fixed position anchored to an element; width follows content up to viewport max. */
-export function basePortaledTooltipStyle(anchorEl, { above = true } = {}) {
+export function basePortaledTooltipStyle(
+  anchorEl,
+  { above = true, bottomInsetPx = getViewportBottomInsetPx() } = {},
+) {
   const rect = anchorEl.getBoundingClientRect()
-  const gap = 4
+  const gap = 8
   const maxWidth = window.innerWidth - VIEWPORT_MARGIN * 2
+
+  if (above) {
+    const bottomFromAnchor = window.innerHeight - rect.top + gap
+    const bottom = Math.max(bottomInsetPx + gap, bottomFromAnchor)
+    const maxHeight = Math.min(
+      TOOLTIP_MAX_HEIGHT_PX,
+      window.innerHeight - bottom - VIEWPORT_MARGIN,
+    )
+
+    return {
+      position: 'fixed',
+      left: rect.left,
+      width: 'max-content',
+      maxWidth,
+      zIndex: TOOLTIP_Z_INDEX,
+      maxHeight: Math.max(96, maxHeight),
+      bottom,
+    }
+  }
+
+  const top = rect.bottom + gap
+  const maxHeight = Math.min(
+    TOOLTIP_MAX_HEIGHT_PX,
+    window.innerHeight - bottomInsetPx - VIEWPORT_MARGIN - top,
+  )
 
   return {
     position: 'fixed',
@@ -49,10 +87,8 @@ export function basePortaledTooltipStyle(anchorEl, { above = true } = {}) {
     width: 'max-content',
     maxWidth,
     zIndex: TOOLTIP_Z_INDEX,
-    maxHeight: '20rem',
-    ...(above
-      ? { bottom: window.innerHeight - rect.top + gap }
-      : { top: rect.bottom + gap }),
+    maxHeight: Math.max(96, maxHeight),
+    top,
   }
 }
 
@@ -63,8 +99,34 @@ export function calendarCourseTooltipStyle(anchorEl, { above = true, hasDescript
   }
 
   const rect = anchorEl.getBoundingClientRect()
-  const gap = 4
+  const gap = 8
   const width = maxTooltipWidthForAnchor(anchorEl)
+  const bottomInsetPx = getViewportBottomInsetPx()
+
+  if (above) {
+    const bottomFromAnchor = window.innerHeight - rect.top + gap
+    const bottom = Math.max(bottomInsetPx + gap, bottomFromAnchor)
+    const maxHeight = Math.min(
+      TOOLTIP_MAX_HEIGHT_PX,
+      window.innerHeight - bottom - VIEWPORT_MARGIN,
+    )
+
+    return {
+      position: 'fixed',
+      left: computePortaledTooltipLeft(rect, width),
+      width,
+      maxWidth: CALENDAR_TOOLTIP_MAX_WIDTH,
+      zIndex: TOOLTIP_Z_INDEX,
+      maxHeight: Math.max(96, maxHeight),
+      bottom,
+    }
+  }
+
+  const top = rect.bottom + gap
+  const maxHeight = Math.min(
+    TOOLTIP_MAX_HEIGHT_PX,
+    window.innerHeight - bottomInsetPx - VIEWPORT_MARGIN - top,
+  )
 
   return {
     position: 'fixed',
@@ -72,9 +134,8 @@ export function calendarCourseTooltipStyle(anchorEl, { above = true, hasDescript
     width,
     maxWidth: CALENDAR_TOOLTIP_MAX_WIDTH,
     zIndex: TOOLTIP_Z_INDEX,
-    ...(above
-      ? { bottom: window.innerHeight - rect.top + gap }
-      : { top: rect.bottom + gap }),
+    maxHeight: Math.max(96, maxHeight),
+    top,
   }
 }
 

@@ -7,6 +7,7 @@ const TABS = [
 export default function MobileBottomNav({ activeTab, onChange }) {
   return (
     <nav
+      id="app-mobile-bottom-nav"
       className="fixed inset-x-0 bottom-0 z-50 border-t border-yale-950 bg-yale-900 pb-[env(safe-area-inset-bottom)] lg:hidden"
       aria-label="Main"
     >

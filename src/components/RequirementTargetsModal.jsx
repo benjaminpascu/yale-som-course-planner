@@ -60,7 +60,7 @@ export default function RequirementTargetsModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center"
+      className="fixed inset-0 z-[60] flex items-end justify-center p-4 pb-[calc(3rem+env(safe-area-inset-bottom)+1rem)] lg:items-center lg:pb-4"
       onClick={onClose}
       aria-hidden={false}
     >

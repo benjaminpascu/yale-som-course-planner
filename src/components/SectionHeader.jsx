@@ -7,11 +7,7 @@ export default function SectionHeader({ tone, title, subtitle, children }) {
   return (
     <div className={`border-b px-4 py-2.5 ${header}`}>
       <div
-        className={
-          children
-            ? 'flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-2'
-            : 'flex items-start justify-between gap-2'
-        }
+        className={`flex justify-between gap-3 ${children ? 'items-center' : 'items-start'}`}
       >
         <div className="min-w-0">
           <h2

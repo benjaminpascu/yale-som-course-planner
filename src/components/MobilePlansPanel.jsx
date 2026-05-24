@@ -24,6 +24,7 @@ export default function MobilePlansPanel({
     <div className="flex h-full min-h-0 flex-col overflow-y-auto">
       <SavedPlansPanel
         variant="flat"
+        compact
         plans={plans}
         courses={courses}
         activePlanId={activePlanId}
@@ -36,6 +37,7 @@ export default function MobilePlansPanel({
         onDeletePlan={onDeletePlan}
       />
       <PlanPanel
+        compact
         selectedCourses={selectedCourses}
         activePlanName={activePlanName}
         isDirty={isDirty}

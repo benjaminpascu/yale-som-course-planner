@@ -8,6 +8,7 @@ import {
   TOOLTIP_HIDE_DELAY_MS,
   basePortaledTooltipStyle,
   clampPortaledTooltipLeft,
+  getViewportBottomInsetPx,
 } from '../lib/portaledTooltip'
 import {
   configuredTargetTagCodes,
@@ -29,9 +30,9 @@ const REQUIREMENTS_SUBTITLE =
 const EMPTY_HINT =
   'No requirements yet. Use Add requirements to set your targets.'
 
-/** Fixed body height so tag rows never push the calendar layout. */
+/** Desktop: fixed body height so tag rows never push the calendar layout. Mobile: auto height. */
 const REQUIREMENTS_BODY_CLASS =
-  'flex h-[4.75rem] items-center overflow-x-hidden overflow-y-auto px-4'
+  'flex px-4 py-2 lg:h-[4.75rem] lg:items-center lg:overflow-x-hidden lg:overflow-y-auto lg:py-0'
 
 function AddRequirementsButton({ onClick, inverse = false }) {
   const handleClick = (event) => {
@@ -90,7 +91,9 @@ function RequirementTagItem({ row, fallYear, springYear }) {
 
   const refreshTooltipStyle = useCallback(() => {
     if (!anchorRef.current) return
-    setTooltipStyle(basePortaledTooltipStyle(anchorRef.current, { above: true }))
+    setTooltipStyle(
+      basePortaledTooltipStyle(anchorRef.current, { above: true }),
+    )
   }, [])
 
   const cancelHideTooltip = useCallback(() => {
@@ -99,6 +102,22 @@ function RequirementTagItem({ row, fallYear, springYear }) {
       hideTimerRef.current = null
     }
   }, [])
+
+  const handleTagClick = useCallback(
+    (event) => {
+      if (!hasContributors) return
+      if (!window.matchMedia('(max-width: 1023px)').matches) return
+      event.stopPropagation()
+      cancelHideTooltip()
+      if (tooltipOpen) {
+        setTooltipOpen(false)
+        return
+      }
+      refreshTooltipStyle()
+      setTooltipOpen(true)
+    },
+    [cancelHideTooltip, hasContributors, refreshTooltipStyle, tooltipOpen],
+  )
 
   const openTooltip = useCallback(() => {
     if (!hasContributors || !anchorRef.current) return
@@ -128,10 +147,20 @@ function RequirementTagItem({ row, fallYear, springYear }) {
 
   useLayoutEffect(() => {
     if (!tooltipOpen || !anchorRef.current || !tooltipRef.current) return
-    const left = clampPortaledTooltipLeft(anchorRef.current, tooltipRef.current)
+    const anchor = anchorRef.current
+    const tooltip = tooltipRef.current
+    const left = clampPortaledTooltipLeft(anchor, tooltip)
+    const tooltipRect = tooltip.getBoundingClientRect()
+    const maxBottom = window.innerHeight - getViewportBottomInsetPx() - 16
+
     setTooltipStyle((prev) => {
-      if (!prev || prev.left === left) return prev
-      return { ...prev, left }
+      if (!prev) return prev
+      let bottom = prev.bottom
+      if (tooltipRect.bottom > maxBottom && typeof bottom === 'number') {
+        bottom = bottom + (tooltipRect.bottom - maxBottom)
+      }
+      if (left === prev.left && bottom === prev.bottom) return prev
+      return { ...prev, left, bottom }
     })
   }, [tooltipOpen, row])
 
@@ -144,6 +173,7 @@ function RequirementTagItem({ row, fallYear, springYear }) {
         className="relative min-w-0 self-start"
         tabIndex={hasContributors ? 0 : undefined}
         aria-describedby={hasContributors && tooltipOpen ? tooltipId : undefined}
+        onClick={handleTagClick}
         onMouseEnter={hasContributors ? openTooltip : undefined}
         onMouseLeave={hasContributors ? scheduleHideTooltip : undefined}
         onFocus={hasContributors ? openTooltip : undefined}
