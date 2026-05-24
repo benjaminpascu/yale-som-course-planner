@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import CalendarCourseBlock from './CalendarCourseBlock'
 import { layoutCoursesForDay } from '../lib/calendarLayout'
 import {
@@ -15,28 +15,77 @@ import {
 import { formatSessionLabel } from '../lib/sessionDisplay'
 import { hasMeetingTime } from '../lib/parseCourses'
 import { sectionTone } from '../lib/sectionTheme'
+import CollapseChevron from './CollapseChevron'
 import SectionHeader from './SectionHeader'
 
 const START_HOUR = 8
-const END_HOUR = 21
+const END_HOUR = 20
 const MINUTES_PER_SLOT = 15
 const TOTAL_MINUTES = (END_HOUR - START_HOUR) * 60
-const PX_PER_MINUTE = 0.85
-const GRID_HEIGHT = TOTAL_MINUTES * PX_PER_MINUTE
+const PX_PER_MINUTE_MOBILE = 0.85
+const PX_PER_MINUTE_MAX = 0.85
+const PX_PER_MINUTE_MIN = 0.38
 
 const CALENDAR_BLOCK_COLOR = 'bg-yale-800'
+const GRID_COLUMNS = '2.75rem repeat(5, minmax(0, 1fr))'
 
-function topPx(startTime) {
-  const minutes = parseTimeToMinutes(startTime)
-  if (minutes === null) return 0
-  return Math.max(0, (minutes - START_HOUR * 60) * PX_PER_MINUTE)
+function useDesktopCalendar() {
+  const [desktop, setDesktop] = useState(() =>
+    typeof window !== 'undefined'
+      ? window.matchMedia('(min-width: 1024px)').matches
+      : false,
+  )
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)')
+    const update = () => setDesktop(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
+
+  return desktop
 }
 
-function heightPx(startTime, endTime) {
+function useFittedPxPerMinute(isDesktop, measureRef, remeasureKey) {
+  const [bodyHeight, setBodyHeight] = useState(0)
+
+  useEffect(() => {
+    if (!isDesktop || !measureRef.current) {
+      setBodyHeight(0)
+      return
+    }
+    const el = measureRef.current
+    const update = () => setBodyHeight(el.clientHeight)
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [isDesktop, measureRef, remeasureKey])
+
+  return useMemo(() => {
+    if (!isDesktop) return PX_PER_MINUTE_MOBILE
+    if (bodyHeight <= 0) return PX_PER_MINUTE_MIN
+    const fitted = bodyHeight / TOTAL_MINUTES
+    return Math.min(
+      PX_PER_MINUTE_MAX,
+      Math.max(PX_PER_MINUTE_MIN, fitted),
+    )
+  }, [isDesktop, bodyHeight])
+}
+
+function topPx(startTime, pxPerMinute) {
+  const minutes = parseTimeToMinutes(startTime)
+  if (minutes === null) return 0
+  return Math.max(0, (minutes - START_HOUR * 60) * pxPerMinute)
+}
+
+function heightPx(startTime, endTime, pxPerMinute) {
+  const slotHeight = MINUTES_PER_SLOT * pxPerMinute
   const start = parseTimeToMinutes(startTime)
   const end = parseTimeToMinutes(endTime)
-  if (start === null || end === null) return MINUTES_PER_SLOT * PX_PER_MINUTE
-  return Math.max(MINUTES_PER_SLOT * PX_PER_MINUTE, (end - start) * PX_PER_MINUTE)
+  if (start === null || end === null) return slotHeight
+  return Math.max(slotHeight, (end - start) * pxPerMinute)
 }
 
 function formatHourLabel(hour) {
@@ -50,6 +99,29 @@ function formatCoursesInPeriod(count) {
   return `${count} courses in period`
 }
 
+const FULL_TERM_TAB_HINT =
+  'Full-term courses appear on both half-term tabs.'
+
+function SessionTabHint() {
+  return (
+    <span className="group/hint relative inline-flex shrink-0">
+      <button
+        type="button"
+        className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs font-semibold text-yale-800 ring-1 ring-yale-200 hover:bg-yale-50"
+        aria-label={FULL_TERM_TAB_HINT}
+      >
+        <span aria-hidden>i</span>
+      </button>
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute right-0 top-full z-20 mt-1 hidden w-max max-w-[14rem] rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-left text-xs leading-snug text-yale-800 shadow-lg group-hover/hint:block group-focus-within/hint:block"
+      >
+        {FULL_TERM_TAB_HINT}
+      </span>
+    </span>
+  )
+}
+
 function blockPositionStyle(column, totalColumns) {
   const widthPct = 100 / totalColumns
   const leftPct = column * widthPct
@@ -59,11 +131,117 @@ function blockPositionStyle(column, totalColumns) {
   }
 }
 
+function CalendarGrid({
+  layoutByDay,
+  hourLabels,
+  gridHeight,
+  pxPerMinute,
+  gridBodyRef,
+  fillHeight,
+  calendarTone,
+  fallYear,
+  springYear,
+  openDetailKey,
+  setOpenDetailKey,
+}) {
+  const columnHeight = gridHeight
+
+  return (
+    <div
+      className={`flex w-full min-h-0 flex-col rounded-lg border shadow-sm ${calendarTone.inset} ${
+        fillHeight ? 'min-h-0 flex-1' : ''
+      }`}
+    >
+      <div
+        className="grid shrink-0"
+        style={{ gridTemplateColumns: GRID_COLUMNS }}
+      >
+        <div />
+        {WEEKDAYS.map((day) => (
+          <div
+            key={day}
+            className="border-b border-gray-200 pb-1 text-center text-xs font-semibold text-gray-700"
+          >
+            {day}
+          </div>
+        ))}
+      </div>
+
+      <div
+        ref={gridBodyRef}
+        className={`grid ${fillHeight ? 'min-h-0 flex-1 content-start' : ''}`}
+        style={{ gridTemplateColumns: GRID_COLUMNS }}
+      >
+        <div
+          className="relative border-r border-gray-100"
+          style={{ height: columnHeight }}
+        >
+          {hourLabels.map(({ hour, top }) => (
+            <div
+              key={hour}
+              className="absolute right-1 -translate-y-1/2 text-[10px] text-gray-400"
+              style={{ top }}
+            >
+              {formatHourLabel(hour)}
+            </div>
+          ))}
+        </div>
+
+        {WEEKDAYS.map((day) => (
+          <div
+            key={day}
+            className="relative border-l border-gray-100 bg-white"
+            style={{ height: columnHeight }}
+          >
+            {hourLabels.map(({ top }) => (
+              <div
+                key={`line-${day}-${top}`}
+                className="pointer-events-none absolute inset-x-0 border-t border-gray-100"
+                style={{ top }}
+              />
+            ))}
+            {layoutByDay[day].map(({ course, column, totalColumns }) => {
+              const blockKey = `${course.courseId}-${day}`
+              const top = topPx(course.startTime, pxPerMinute)
+              return (
+                <CalendarCourseBlock
+                  key={blockKey}
+                  course={course}
+                  fallYear={fallYear}
+                  springYear={springYear}
+                  colorClass={CALENDAR_BLOCK_COLOR}
+                  blockTopPx={top}
+                  gridHeight={gridHeight}
+                  isDetailOpen={openDetailKey === blockKey}
+                  onToggleDetail={(open) =>
+                    setOpenDetailKey(open ? blockKey : null)
+                  }
+                  positionStyle={{
+                    top,
+                    height: heightPx(
+                      course.startTime,
+                      course.endTime,
+                      pxPerMinute,
+                    ),
+                    ...blockPositionStyle(column, totalColumns),
+                  }}
+                />
+              )
+            })}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function WeeklyCalendar({
   selectedCourses,
   hasSelection,
   fallYear = null,
   springYear = null,
+  expanded = true,
+  onToggle = () => {},
 }) {
   const timedCourses = useMemo(
     () => selectedCourses.filter(hasMeetingTime),
@@ -82,6 +260,14 @@ export default function WeeklyCalendar({
 
   const [calendarView, setCalendarView] = useState(defaultView)
   const [openDetailKey, setOpenDetailKey] = useState(null)
+  const isDesktop = useDesktopCalendar()
+  const gridBodyRef = useRef(null)
+  const pxPerMinute = useFittedPxPerMinute(
+    isDesktop,
+    gridBodyRef,
+    `${timedCourses.length}-${calendarView}-${viewOptions.length}`,
+  )
+  const gridHeight = TOTAL_MINUTES * pxPerMinute
 
   useEffect(() => {
     if (!openDetailKey) return
@@ -144,10 +330,10 @@ export default function WeeklyCalendar({
   const hourLabels = useMemo(() => {
     const labels = []
     for (let h = START_HOUR; h <= END_HOUR; h++) {
-      labels.push({ hour: h, top: (h - START_HOUR) * 60 * PX_PER_MINUTE })
+      labels.push({ hour: h, top: (h - START_HOUR) * 60 * pxPerMinute })
     }
     return labels
-  }, [])
+  }, [pxPerMinute])
 
   const calendarTone = sectionTone('calendar')
   const activeViewLabel = useMemo(() => {
@@ -162,11 +348,71 @@ export default function WeeklyCalendar({
       : ''
   }, [viewOptions, calendarView, fallYear, springYear, selectedCourses])
 
+  const sectionLayoutClass = `flex flex-col border-b ${calendarTone.section} lg:min-h-0 ${
+    hasSelection && expanded ? 'min-h-0 flex-1 overflow-hidden' : 'shrink-0'
+  }`
+
+  const gridSharedProps = {
+    layoutByDay,
+    hourLabels,
+    gridHeight,
+    pxPerMinute,
+    gridBodyRef,
+    calendarTone,
+    fallYear,
+    springYear,
+    openDetailKey,
+    setOpenDetailKey,
+  }
+
+  const showSessionTabs = viewOptions.length > 1
+
+  const periodSubtitle = (
+    <>
+      {!showSessionTabs && activeViewLabel ? `${activeViewLabel} · ` : null}
+      {formatCoursesInPeriod(periodCourses.length)} (
+      {formatCourseUnits(periodUnits)})
+      {periodUntimedCount > 0 ? (
+        <span className="text-amber-700">
+          {` · ${periodUntimedCount} without weekly time`}
+        </span>
+      ) : null}
+    </>
+  )
+
+  const sessionTabs = showSessionTabs ? (
+    <div
+      className="flex max-w-[min(100%,20rem)] shrink-0 flex-wrap items-center justify-end gap-1.5 sm:max-w-none"
+      role="tablist"
+      aria-label="Calendar session view"
+    >
+      {viewOptions.map((opt) => {
+        const active = calendarView === opt.id
+        return (
+          <button
+            key={opt.id}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            onClick={() => setCalendarView(opt.id)}
+            className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+              active
+                ? 'bg-yale-800 text-white shadow-sm'
+                : 'bg-white text-yale-800 ring-1 ring-yale-200 hover:bg-yale-50'
+            }`}
+          >
+            {opt.label}
+          </button>
+        )
+      })}
+    </div>
+  ) : null
+
   if (!hasSelection) {
     return (
       <section
         id="weekly-calendar"
-        className={`flex min-h-44 shrink-0 flex-col border-b ${calendarTone.section} sm:min-h-52`}
+        className={`${sectionLayoutClass} min-h-44 sm:min-h-52`}
         aria-label="Weekly schedule"
       >
         <SectionHeader
@@ -186,150 +432,61 @@ export default function WeeklyCalendar({
   return (
     <section
       id="weekly-calendar"
-      className={`flex shrink-0 flex-col border-b ${calendarTone.section}`}
+      className={sectionLayoutClass}
+      aria-label="Weekly schedule"
     >
-      <SectionHeader
-        tone="calendar"
-        title="Weekly calendar"
-        subtitle={
-          <>
-            {activeViewLabel ? `${activeViewLabel} · ` : null}
-            {formatCoursesInPeriod(periodCourses.length)} (
-            {formatCourseUnits(periodUnits)})
-            {periodUntimedCount > 0
-              ? ` · ${periodUntimedCount} without weekly time`
-              : ''}
-          </>
-        }
-      />
-
-      {viewOptions.length > 1 ? (
-        <div
-          className="flex flex-wrap items-center gap-1.5 border-b border-yale-100/80 bg-yale-50/40 px-4 py-2"
-          role="tablist"
-          aria-label="Calendar session view"
-        >
-          {viewOptions.map((opt) => {
-            const active = calendarView === opt.id
-            return (
-              <button
-                key={opt.id}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                onClick={() => setCalendarView(opt.id)}
-                className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
-                  active
-                    ? 'bg-yale-800 text-white shadow-sm'
-                    : 'bg-white text-yale-800 ring-1 ring-yale-200 hover:bg-yale-50'
-                }`}
-              >
-                {opt.label}
-              </button>
-            )
-          })}
-        </div>
-      ) : null}
-
-      {mixedNonOverlappingSessions && viewOptions.length > 1 ? (
-        <p className="border-b border-yale-100/60 px-4 py-1.5 text-xs text-yale-700">
-          Fall 1 and Fall 2 (or Spring 1 and 2) do not meet in the same weeks —
-          switch tabs to see each schedule. Full-term courses appear on both
-          halves.
-        </p>
-      ) : null}
-
-      {timedCourses.length === 0 ? (
-        <p className="px-4 py-10 text-center text-sm text-gray-600">
-          None of your selected courses have a weekly meeting time, so nothing
-          appears on the grid. They still count in your plan and requirements
-          below.
-        </p>
-      ) : visibleCourses.length === 0 ? (
-        <p className="px-4 py-10 text-center text-sm text-gray-600">
-          No courses in your plan match this session view. Try another tab
-          above.
-        </p>
-      ) : (
-        <div className="w-full px-4 py-2 sm:py-3">
-          <div
-            className={`grid w-full overflow-visible rounded-lg border shadow-sm ${calendarTone.inset}`}
-            style={{
-              gridTemplateColumns: '2.75rem repeat(5, minmax(0, 1fr))',
-            }}
+      <div className={`border-b ${calendarTone.header}`}>
+        <div className="flex items-center justify-between gap-2 px-4 py-2.5">
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-expanded={expanded}
+            className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-left"
           >
-            <div />
-            {WEEKDAYS.map((day) => (
-              <div
-                key={day}
-                className="border-b border-gray-200 pb-1 text-center text-xs font-semibold text-gray-700"
-              >
-                {day}
-              </div>
-            ))}
-
-            <div
-              className="relative border-r border-gray-100"
-              style={{ height: GRID_HEIGHT }}
-            >
-              {hourLabels.map(({ hour, top }) => (
-                <div
-                  key={hour}
-                  className="absolute right-1 -translate-y-1/2 text-[10px] text-gray-400"
-                  style={{ top }}
-                >
-                  {formatHourLabel(hour)}
-                </div>
-              ))}
+            <CollapseChevron open={expanded} />
+            <div className="min-w-0">
+              <h2 className="text-sm font-semibold text-yale-950">
+                Weekly calendar
+              </h2>
+              <p className="mt-0.5 text-xs text-yale-700">{periodSubtitle}</p>
             </div>
-
-            {WEEKDAYS.map((day) => (
-              <div
-                key={day}
-                className="relative border-l border-gray-100 bg-white"
-                style={{ height: GRID_HEIGHT }}
-              >
-                {hourLabels.map(({ top }) => (
-                  <div
-                    key={`line-${day}-${top}`}
-                    className="pointer-events-none absolute inset-x-0 border-t border-gray-100"
-                    style={{ top }}
-                  />
-                ))}
-                {layoutByDay[day].map(
-                  ({ course, column, totalColumns }) => {
-                    const blockKey = `${course.courseId}-${day}`
-                    const top = topPx(course.startTime)
-                    return (
-                      <CalendarCourseBlock
-                        key={blockKey}
-                        course={course}
-                        fallYear={fallYear}
-                        springYear={springYear}
-                        colorClass={CALENDAR_BLOCK_COLOR}
-                        blockTopPx={top}
-                        gridHeight={GRID_HEIGHT}
-                        isDetailOpen={openDetailKey === blockKey}
-                        onToggleDetail={(open) =>
-                          setOpenDetailKey(open ? blockKey : null)
-                        }
-                        positionStyle={{
-                          top,
-                          height: heightPx(
-                            course.startTime,
-                            course.endTime,
-                          ),
-                          ...blockPositionStyle(column, totalColumns),
-                        }}
-                      />
-                    )
-                  },
-                )}
-              </div>
-            ))}
-          </div>
+          </button>
+          {sessionTabs ? (
+            <div className="flex shrink-0 items-center gap-1.5">
+              {sessionTabs}
+              {mixedNonOverlappingSessions ? <SessionTabHint /> : null}
+            </div>
+          ) : null}
         </div>
-      )}
+      </div>
+
+      {expanded ? (
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          {timedCourses.length === 0 ? (
+            <p className="shrink-0 px-4 py-10 text-center text-sm text-gray-600 lg:flex-1 lg:content-center">
+              None of your selected courses have a weekly meeting time, so nothing
+              appears on the grid. They still count in your plan and requirements
+              below.
+            </p>
+          ) : visibleCourses.length === 0 ? (
+            <p className="shrink-0 px-4 py-10 text-center text-sm text-gray-600 lg:flex-1 lg:content-center">
+              No courses in your plan match this session view. Try another tab
+              above.
+            </p>
+          ) : (
+            <div
+              className={`flex min-h-0 w-full flex-1 flex-col px-4 py-2 sm:py-3 lg:py-2 ${
+                isDesktop ? 'overflow-hidden' : ''
+              }`}
+            >
+              <CalendarGrid
+                {...gridSharedProps}
+                fillHeight={isDesktop}
+              />
+            </div>
+          )}
+        </div>
+      ) : null}
     </section>
   )
 }

@@ -43,6 +43,7 @@ function formatPlanSummary(courseCount, unitCount) {
 }
 
 export default function SavedPlansPanel({
+  variant = 'flat',
   plans,
   courses,
   activePlanId,
@@ -105,20 +106,8 @@ export default function SavedPlansPanel({
     onRenamePlan(openPlan.id, renameDraft)
   }
 
-  return (
-    <details className={`group border-b ${tone.section}`}>
-      <summary
-        className={`flex cursor-pointer list-none items-center gap-2 border-b px-4 py-3 text-sm font-semibold text-yale-950 marker:content-none [&::-webkit-details-marker]:hidden ${tone.header}`}
-      >
-        <CollapseChevron />
-        <span className="flex-1">Saved plans</span>
-        {plans.length > 0 ? (
-          <span className="font-normal text-yale-800">
-            {plans.length} saved
-          </span>
-        ) : null}
-      </summary>
-
+  const body = (
+    <>
       <PlanDisclaimer className="border-b border-yale-100 px-4 py-2" />
 
       <div className="flex flex-col gap-4 px-4 py-4">
@@ -149,7 +138,7 @@ export default function SavedPlansPanel({
             <p className="text-sm text-yale-700">
               {hasSelection
                 ? 'Name your plan and click Save to plan to keep your current course selection.'
-                : 'Add courses from the catalog below, then name a plan and click Save to plan — or click Add to start with an empty plan.'}
+                : 'Add courses from the catalog, then name a plan and click Save to plan — or click Add to start with an empty plan.'}
             </p>
           ) : (
             <ul className="space-y-2">
@@ -185,19 +174,17 @@ export default function SavedPlansPanel({
                         onClick={() => handlePlanRowClick(plan.id)}
                         aria-expanded={menuOpen}
                         aria-current={isActive ? 'true' : undefined}
-                        className="flex min-w-0 flex-1 flex-nowrap items-center gap-2 py-2 pl-3 pr-2 text-left"
+                        className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1 py-2 pl-3 pr-2 text-left"
                       >
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-gray-900">
+                          <p className="text-sm font-medium text-gray-900 break-words">
                             {plan.name}
-                            {showUnsaved ? (
-                              <span className="ml-1 font-normal text-red-700">
-                                (unsaved)
-                              </span>
-                            ) : null}
                           </p>
                           <p className="text-xs text-gray-500">
                             {formatPlanSummary(savedCount, savedUnits)}
+                            {showUnsaved ? (
+                              <span className="text-red-700"> · unsaved</span>
+                            ) : null}
                           </p>
                         </div>
                         {isActive ? (
@@ -276,6 +263,22 @@ export default function SavedPlansPanel({
           )}
         </div>
       </div>
-    </details>
+    </>
   )
+
+  if (variant === 'collapsible') {
+    return (
+      <details className={`group border-b ${tone.section}`}>
+        <summary
+          className={`flex cursor-pointer list-none items-center gap-2 border-b px-4 py-3 text-sm font-semibold text-yale-950 marker:content-none [&::-webkit-details-marker]:hidden ${tone.header}`}
+        >
+          <CollapseChevron />
+          <span className="flex-1">Saved plans</span>
+        </summary>
+        {body}
+      </details>
+    )
+  }
+
+  return <div className={tone.section}>{body}</div>
 }

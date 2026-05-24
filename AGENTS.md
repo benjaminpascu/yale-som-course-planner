@@ -1,3 +1,8 @@
+---
+description: 
+alwaysApply: true
+---
+
 # Agent handoff — Yale SOM Course Planner
 
 **Read this file first** when starting a new Cursor chat or a **new agent** on this project.

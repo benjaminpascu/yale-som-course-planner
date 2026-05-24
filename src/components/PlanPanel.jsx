@@ -31,6 +31,8 @@ export default function PlanPanel({
   isDirty,
   fallYear,
   springYear,
+  expanded,
+  onToggle,
   onSavePlan,
   onRemoveCourse,
   onClearPlan,
@@ -53,15 +55,19 @@ export default function PlanPanel({
     activePlanName != null || courseCount > 0
 
   return (
-    <details className={`group border-b ${planTone.section}`}>
-      <summary
-        className={`flex cursor-pointer list-none items-center gap-2 border-b px-4 py-3 text-sm font-semibold text-yale-950 marker:content-none [&::-webkit-details-marker]:hidden ${planTone.header}`}
+    <section
+      className={`flex flex-col border-b ${planTone.section} ${
+        expanded ? 'min-h-0 flex-1 overflow-hidden' : 'shrink-0'
+      }`}
+    >
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={expanded}
+        className={`flex w-full shrink-0 cursor-pointer items-center gap-2 border-b px-4 py-3 text-left text-sm font-semibold text-yale-950 ${planTone.header}`}
       >
-        <CollapseChevron />
-        <span className="flex-1">
-          Current plan
-          {activePlanName != null ? ` (${activePlanName})` : ''}
-        </span>
+        <CollapseChevron open={expanded} />
+        <span className="flex-1">Your plan</span>
         {showSummary ? (
           <span className="shrink-0 font-normal text-yale-800">
             {formatPlanHeaderSummary(courseCount, totalUnits)}
@@ -70,107 +76,115 @@ export default function PlanPanel({
             ) : null}
           </span>
         ) : null}
-      </summary>
+      </button>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-yale-150 px-4 py-2">
-        <p className="text-xs text-yale-700">
-          {activePlanName ? (
-            isDirty ? (
-              <>
-                Unsaved changes to your plan, named{' '}
-                <span className="italic">{activePlanName}</span>. Add or remove courses below, then save.
-              </>
-            ) : (
-              <>
-                Courses in your plan, named <span className="italic">{activePlanName}</span>.
-              </>
-            )
-          ) : (
-            'Click a saved plan above to show it on the calendar, then add courses here.'
-          )}
-        </p>
-        {activePlanName && isDirty ? (
-          <button
-            type="button"
-            onClick={onSavePlan}
-            className={`shrink-0 rounded-md px-3 py-1.5 text-xs font-medium ${SAVE_BUTTON}`}
-          >
-            Save plan
-          </button>
-        ) : null}
-      </div>
+      {expanded ? (
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          {!activePlanName || isDirty ? (
+            <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-yale-150 px-4 py-2">
+              <p className="text-xs text-yale-700">
+                {!activePlanName ? (
+                  'Open Plans in the header to pick or create a plan, then add courses from the catalog.'
+                ) : (
+                  <>
+                    Unsaved changes to{' '}
+                    <span className="italic">{activePlanName}</span>. Save when
+                    you&apos;re done editing.
+                  </>
+                )}
+              </p>
+              {activePlanName && isDirty ? (
+                <button
+                  type="button"
+                  onClick={onSavePlan}
+                  className={`shrink-0 rounded-md px-3 py-1.5 text-xs font-medium ${SAVE_BUTTON}`}
+                >
+                  Save plan
+                </button>
+              ) : null}
+            </div>
+          ) : null}
 
-      {courseCount === 0 ? (
-        <p className="border-l-2 border-yale-200 py-6 pl-5 pr-4 text-center text-sm text-gray-500 sm:pl-6">
-          No courses in the active plan. Select courses from the catalog below
-          — they appear here and on the calendar when they have a weekly time.
-        </p>
-      ) : (
-        <>
-          <div className="space-y-0 border-l-2 border-yale-200 pb-3 pl-5 pr-4 pt-1 sm:pl-6">
-            {grouped.map((group, groupIndex) => (
-              <section
-                key={group.session}
-                className={groupIndex > 0 ? 'mt-5 border-t border-yale-150 pt-4' : ''}
-              >
-                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-yale-800">
-                  {group.session === 'Other'
-                    ? 'Other'
-                    : formatSessionLabel(group.session, {
-                        fallYear,
-                        springYear,
-                      })}
-                </h3>
-                <ul className="space-y-0">
-                  {group.courses.map((course) => (
-                    <li
-                      key={course.courseId}
-                      className={`mb-2 flex items-start gap-2 rounded-md px-3 py-2 text-sm shadow-sm ${IN_PLAN_SURFACE}`}
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium text-gray-900">
-                          {formatCourseHeading(course)}
-                        </p>
-                        <div className="mt-0.5 space-y-0.5 pl-3 text-xs">
-                          <p className="text-gray-500">
-                            {formatSchedule(course)}
-                          </p>
-                          {!hasMeetingTime(course) && (
-                            <p className="text-amber-700">
-                              Not on calendar (no weekly time)
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => onRemoveCourse(course.courseId)}
-                        className="shrink-0 rounded px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                        aria-label={`Remove ${course.courseNumber} from plan`}
-                      >
-                        Remove
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ))}
-          </div>
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-yale-150 bg-yale-50 px-4 py-2">
-            <p className="text-xs text-yale-900">
-              {courseCount} course{courseCount === 1 ? '' : 's'} ·{' '}
-              {formatTotalUnits(totalUnits)}
+          {courseCount === 0 ? (
+            <p className="shrink-0 border-l-2 border-yale-200 py-6 pl-5 pr-4 text-center text-sm text-gray-500 sm:pl-6">
+              No courses in your plan yet. Select courses from the catalog on the
+              left — they appear here and on the calendar when they have a weekly
+              time.
             </p>
-            <button
-              type="button"
-              onClick={onClearPlan}
-              className="text-xs font-medium text-gray-600 underline hover:text-gray-900"
-            >
-              Clear all courses
-            </button>
-          </div>
-        </>
-      )}
-    </details>
+          ) : (
+            <>
+              <div className="min-h-0 flex-1 overflow-y-auto">
+                <div className="space-y-0 border-l-2 border-yale-200 pb-3 pl-5 pr-4 pt-1 sm:pl-6">
+                  {grouped.map((group, groupIndex) => (
+                    <section
+                      key={group.session}
+                      className={
+                        groupIndex > 0
+                          ? 'mt-5 border-t border-yale-150 pt-4'
+                          : ''
+                      }
+                    >
+                      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-yale-800">
+                        {group.session === 'Other'
+                          ? 'Other'
+                          : formatSessionLabel(group.session, {
+                              fallYear,
+                              springYear,
+                            })}
+                      </h3>
+                      <ul className="space-y-0">
+                        {group.courses.map((course) => (
+                          <li
+                            key={course.courseId}
+                            className={`mb-2 flex items-start gap-2 rounded-md px-3 py-2 text-sm shadow-sm ${IN_PLAN_SURFACE}`}
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p className="font-medium text-gray-900">
+                                {formatCourseHeading(course)}
+                              </p>
+                              <div className="mt-0.5 space-y-0.5 pl-3 text-xs">
+                                <p className="text-gray-500">
+                                  {formatSchedule(course)}
+                                </p>
+                                {!hasMeetingTime(course) && (
+                                  <p className="text-amber-700">
+                                    Not on calendar (no weekly time)
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => onRemoveCourse(course.courseId)}
+                              className="shrink-0 rounded px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                              aria-label={`Remove ${course.courseNumber} from plan`}
+                            >
+                              Remove
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+                  ))}
+                </div>
+              </div>
+              <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-yale-150 bg-yale-50 px-4 py-2">
+                <p className="text-xs text-yale-900">
+                  {courseCount} course{courseCount === 1 ? '' : 's'} ·{' '}
+                  {formatTotalUnits(totalUnits)}
+                </p>
+                <button
+                  type="button"
+                  onClick={onClearPlan}
+                  className="text-xs font-medium text-gray-600 underline hover:text-gray-900"
+                >
+                  Clear all courses
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      ) : null}
+    </section>
   )
 }

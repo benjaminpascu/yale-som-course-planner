@@ -1,69 +1,58 @@
+import { useState } from 'react'
 import PlanPanel from './PlanPanel'
-import SavedPlansPanel from './SavedPlansPanel'
-import SectionHeader from './SectionHeader'
 import TagUnitTracker from './TagUnitTracker'
 import WeeklyCalendar from './WeeklyCalendar'
-import { sectionTone } from '../lib/sectionTheme'
 
-/** Top stack: calendar → requirements → plans (breaker) → saved + current plan. */
+/** Top stack: calendar ↔ plan (one expanded at a time) with requirements between. */
 export default function PlanningPanel({
-  courses,
   selectedCourses,
   hasSelection,
   fallYear,
   springYear,
   tags,
-  plans,
   activePlanId,
   activePlanName,
   isDirty,
-  onAddPlan,
-  onSelectPlan,
-  onRenamePlan,
   onSavePlan,
-  onDeletePlan,
   onRemoveCourse,
   onClearPlan,
 }) {
+  const [expandedPane, setExpandedPane] = useState('calendar')
+
   return (
-    <div className="flex w-full flex-col">
+    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
       <WeeklyCalendar
         selectedCourses={selectedCourses}
         hasSelection={hasSelection}
         fallYear={fallYear}
         springYear={springYear}
+        expanded={expandedPane === 'calendar'}
+        onToggle={() =>
+          setExpandedPane((pane) => (pane === 'calendar' ? 'plan' : 'calendar'))
+        }
       />
-      <TagUnitTracker
-        selectedCourses={selectedCourses}
-        tags={tags}
-        fallYear={fallYear}
-        springYear={springYear}
-      />
-      <div className={`flex flex-col ${sectionTone('plansBreaker').section}`}>
-        <SectionHeader tone="plansBreaker" title="Plans" />
-        <SavedPlansPanel
-          plans={plans}
-          courses={courses}
-          activePlanId={activePlanId}
-          hasSelection={hasSelection}
-          isDirty={isDirty}
-          onAddPlan={onAddPlan}
-          onSelectPlan={onSelectPlan}
-          onRenamePlan={onRenamePlan}
-          onSavePlan={onSavePlan}
-          onDeletePlan={onDeletePlan}
-        />
-        <PlanPanel
+      <div className="shrink-0">
+        <TagUnitTracker
           selectedCourses={selectedCourses}
-          activePlanName={activePlanName}
-          isDirty={isDirty}
+          tags={tags}
           fallYear={fallYear}
           springYear={springYear}
-          onSavePlan={() => activePlanId && onSavePlan(activePlanId)}
-          onRemoveCourse={onRemoveCourse}
-          onClearPlan={onClearPlan}
         />
       </div>
+      <PlanPanel
+        selectedCourses={selectedCourses}
+        activePlanName={activePlanName}
+        isDirty={isDirty}
+        fallYear={fallYear}
+        springYear={springYear}
+        expanded={expandedPane === 'plan'}
+        onToggle={() =>
+          setExpandedPane((pane) => (pane === 'plan' ? 'calendar' : 'plan'))
+        }
+        onSavePlan={() => activePlanId && onSavePlan(activePlanId)}
+        onRemoveCourse={onRemoveCourse}
+        onClearPlan={onClearPlan}
+      />
     </div>
   )
 }

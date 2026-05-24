@@ -17,9 +17,11 @@ function GitHubIcon({ className }) {
   )
 }
 
-export default function AppFooter() {
+export default function AppFooter({ className = '' }) {
   return (
-    <footer className="border-t border-yale-950 bg-yale-900 px-4 py-6 text-center text-sm text-white">
+    <footer
+      className={`border-t border-yale-950 bg-yale-900 px-4 py-6 text-center text-sm text-white ${className}`}
+    >
       <a
         href={GITHUB_PROFILE_URL}
         target="_blank"

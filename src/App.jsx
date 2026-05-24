@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AppFooter from './components/AppFooter'
 import CourseBrowser from './components/CourseBrowser'
+import PlansMenu from './components/PlansMenu'
 import PlanningPanel from './components/PlanningPanel'
 import { getSemesterCalendarYears } from './lib/academicYear'
 import { loadAppData } from './lib/loadData'
@@ -231,65 +232,81 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b border-yale-950 bg-yale-900 px-4 py-3 text-white sm:py-4">
-        <h1 className="text-xl font-semibold">
-          Yale SOM Course Planner
-        </h1>
-        <p className="mt-1 text-sm text-yale-100">
-          {fallYear != null && springYear != null ? (
-            <>
-              Academic Year {fallYear}-{String(springYear).slice(-2)}
-              <span aria-hidden className="px-1.5">
-                ·
-              </span>
-            </>
-          ) : null}
-          {courses.length} courses loaded
-        </p>
-        <p className="mt-0.5 text-xs text-yale-200">
-          Source:{' '}
-          <a
-            href={YALE_COURSE_LIST_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-medium text-white underline decoration-yale-200/80 underline-offset-2 hover:decoration-white"
-          >
-            Yale SOM Course List
-          </a>
-        </p>
+    <div className="flex min-h-screen flex-col bg-gray-50 lg:h-dvh lg:overflow-hidden">
+      <header className="shrink-0 border-b border-yale-950 bg-yale-900 px-4 py-3 text-white sm:py-4">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl font-semibold">
+              Yale SOM Course Planner
+            </h1>
+            <p className="mt-1 text-sm text-yale-100">
+              {fallYear != null && springYear != null ? (
+                <>
+                  Academic Year {fallYear}-{String(springYear).slice(-2)}
+                  <span aria-hidden className="px-1.5">
+                    ·
+                  </span>
+                </>
+              ) : null}
+              {courses.length} courses loaded
+            </p>
+            <p className="mt-0.5 text-xs text-yale-200">
+              Source:{' '}
+              <a
+                href={YALE_COURSE_LIST_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-white underline decoration-yale-200/80 underline-offset-2 hover:decoration-white"
+              >
+                Yale SOM Course List
+              </a>
+            </p>
+          </div>
+          <PlansMenu
+            plans={planStore.plans}
+            courses={courses}
+            activePlanId={planStore.activePlanId}
+            activePlanName={activePlan?.name ?? null}
+            hasSelection={selectedIds.size > 0}
+            isDirty={isDirty}
+            onAddPlan={handleAddPlan}
+            onSelectPlan={handleSelectPlan}
+            onSavePlan={handleSavePlan}
+            onRenamePlan={handleRenamePlan}
+            onDeletePlan={handleDeletePlan}
+          />
+        </div>
       </header>
 
-      <main className="flex w-full flex-col bg-white">
+      <main className="grid min-h-0 w-full flex-1 grid-cols-1 bg-white lg:grid-cols-[22rem_minmax(0,1fr)] lg:overflow-hidden">
+        <aside className="order-2 min-h-0 border-t border-gray-200 lg:order-1 lg:flex lg:flex-col lg:overflow-hidden lg:border-r lg:border-t-0">
+          <CourseBrowser
+            courses={courses}
+            tags={tags}
+            selectedIds={selectedIds}
+            selectedCourses={selectedCourses}
+            onToggleCourse={toggleCourse}
+            fallYear={fallYear}
+            springYear={springYear}
+          />
+        </aside>
+        <section className="order-1 flex min-h-0 flex-col overflow-hidden lg:order-2">
         <PlanningPanel
-          courses={courses}
           selectedCourses={selectedCourses}
           hasSelection={selectedIds.size > 0}
           fallYear={fallYear}
           springYear={springYear}
           tags={tags}
-          plans={planStore.plans}
           activePlanId={planStore.activePlanId}
           activePlanName={activePlan?.name ?? null}
           isDirty={isDirty}
-          onAddPlan={handleAddPlan}
-          onSelectPlan={handleSelectPlan}
           onSavePlan={handleSavePlan}
-          onRenamePlan={handleRenamePlan}
-          onDeletePlan={handleDeletePlan}
           onRemoveCourse={removeCourse}
           onClearPlan={clearPlan}
         />
-        <CourseBrowser
-          courses={courses}
-          tags={tags}
-          selectedIds={selectedIds}
-          onToggleCourse={toggleCourse}
-          fallYear={fallYear}
-          springYear={springYear}
-        />
+        </section>
       </main>
-      <AppFooter />
+      <AppFooter className="shrink-0 lg:hidden" />
     </div>
   )
 }

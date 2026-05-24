@@ -30,12 +30,14 @@ export default function CourseBrowser({
   courses,
   tags,
   selectedIds,
+  selectedCourses = [],
   onToggleCourse,
   fallYear = null,
   springYear = null,
 }) {
   const [filters, setFilters] = useState(createEmptyFilters)
   const [page, setPage] = useState(1)
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   const tagsByCourseNumber = useMemo(
     () => buildTagsByCourseNumber(tags),
@@ -72,6 +74,19 @@ export default function CourseBrowser({
   const rangeEnd = Math.min(page * PAGE_SIZE, filtered.length)
 
   const active = hasActiveFilters(filters)
+  const activeFilterCount = useMemo(() => {
+    let count = 0
+    if (filters.search.trim()) count += 1
+    if (filters.timeFrom) count += 1
+    if (filters.timeTo) count += 1
+    count += filters.sessions.size
+    count += filters.days.size
+    count += filters.units.size
+    count += filters.bidTypes.size
+    count += filters.categories.size
+    count += filters.tagCodes.size
+    return count
+  }, [filters])
 
   const conflictingIds = useMemo(
     () => getConflictingCourseIds(courses, selectedIds),
@@ -109,9 +124,133 @@ export default function CourseBrowser({
   const filterTone = sectionTone('filters')
   const catalogTone = sectionTone('catalog')
 
+  useEffect(() => {
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') setFiltersOpen(false)
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
   return (
-    <div className="flex w-full flex-col">
-      <section className={`w-full ${catalogTone.section}`}>
+    <div className="flex h-full min-h-0 w-full flex-col">
+      <section
+        className={`hidden h-full min-h-0 w-full lg:flex lg:flex-col lg:overflow-hidden ${catalogTone.section}`}
+      >
+        <SectionHeader
+          tone="catalog"
+          title="Course catalog"
+          subtitle={`${filtered.length} matched · ${selectedCourses.length} in plan`}
+        />
+
+        <div className="border-b border-yale-150 px-4 py-2">
+          <button
+            type="button"
+            onClick={() => setFiltersOpen(true)}
+            className="w-full rounded-md border border-yale-200 bg-white px-3 py-2 text-left text-sm font-medium text-yale-950 shadow-sm hover:bg-yale-50"
+          >
+            Search &amp; filters
+            {active ? (
+              <span className="ml-1 text-yale-800">({activeFilterCount} active)</span>
+            ) : null}
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto">
+          {filtered.length === 0 ? (
+            <p
+              className={`px-4 py-8 text-center text-sm ${
+                timeRangeError ? 'text-amber-800' : 'text-gray-500'
+              }`}
+            >
+              {timeRangeError ??
+                'No courses found. Try expanding your selection criteria.'}
+            </p>
+          ) : (
+            <>
+              <ul className="divide-y divide-gray-200/80">
+                {pageCourses.map((course) => (
+                  <CourseRow
+                    key={course.courseId}
+                    course={course}
+                    requirementTagCodes={getCourseRequirementTags(
+                      course.courseNumber,
+                      tagsByCourseNumber,
+                    )}
+                    isSelected={selectedIds.has(course.courseId)}
+                    hasConflict={conflictingIds.has(course.courseId)}
+                    onToggle={() => onToggleCourse(course.courseId)}
+                  />
+                ))}
+              </ul>
+              {totalPages > 1 ? (
+                <nav
+                  className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200/80 bg-gray-50/80 px-4 py-3"
+                  aria-label="Course catalog pages"
+                >
+                  <p className="text-sm text-gray-600">
+                    Page {page} of {totalPages}
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={page <= 1}
+                      className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      Previous
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPage((p) => Math.min(totalPages, p + 1))
+                      }
+                      disabled={page >= totalPages}
+                      className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </nav>
+              ) : null}
+            </>
+          )}
+        </div>
+
+        {filtersOpen ? (
+          <div
+            className="fixed inset-0 z-40 bg-black/35"
+            onClick={() => setFiltersOpen(false)}
+            aria-hidden
+          >
+            <div
+              className={`h-full w-[min(54rem,100vw-2.5rem)] overflow-y-auto bg-white shadow-2xl ${filterTone.section}`}
+              onClick={(event) => event.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Search and filters"
+            >
+              <div
+                className={`sticky top-0 z-10 flex items-center justify-between border-b px-4 py-3 ${filterTone.header}`}
+              >
+                <p className="text-sm font-semibold text-yale-950">
+                  Search &amp; filters
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setFiltersOpen(false)}
+                  className="rounded border border-yale-300 bg-white px-2.5 py-1 text-xs font-medium text-yale-900 hover:bg-yale-50"
+                >
+                  Close
+                </button>
+              </div>
+              <CourseFilters {...filterProps} />
+            </div>
+          </div>
+        ) : null}
+      </section>
+
+      <section className={`w-full lg:hidden ${catalogTone.section}`}>
         <SectionHeader
           tone="catalog"
           title="Course catalog"

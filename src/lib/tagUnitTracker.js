@@ -52,6 +52,19 @@ export function getSemesterBreakdownLines(bySemester, years = {}) {
 }
 
 /**
+ * Single-line fall/spring breakdown when units span both semesters.
+ *
+ * @param {{ fall: number, spring: number }} bySemester
+ * @param {{ fallYear?: number | null, springYear?: number | null }} [years]
+ * @returns {string | null}
+ */
+export function formatSemesterBreakdown(bySemester, years = {}) {
+  const lines = getSemesterBreakdownLines(bySemester, years)
+  if (!lines) return null
+  return lines.map((line) => line.text).join(' · ')
+}
+
+/**
  * Live units per Yale requirement tag for courses in the active plan.
  * A course with multiple tags contributes its full units toward each tag.
  *

@@ -140,6 +140,7 @@ The tag taxonomy comes from Yale's own filter dropdown (see §6.2). The merge sc
 - Color-coded by tag, category, or user choice.
 - Hovering a block shows full course info including session, units, faculty, room.
 - Remove courses from the plan via the catalog or **Your plan** panel (calendar blocks are not clickable).
+- **Hover popup:** Must use the portal pattern in §7.6 (not an in-flow `absolute` tooltip).
 
 ### 7.3 Tag unit tracker
 - Persistent panel (top or side) showing **accumulated units per requirement tag** for courses in the active plan.
@@ -159,6 +160,7 @@ The tag taxonomy comes from Yale's own filter dropdown (see §6.2). The merge sc
 
 - **Sums units, not course count** — a single course can contribute 0.5 to 6.0 units toward each tag it carries.
 - Tooltip on hover: which selected courses contribute to that tag, and how many units each contributes.
+- **Hover popup:** Must use the portal pattern in §7.6 (not an in-flow `absolute` tooltip).
 - If a course has multiple tags, its units count toward **each** tag it has (no "choose which bucket" UI in v1).
 - The app does **not** store graduation thresholds or show progress bars like "3/4 units" — students compare totals to their own targets.
 - Visible disclaimer: tags are student-maintained; verify with your advisor.
@@ -172,6 +174,33 @@ The tag taxonomy comes from Yale's own filter dropdown (see §6.2). The merge sc
 ### 7.5 Admin / tag management
 - **No custom admin UI in v1.** Maintainers use Supabase's built-in table editor to upload CSV data, edit tags, and manage allowlisted admin emails.
 - README documents the semester workflow for the next maintainer (CSV upload, tag refresh via `build_tags.py`, handoff).
+
+### 7.6 Hover detail popups (required UI pattern)
+
+Several panels use hover (desktop) or tap (mobile) to show extra detail: **calendar course blocks** (`CalendarCourseBlock.jsx`) and **requirement tag rows** (`TagUnitTracker.jsx` → `RequirementTagItem`). These popups must always render **above all other UI**, including overlapping calendar blocks, the fixed-height requirements strip, and plan panel.
+
+**Do not** implement these as in-flow `absolute` / `position: relative` tooltips with CSS `:hover` alone. Parent sections use `overflow: hidden` or sibling stacking, so in-flow tooltips get **clipped** or paint **behind** other elements.
+
+**Required approach (both locations):**
+
+1. **Portal:** Render the popup with React `createPortal(..., document.body)` so it escapes parent overflow and stacking contexts.
+2. **Fixed positioning:** Position with `position: fixed` and coordinates from `anchorRef.current.getBoundingClientRect()`.
+3. **Z-index:** Use `z-index: 100` (shared constant `TOOLTIP_Z_INDEX` in `src/lib/portaledTooltip.js`).
+4. **Width:** `width: max-content` with a viewport max so the popup sizes to its content. Calendar course popups with a description cap at 18–28rem and balance column heights. After render, clamp `left` so the popup stays on screen (`computePortaledTooltipLeft` / `clampPortaledTooltipLeft` in the same module): default align to the anchor’s left edge; if that overflows the right edge, **right-align to the anchor and expand left** (e.g. Friday columns).
+5. **Placement:** Calendar blocks may show above or below the anchor depending on grid position; requirement tags show **above** the row (`bottom: window.innerHeight - rect.top + gap`).
+6. **Open / close:** `onMouseEnter` / `onFocus` opens; `onMouseLeave` / `onBlur` schedules close after ~80ms so the user can move the pointer into the popup (scroll, links). Cancel the timer if the pointer re-enters the anchor or popup.
+7. **Reposition:** While open, listen for `scroll` (capture) and `resize` and recompute fixed coordinates from the anchor rect.
+8. **Mobile:** Calendar uses a bottom sheet (`fixed`, `md:hidden`); requirement hovers are desktop-only (`max-md:hidden` on the portaled popup).
+
+**Reference implementations:**
+
+| Surface | File |
+|---|---|
+| Shared positioning helpers | `src/lib/portaledTooltip.js` |
+| Calendar course block | `src/components/CalendarCourseBlock.jsx` |
+| Requirement tag row | `src/components/TagUnitTracker.jsx` (`RequirementTagItem`) |
+
+When adding a new hover detail popup elsewhere, copy this pattern — do not reintroduce `group-hover:block` + `absolute` inside scrollable or layered layout.
 
 ## 8. Tech stack
 

@@ -2,7 +2,8 @@
 export function TagDisclaimer({ className = '' }) {
   return (
     <p className={`text-xs text-amber-900/90 ${className}`.trim()}>
-      Requirement tags are student-maintained. Verify requirements with your
+      Which courses count toward each requirement is student-maintained. Verify
+      requirements with your
       advisor and the{' '}
       <a
         href="https://som.yale.edu/elective-core-courses"
