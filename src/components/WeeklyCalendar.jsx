@@ -22,7 +22,7 @@ const START_HOUR = 8
 const END_HOUR = 20
 const MINUTES_PER_SLOT = 15
 const TOTAL_MINUTES = (END_HOUR - START_HOUR) * 60
-const PX_PER_MINUTE_MOBILE = 0.85
+const PX_PER_MINUTE_MOBILE = 0.425
 const PX_PER_MINUTE_MAX = 0.85
 const PX_PER_MINUTE_MIN = 0.38
 
@@ -47,21 +47,35 @@ function useDesktopCalendar() {
   return desktop
 }
 
-function useFittedPxPerMinute(isDesktop, measureRef, remeasureKey) {
+function useFittedPxPerMinute(isDesktop, measureRef, remeasureKey, expanded) {
   const [bodyHeight, setBodyHeight] = useState(0)
 
   useEffect(() => {
-    if (!isDesktop || !measureRef.current) {
+    if (!isDesktop || !expanded) {
       setBodyHeight(0)
       return
     }
     const el = measureRef.current
+    if (!el) {
+      setBodyHeight(0)
+      return
+    }
     const update = () => setBodyHeight(el.clientHeight)
     update()
+    // Flex layout may settle after mount when toggling plan ↔ calendar.
+    let raf2 = 0
+    const raf1 = requestAnimationFrame(() => {
+      update()
+      raf2 = requestAnimationFrame(update)
+    })
     const ro = new ResizeObserver(update)
     ro.observe(el)
-    return () => ro.disconnect()
-  }, [isDesktop, measureRef, remeasureKey])
+    return () => {
+      cancelAnimationFrame(raf1)
+      cancelAnimationFrame(raf2)
+      ro.disconnect()
+    }
+  }, [isDesktop, measureRef, remeasureKey, expanded])
 
   return useMemo(() => {
     if (!isDesktop) return PX_PER_MINUTE_MOBILE
@@ -266,6 +280,7 @@ export default function WeeklyCalendar({
     isDesktop,
     gridBodyRef,
     `${timedCourses.length}-${calendarView}-${viewOptions.length}`,
+    expanded,
   )
   const gridHeight = TOTAL_MINUTES * pxPerMinute
 
@@ -349,7 +364,9 @@ export default function WeeklyCalendar({
   }, [viewOptions, calendarView, fallYear, springYear, selectedCourses])
 
   const sectionLayoutClass = `flex flex-col border-b ${calendarTone.section} lg:min-h-0 ${
-    hasSelection && expanded ? 'min-h-0 flex-1 overflow-hidden' : 'shrink-0'
+    hasSelection && expanded
+      ? 'shrink-0 lg:min-h-0 lg:flex-1 lg:overflow-hidden'
+      : 'shrink-0'
   }`
 
   const gridSharedProps = {
@@ -382,7 +399,7 @@ export default function WeeklyCalendar({
 
   const sessionTabs = showSessionTabs ? (
     <div
-      className="flex max-w-[min(100%,20rem)] shrink-0 flex-wrap items-center justify-end gap-1.5 sm:max-w-none"
+      className="flex flex-wrap items-center justify-end gap-1.5"
       role="tablist"
       aria-label="Calendar session view"
     >
@@ -436,23 +453,25 @@ export default function WeeklyCalendar({
       aria-label="Weekly schedule"
     >
       <div className={`border-b ${calendarTone.header}`}>
-        <div className="flex items-center justify-between gap-2 px-4 py-2.5">
+        <div className="flex flex-col gap-2 px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
           <button
             type="button"
             onClick={onToggle}
             aria-expanded={expanded}
-            className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-left"
+            className="flex min-w-0 cursor-pointer items-start gap-2 text-left sm:flex-1 sm:items-center"
           >
             <CollapseChevron open={expanded} />
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <h2 className="text-sm font-semibold text-yale-950">
                 Weekly calendar
               </h2>
-              <p className="mt-0.5 text-xs text-yale-700">{periodSubtitle}</p>
+              <p className="mt-0.5 text-xs leading-snug text-yale-700">
+                {periodSubtitle}
+              </p>
             </div>
           </button>
           {sessionTabs ? (
-            <div className="flex shrink-0 items-center gap-1.5">
+            <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5 pl-6 sm:pl-0">
               {sessionTabs}
               {mixedNonOverlappingSessions ? <SessionTabHint /> : null}
             </div>
@@ -461,7 +480,7 @@ export default function WeeklyCalendar({
       </div>
 
       {expanded ? (
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="flex shrink-0 flex-col lg:min-h-0 lg:flex-1 lg:overflow-hidden">
           {timedCourses.length === 0 ? (
             <p className="shrink-0 px-4 py-10 text-center text-sm text-gray-600 lg:flex-1 lg:content-center">
               None of your selected courses have a weekly meeting time, so nothing
@@ -475,7 +494,7 @@ export default function WeeklyCalendar({
             </p>
           ) : (
             <div
-              className={`flex min-h-0 w-full flex-1 flex-col px-4 py-2 sm:py-3 lg:py-2 ${
+              className={`flex w-full shrink-0 flex-col px-4 py-2 sm:py-3 lg:min-h-0 lg:flex-1 lg:py-2 ${
                 isDesktop ? 'overflow-hidden' : ''
               }`}
             >

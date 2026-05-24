@@ -19,13 +19,12 @@ import {
   computeTagUnitTotals,
   formatTagUnits,
 } from '../lib/tagUnitTracker'
-import CollapseChevron from './CollapseChevron'
 import RequirementTag from './RequirementTag'
 import RequirementTargetsModal from './RequirementTargetsModal'
 import SectionHeader from './SectionHeader'
 
 const REQUIREMENTS_SUBTITLE =
-  'Progress toward unit targets for your selected plan. Hover a requirement for details.'
+  'Progress toward unit targets for your selected plan. Tap or hover a requirement for details.'
 
 const EMPTY_HINT =
   'No requirements yet. Use Add requirements to set your targets.'
@@ -257,7 +256,7 @@ export default function TagUnitTracker({
   return (
     <>
       <section
-        className={`hidden shrink-0 border-b lg:block ${reqTone.section}`}
+        className={`shrink-0 border-b ${reqTone.section}`}
         aria-label="Requirements"
       >
         <SectionHeader
@@ -273,27 +272,6 @@ export default function TagUnitTracker({
           springYear={springYear}
         />
       </section>
-
-      <details className={`group shrink-0 border-b lg:hidden ${reqTone.section}`}>
-        <summary
-          className={`flex cursor-pointer list-none flex-col gap-0.5 border-b px-4 py-2.5 marker:content-none [&::-webkit-details-marker]:hidden ${reqTone.header}`}
-        >
-          <div className="flex items-center gap-2">
-            <CollapseChevron />
-            <span className="flex-1 text-sm font-semibold text-yale-950">
-              Requirements
-            </span>
-            <AddRequirementsButton onClick={() => setModalOpen(true)} />
-          </div>
-          <p className="pl-6 text-xs text-yale-700">{REQUIREMENTS_SUBTITLE}</p>
-        </summary>
-
-        <RequirementsGrid
-          rows={visibleRows}
-          fallYear={fallYear}
-          springYear={springYear}
-        />
-      </details>
 
       <RequirementTargetsModal
         open={modalOpen}

@@ -67,7 +67,7 @@ export default function CourseRow({
             ? 'grid-cols-[auto_minmax(0,1fr)_auto]'
             : 'grid-cols-[auto_minmax(0,1fr)]'
         } ${
-          isSelected ? 'hover:bg-yale-selected-hover' : 'hover:bg-yale-selected'
+          isSelected ? 'hover:bg-save-100' : 'hover:bg-save-50'
         }`}
       >
         <CollapseChevron open={isExpanded} />
@@ -119,7 +119,7 @@ export default function CourseRow({
                 }`}
               >
                 {isSelected ? (
-                  <span className="rounded bg-yale-600 px-1 py-px text-[10px] font-medium leading-tight text-white">
+                  <span className="rounded bg-save-800 px-1 py-px text-[10px] font-medium leading-tight text-white">
                     In plan
                   </span>
                 ) : null}

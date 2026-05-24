@@ -68,7 +68,7 @@ export default function PlanPanel({
         type="button"
         onClick={onToggle}
         aria-expanded={expanded}
-        className={`flex w-full shrink-0 cursor-pointer items-center gap-2 border-b px-4 py-3 text-left text-sm font-semibold text-yale-950 ${planTone.header}`}
+        className={`flex w-full shrink-0 cursor-pointer items-center gap-2 border-b px-4 py-2 text-left text-xs font-semibold text-yale-950 ${planTone.header}`}
       >
         <CollapseChevron open={expanded} />
         <span className="flex-1">Your plan</span>

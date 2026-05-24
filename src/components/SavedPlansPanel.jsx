@@ -165,7 +165,7 @@ export default function SavedPlansPanel({
                     <div
                       className={`flex items-center gap-0.5 rounded-md transition-colors ${
                         isActive
-                          ? 'hover:bg-yale-selected-hover'
+                          ? 'hover:bg-save-100'
                           : 'hover:bg-black/[0.03]'
                       }`}
                     >

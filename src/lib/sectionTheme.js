@@ -11,14 +11,14 @@ export const SECTION_TONE = {
     inset: 'bg-white border-gray-200',
   },
   requirements: {
-    section: 'bg-gray-50',
+    section: 'bg-white',
     header: 'border-gray-200 bg-gray-100',
     inset: 'bg-white border-gray-200',
   },
   plan: {
-    section: 'bg-yale-50',
-    header: 'border-yale-150 bg-yale-100',
-    inset: 'bg-white border-yale-150',
+    section: 'bg-white',
+    header: 'border-gray-200 bg-gray-100',
+    inset: 'bg-white border-gray-200',
   },
   /** Dark blue breaker — groups saved + current plan panels. */
   plansBreaker: {
@@ -48,9 +48,9 @@ export function isInverseSectionTone(tone) {
   return tone === 'catalog' || tone === 'plansBreaker'
 }
 
-/** Course added to plan — light blue tint (catalog rows + plan cards). */
+/** Course added to plan — light green tint (catalog rows + plan cards). */
 export const IN_PLAN_SURFACE =
-  'border-yale-200 bg-yale-selected ring-2 ring-inset ring-yale-200/90'
+  'border-save-100 bg-save-50 ring-2 ring-inset ring-save-100/90'
 
 /** Primary save action (plans). */
 export const SAVE_BUTTON =
