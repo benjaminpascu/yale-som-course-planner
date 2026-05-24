@@ -116,12 +116,16 @@ function formatCoursesInPeriod(count) {
 const FULL_TERM_TAB_HINT =
   'Full-term courses appear on both half-term tabs.'
 
-function SessionTabHint() {
+function SessionTabHint({ inverse = false }) {
   return (
     <span className="group/hint relative inline-flex shrink-0">
       <button
         type="button"
-        className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs font-semibold text-yale-800 ring-1 ring-yale-200 hover:bg-yale-50"
+        className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold ${
+          inverse
+            ? 'bg-white/15 text-white ring-1 ring-white/40 hover:bg-white/25'
+            : 'bg-white text-yale-800 ring-1 ring-yale-200 hover:bg-yale-50'
+        }`}
         aria-label={FULL_TERM_TAB_HINT}
       >
         <span aria-hidden>i</span>
@@ -394,7 +398,7 @@ export default function WeeklyCalendar({
       {formatCoursesInPeriod(periodCourses.length)} (
       {formatCourseUnits(periodUnits)})
       {periodUntimedCount > 0 ? (
-        <span className="text-amber-700">
+        <span className="text-amber-200 lg:text-amber-700">
           {` · ${periodUntimedCount} without weekly time`}
         </span>
       ) : null}
@@ -403,7 +407,7 @@ export default function WeeklyCalendar({
 
   const sessionTabs = showSessionTabs ? (
     <div
-      className="flex flex-wrap items-center justify-end gap-1.5"
+      className="flex flex-wrap items-center gap-1.5 lg:justify-end"
       role="tablist"
       aria-label="Calendar session view"
     >
@@ -437,7 +441,7 @@ export default function WeeklyCalendar({
         aria-label="Weekly schedule"
       >
         <SectionHeader
-          tone="calendar"
+          tone={fillViewport ? 'catalog' : 'calendar'}
           title="Weekly calendar"
           subtitle={
             fillViewport
@@ -460,7 +464,18 @@ export default function WeeklyCalendar({
       className={sectionLayoutClass}
       aria-label="Weekly schedule"
     >
-      <div className={`border-b ${calendarTone.header}`}>
+      <div className="lg:hidden">
+        <SectionHeader tone="catalog" title="Weekly calendar" subtitle={periodSubtitle}>
+          {mixedNonOverlappingSessions ? <SessionTabHint inverse /> : null}
+        </SectionHeader>
+        {sessionTabs ? (
+          <div className="border-b border-yale-200 bg-gray-100 px-4 py-2">
+            {sessionTabs}
+          </div>
+        ) : null}
+      </div>
+
+      <div className={`hidden border-b lg:block ${calendarTone.header}`}>
         <div className="flex flex-col gap-2 px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
           <div className="flex min-w-0 items-center justify-between gap-2 sm:flex-1 sm:justify-start">
             {collapsible ? (

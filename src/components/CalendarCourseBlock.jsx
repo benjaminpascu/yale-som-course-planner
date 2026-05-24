@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import CourseDetailSheet from './CourseDetailSheet'
 import { normalizeCategory } from '../lib/categoryDisplay'
 import {
   formatCourseUnits,
@@ -207,32 +208,14 @@ export default function CalendarCourseBlock({
   return (
     <>
       {isDetailOpen ? (
-        <>
-          <button
-            type="button"
-            className="fixed inset-0 z-40 bg-black/30 md:hidden"
-            aria-label="Close course details"
-            onClick={() => onToggleDetail(false)}
-          />
-          <div
-            className="fixed inset-x-0 bottom-0 z-50 max-h-[min(85vh,32rem)] overflow-y-auto rounded-t-xl border-t border-gray-200 bg-white px-4 pb-6 pt-4 shadow-2xl md:hidden"
-            role="dialog"
-            aria-labelledby={tooltipId}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-gray-200" />
-            <div id={tooltipId}>
-              <CalendarCourseDetail
-                course={course}
-                fallYear={fallYear}
-                springYear={springYear}
-              />
-            </div>
-            <p className="mt-3 text-center text-[11px] text-gray-400">
-              Tap outside to close
-            </p>
-          </div>
-        </>
+        <CourseDetailSheet
+          open={isDetailOpen}
+          onClose={() => onToggleDetail(false)}
+          course={course}
+          fallYear={fallYear}
+          springYear={springYear}
+          detailId={tooltipId}
+        />
       ) : null}
 
       <button

@@ -120,22 +120,9 @@ export default function SavedPlansPanel({
 
   const body = (
     <>
-      {compact ? (
-        <div className={`border-b border-yale-100 ${sectionPad}`}>
-          <h2 className="text-xs font-semibold text-yale-950">Saved plans</h2>
-          <p className="mt-0.5 text-[10px] leading-snug text-yale-700">
-            Tap a plan to show it on the calendar. Use ⋯ to rename or delete.
-          </p>
-        </div>
+      {!compact ? (
+        <PlanDisclaimer className={`border-b border-yale-100 ${sectionPad}`} />
       ) : null}
-
-      <PlanDisclaimer
-        className={`border-b border-yale-100 ${sectionPad} ${
-          compact ? 'text-[10px] leading-snug' : ''
-        }`}
-      >
-        {compact ? 'Plans stay in this browser only.' : undefined}
-      </PlanDisclaimer>
 
       <div className={`flex flex-col ${contentGap} ${contentPad}`}>
         <form
@@ -363,6 +350,10 @@ export default function SavedPlansPanel({
         {body}
       </details>
     )
+  }
+
+  if (compact) {
+    return <div>{body}</div>
   }
 
   return <div className={tone.section}>{body}</div>

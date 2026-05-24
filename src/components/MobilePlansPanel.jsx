@@ -1,5 +1,8 @@
 import PlanPanel from './PlanPanel'
 import SavedPlansPanel from './SavedPlansPanel'
+import SectionHeader from './SectionHeader'
+import { PlanDisclaimer } from './Disclaimer'
+import { sectionTone } from '../lib/sectionTheme'
 
 /** Mobile Plans tab: saved plans management + working course list. */
 export default function MobilePlansPanel({
@@ -20,8 +23,17 @@ export default function MobilePlansPanel({
   onRemoveCourse,
   onClearPlan,
 }) {
+  const catalogTone = sectionTone('catalog')
+
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-y-auto">
+    <div
+      className={`flex h-full min-h-0 flex-col overflow-y-auto ${catalogTone.section}`}
+    >
+      <SectionHeader
+        tone="catalog"
+        title="Plans"
+        subtitle="Select a plan to show on the calendar"
+      />
       <SavedPlansPanel
         variant="flat"
         compact
@@ -51,6 +63,7 @@ export default function MobilePlansPanel({
         onRemoveCourse={onRemoveCourse}
         onClearPlan={onClearPlan}
       />
+      <PlanDisclaimer className="shrink-0 border-t border-yale-200 px-4 py-2 text-[10px] leading-snug text-gray-500" />
     </div>
   )
 }

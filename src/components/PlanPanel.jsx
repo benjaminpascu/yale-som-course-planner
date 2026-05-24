@@ -1,19 +1,12 @@
 import { useMemo } from 'react'
-import {
-  formatCourseHeading,
-  formatCourseUnits,
-} from '../lib/courseDisplay'
-import {
-  formatSchedule,
-  hasMeetingTime,
-  NO_MEETING_TIME_MESSAGE,
-} from '../lib/parseCourses'
-import { IN_PLAN_SURFACE, SAVE_BUTTON, sectionTone } from '../lib/sectionTheme'
+import { formatCourseUnits } from '../lib/courseDisplay'
+import { SAVE_BUTTON, sectionTone } from '../lib/sectionTheme'
 import {
   formatSessionLabel,
   groupCoursesBySession,
 } from '../lib/sessionDisplay'
 import CollapseChevron from './CollapseChevron'
+import PlanCourseRow from './PlanCourseRow'
 
 function formatTotalUnits(total) {
   if (total === 1) return '1 unit total'
@@ -178,46 +171,14 @@ export default function PlanPanel({
                       </h3>
                       <ul className="space-y-0">
                         {group.courses.map((course) => (
-                          <li
+                          <PlanCourseRow
                             key={course.courseId}
-                            className={`flex items-start rounded-md shadow-sm ${IN_PLAN_SURFACE} ${
-                              compact
-                                ? 'mb-1 gap-1.5 px-2 py-1.5 text-xs'
-                                : 'mb-2 gap-2 px-3 py-2 text-sm'
-                            }`}
-                          >
-                            <div className="min-w-0 flex-1">
-                              <p className="font-medium leading-snug text-gray-900">
-                                {formatCourseHeading(course)}
-                              </p>
-                              <div
-                                className={`mt-0.5 space-y-0.5 ${
-                                  compact ? 'pl-2 text-[10px]' : 'pl-3 text-xs'
-                                }`}
-                              >
-                                <p className="text-gray-500">
-                                  {formatSchedule(course)}
-                                </p>
-                                {!hasMeetingTime(course) ? (
-                                  <p className="font-medium text-amber-700">
-                                    {NO_MEETING_TIME_MESSAGE}
-                                  </p>
-                                ) : null}
-                              </div>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => onRemoveCourse(course.courseId)}
-                              className={`-mr-1 flex shrink-0 items-center justify-center rounded-md leading-none text-gray-400 hover:bg-red-50 hover:text-red-700 ${
-                                compact
-                                  ? 'h-6 w-6 text-base'
-                                  : 'h-7 w-7 text-lg'
-                              }`}
-                              aria-label={`Remove ${course.courseNumber} from plan`}
-                            >
-                              <span aria-hidden>×</span>
-                            </button>
-                          </li>
+                            course={course}
+                            fallYear={fallYear}
+                            springYear={springYear}
+                            compact={compact}
+                            onRemoveCourse={onRemoveCourse}
+                          />
                         ))}
                       </ul>
                     </section>
