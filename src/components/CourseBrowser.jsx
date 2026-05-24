@@ -110,6 +110,7 @@ export default function CourseBrowser({
   onToggleCourse,
   fallYear = null,
   springYear = null,
+  fullHeight = false,
 }) {
   const [filters, setFilters] = useState(createEmptyFilters)
   const [page, setPage] = useState(1)
@@ -292,7 +293,11 @@ export default function CourseBrowser({
         />
       </section>
 
-      <section className={`w-full lg:hidden ${catalogTone.section}`}>
+      <section
+        className={`flex w-full flex-col lg:hidden ${
+          fullHeight ? 'h-full min-h-0' : ''
+        } ${catalogTone.section}`}
+      >
         <SectionHeader
           tone="catalog"
           title="Course catalog"
@@ -312,14 +317,20 @@ export default function CourseBrowser({
           </p>
         ) : (
           <>
-            <ul className="divide-y divide-yale-200">
-              {pageCourses.map((course) => (
-                <CourseRow
-                  key={course.courseId}
-                  {...getCourseRowProps(course)}
-                />
-              ))}
-            </ul>
+            <div
+              className={
+                fullHeight ? 'min-h-0 flex-1 overflow-y-auto' : undefined
+              }
+            >
+              <ul className="divide-y divide-yale-200">
+                {pageCourses.map((course) => (
+                  <CourseRow
+                    key={course.courseId}
+                    {...getCourseRowProps(course)}
+                  />
+                ))}
+              </ul>
+            </div>
             <CatalogPagination
               page={page}
               totalPages={totalPages}

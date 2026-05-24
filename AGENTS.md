@@ -77,8 +77,7 @@ npm run build
 | Course browser + filters | `src/components/CourseBrowser.jsx` |
 | Weekly calendar | `src/components/WeeklyCalendar.jsx` |
 | Requirement tag units | `src/components/TagUnitTracker.jsx`, `src/lib/tagUnitTracker.js` |
-| Saved plans UI + localStorage | `src/components/PlanManager.jsx`, `src/lib/planStorage.js` |
-| Plan CSV export | `src/lib/planExport.js` |
+| Saved plans UI + localStorage | `src/components/PlansMenu.jsx`, `src/components/SavedPlansPanel.jsx`, `src/lib/planStorage.js` |
 | Section colors / in-plan highlight | `src/lib/sectionTheme.js` |
 | Fall/spring catalog years + header label | `src/lib/academicYear.js`, `App.jsx` |
 | Session-aware conflicts | `src/lib/scheduleConflicts.js` |

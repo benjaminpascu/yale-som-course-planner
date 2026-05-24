@@ -35,8 +35,11 @@ export default function PlanPanel({
   isDirty,
   fallYear,
   springYear,
+  collapsible = true,
   expanded,
   onToggle,
+  planEmptyHint = 'Open Plans in the header to pick or create a plan, then add courses from the catalog.',
+  catalogSelectHint = 'the catalog on the left',
   onSavePlan,
   onRemoveCourse,
   onClearPlan,
@@ -58,38 +61,53 @@ export default function PlanPanel({
   const showSummary =
     activePlanName != null || courseCount > 0
 
+  const summaryEl = showSummary ? (
+    <span className="shrink-0 font-normal text-yale-800">
+      {formatPlanHeaderSummary(courseCount, totalUnits)}
+      {isDirty ? <span className="text-red-700"> · unsaved</span> : null}
+    </span>
+  ) : null
+
   return (
     <section
       className={`flex flex-col border-b ${planTone.section} ${
-        expanded ? 'min-h-0 flex-1 overflow-hidden' : 'shrink-0'
+        expanded && collapsible
+          ? 'min-h-0 flex-1 overflow-hidden'
+          : 'shrink-0'
       }`}
     >
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={expanded}
-        className={`flex w-full shrink-0 cursor-pointer items-center gap-2 border-b px-4 py-2 text-left text-xs font-semibold text-yale-950 ${planTone.header}`}
-      >
-        <CollapseChevron open={expanded} />
-        <span className="flex-1">Your plan</span>
-        {showSummary ? (
-          <span className="shrink-0 font-normal text-yale-800">
-            {formatPlanHeaderSummary(courseCount, totalUnits)}
-            {isDirty ? (
-              <span className="text-red-700"> · unsaved</span>
-            ) : null}
-          </span>
-        ) : null}
-      </button>
+      {collapsible ? (
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={expanded}
+          className={`flex w-full shrink-0 cursor-pointer items-center gap-2 border-b px-4 py-2 text-left text-xs font-semibold text-yale-950 ${planTone.header}`}
+        >
+          <CollapseChevron open={expanded} />
+          <span className="flex-1">Your plan</span>
+          {summaryEl}
+        </button>
+      ) : (
+        <div
+          className={`flex w-full shrink-0 items-center gap-2 border-b px-4 py-2 text-xs font-semibold text-yale-950 ${planTone.header}`}
+        >
+          <span className="flex-1">Your plan</span>
+          {summaryEl}
+        </div>
+      )}
 
       {expanded ? (
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div
+          className={
+            collapsible
+              ? 'flex min-h-0 flex-1 flex-col overflow-hidden'
+              : 'flex flex-col'
+          }
+        >
           {!activePlanName || isDirty ? (
             <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-yale-150 px-4 py-2">
               <p className="text-xs text-yale-700">
-                {!activePlanName ? (
-                  'Open Plans in the header to pick or create a plan, then add courses from the catalog.'
-                ) : (
+                {!activePlanName ? planEmptyHint : (
                   <>
                     Unsaved changes to{' '}
                     <span className="italic">{activePlanName}</span>. Save when
@@ -111,8 +129,8 @@ export default function PlanPanel({
 
           {courseCount === 0 ? (
             <p className="shrink-0 border-l-2 border-yale-200 py-6 pl-5 pr-4 text-center text-sm text-gray-500 sm:pl-6">
-              No courses in your plan yet. Select courses from the catalog on the
-              left — they appear here and on the calendar when they have a weekly
+              No courses in your plan yet. Select courses from {catalogSelectHint}{' '}
+              — they appear here and on the calendar when they have a weekly
               time.
             </p>
           ) : (

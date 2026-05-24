@@ -3,8 +3,12 @@ import PlanPanel from './PlanPanel'
 import TagUnitTracker from './TagUnitTracker'
 import WeeklyCalendar from './WeeklyCalendar'
 
-/** Top stack: calendar ↔ plan (one expanded at a time) with requirements between. */
+/**
+ * Desktop: calendar ↔ plan accordion with requirements between.
+ * Mobile calendar tab: calendar + requirements only (`variant="calendar"`).
+ */
 export default function PlanningPanel({
+  variant = 'desktop',
   selectedCourses,
   hasSelection,
   fallYear,
@@ -18,6 +22,7 @@ export default function PlanningPanel({
   onClearPlan,
 }) {
   const [expandedPane, setExpandedPane] = useState('calendar')
+  const calendarOnly = variant === 'calendar'
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
@@ -26,7 +31,9 @@ export default function PlanningPanel({
         hasSelection={hasSelection}
         fallYear={fallYear}
         springYear={springYear}
-        expanded={expandedPane === 'calendar'}
+        collapsible={!calendarOnly}
+        fillViewport={calendarOnly}
+        expanded={calendarOnly ? true : expandedPane === 'calendar'}
         onToggle={() =>
           setExpandedPane((pane) => (pane === 'calendar' ? 'plan' : 'calendar'))
         }
@@ -39,20 +46,22 @@ export default function PlanningPanel({
           springYear={springYear}
         />
       </div>
-      <PlanPanel
-        selectedCourses={selectedCourses}
-        activePlanName={activePlanName}
-        isDirty={isDirty}
-        fallYear={fallYear}
-        springYear={springYear}
-        expanded={expandedPane === 'plan'}
-        onToggle={() =>
-          setExpandedPane((pane) => (pane === 'plan' ? 'calendar' : 'plan'))
-        }
-        onSavePlan={() => activePlanId && onSavePlan(activePlanId)}
-        onRemoveCourse={onRemoveCourse}
-        onClearPlan={onClearPlan}
-      />
+      {!calendarOnly ? (
+        <PlanPanel
+          selectedCourses={selectedCourses}
+          activePlanName={activePlanName}
+          isDirty={isDirty}
+          fallYear={fallYear}
+          springYear={springYear}
+          expanded={expandedPane === 'plan'}
+          onToggle={() =>
+            setExpandedPane((pane) => (pane === 'plan' ? 'calendar' : 'plan'))
+          }
+          onSavePlan={() => activePlanId && onSavePlan(activePlanId)}
+          onRemoveCourse={onRemoveCourse}
+          onClearPlan={onClearPlan}
+        />
+      ) : null}
     </div>
   )
 }

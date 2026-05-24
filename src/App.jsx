@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import AppFooter from './components/AppFooter'
 import CourseBrowser from './components/CourseBrowser'
+import MobileBottomNav from './components/MobileBottomNav'
+import MobilePlansPanel from './components/MobilePlansPanel'
 import PlansMenu from './components/PlansMenu'
 import PlanningPanel from './components/PlanningPanel'
+import { SAVE_BUTTON } from './lib/sectionTheme'
 import { getSemesterCalendarYears } from './lib/academicYear'
 import { loadAppData } from './lib/loadData'
 import {
@@ -28,6 +30,7 @@ function App() {
   const [error, setError] = useState(null)
   const [planStore, setPlanStore] = useState(() => loadPlanStore())
   const [selectedIds, setSelectedIds] = useState(() => new Set())
+  const [mobileTab, setMobileTab] = useState('calendar')
   const planHydratedRef = useRef(false)
 
   const validCourseIds = useMemo(
@@ -231,8 +234,41 @@ function App() {
     )
   }
 
+  const planningPanelProps = {
+    selectedCourses,
+    hasSelection: selectedIds.size > 0,
+    fallYear,
+    springYear,
+    tags,
+    activePlanId: planStore.activePlanId,
+    activePlanName: activePlan?.name ?? null,
+    isDirty,
+    onSavePlan: handleSavePlan,
+    onRemoveCourse: removeCourse,
+    onClearPlan: clearPlan,
+  }
+
+  const plansPanelProps = {
+    plans: planStore.plans,
+    courses,
+    activePlanId: planStore.activePlanId,
+    activePlanName: activePlan?.name ?? null,
+    hasSelection: selectedIds.size > 0,
+    isDirty,
+    selectedCourses,
+    fallYear,
+    springYear,
+    onAddPlan: handleAddPlan,
+    onSelectPlan: handleSelectPlan,
+    onRenamePlan: handleRenamePlan,
+    onSavePlan: handleSavePlan,
+    onDeletePlan: handleDeletePlan,
+    onRemoveCourse: removeCourse,
+    onClearPlan: clearPlan,
+  }
+
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50 lg:h-dvh lg:overflow-hidden">
+    <div className="flex min-h-dvh flex-col bg-gray-50 lg:h-dvh lg:overflow-hidden">
       <header className="shrink-0 border-b border-yale-950 bg-yale-900 px-4 py-3 text-white sm:py-4">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
@@ -261,25 +297,46 @@ function App() {
                 Yale SOM Course List
               </a>
             </p>
+            <p className="mt-2 text-xs text-yale-100 lg:hidden">
+              <span className="font-medium text-white">
+                {activePlan?.name ?? 'No plan selected'}
+              </span>
+              {isDirty ? (
+                <span className="font-medium text-amber-300"> · unsaved</span>
+              ) : null}
+            </p>
           </div>
-          <PlansMenu
-            plans={planStore.plans}
-            courses={courses}
-            activePlanId={planStore.activePlanId}
-            activePlanName={activePlan?.name ?? null}
-            hasSelection={selectedIds.size > 0}
-            isDirty={isDirty}
-            onAddPlan={handleAddPlan}
-            onSelectPlan={handleSelectPlan}
-            onSavePlan={handleSavePlan}
-            onRenamePlan={handleRenamePlan}
-            onDeletePlan={handleDeletePlan}
-          />
+          <div className="flex shrink-0 flex-col items-end gap-2">
+            {planStore.activePlanId && isDirty ? (
+              <button
+                type="button"
+                onClick={() => handleSavePlan(planStore.activePlanId)}
+                className={`rounded-md px-3 py-2 text-sm font-medium lg:hidden ${SAVE_BUTTON}`}
+              >
+                Save plan
+              </button>
+            ) : null}
+            <div className="hidden lg:block">
+              <PlansMenu
+                plans={planStore.plans}
+                courses={courses}
+                activePlanId={planStore.activePlanId}
+                activePlanName={activePlan?.name ?? null}
+                hasSelection={selectedIds.size > 0}
+                isDirty={isDirty}
+                onAddPlan={handleAddPlan}
+                onSelectPlan={handleSelectPlan}
+                onSavePlan={handleSavePlan}
+                onRenamePlan={handleRenamePlan}
+                onDeletePlan={handleDeletePlan}
+              />
+            </div>
+          </div>
         </div>
       </header>
 
-      <main className="grid min-h-0 w-full flex-1 grid-cols-1 bg-white lg:grid-cols-[22rem_minmax(0,1fr)] lg:overflow-hidden">
-        <aside className="order-2 min-h-0 border-t-2 border-yale-600 lg:order-1 lg:flex lg:flex-col lg:overflow-hidden lg:border-r-2 lg:border-t-0 lg:border-yale-600">
+      <main className="hidden min-h-0 w-full flex-1 grid-cols-1 bg-white lg:grid lg:grid-cols-[22rem_minmax(0,1fr)] lg:overflow-hidden">
+        <aside className="flex min-h-0 flex-col overflow-hidden border-r-2 border-yale-600">
           <CourseBrowser
             courses={courses}
             tags={tags}
@@ -290,23 +347,31 @@ function App() {
             springYear={springYear}
           />
         </aside>
-        <section className="order-1 flex min-h-0 flex-col overflow-hidden lg:order-2">
-        <PlanningPanel
-          selectedCourses={selectedCourses}
-          hasSelection={selectedIds.size > 0}
-          fallYear={fallYear}
-          springYear={springYear}
-          tags={tags}
-          activePlanId={planStore.activePlanId}
-          activePlanName={activePlan?.name ?? null}
-          isDirty={isDirty}
-          onSavePlan={handleSavePlan}
-          onRemoveCourse={removeCourse}
-          onClearPlan={clearPlan}
-        />
+        <section className="flex min-h-0 flex-col overflow-hidden">
+          <PlanningPanel {...planningPanelProps} />
         </section>
       </main>
-      <AppFooter className="shrink-0 lg:hidden" />
+
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white pb-[calc(3rem+env(safe-area-inset-bottom))] lg:hidden">
+        {mobileTab === 'calendar' ? (
+          <PlanningPanel {...planningPanelProps} variant="calendar" />
+        ) : null}
+        {mobileTab === 'catalog' ? (
+          <CourseBrowser
+            courses={courses}
+            tags={tags}
+            selectedIds={selectedIds}
+            selectedCourses={selectedCourses}
+            onToggleCourse={toggleCourse}
+            fallYear={fallYear}
+            springYear={springYear}
+            fullHeight
+          />
+        ) : null}
+        {mobileTab === 'plans' ? <MobilePlansPanel {...plansPanelProps} /> : null}
+      </div>
+
+      <MobileBottomNav activeTab={mobileTab} onChange={setMobileTab} />
     </div>
   )
 }

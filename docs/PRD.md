@@ -166,10 +166,12 @@ The tag taxonomy comes from Yale's own filter dropdown (see §6.2). The merge sc
 - Visible disclaimer: tags are student-maintained; verify with your advisor.
 
 ### 7.4 Plan management
-- "Save plan" button → prompts for a name, stores in localStorage.
-- Dropdown to switch between saved plans.
-- "Duplicate plan" to fork a scenario.
-- "Export" button → downloads the plan as **JSON** for sharing or backup (no PDF in v1).
+- Named plans stored in `localStorage` (see §6.3). No login, no plan file export (CSV/JSON).
+- **Working selection:** One **active** plan at a time. The catalog, calendar, and requirements panels all reflect the current course selection. Edits are immediate; **Save plan** writes the current selection to that plan’s stored course list.
+- **Plans menu** (header): create a plan, switch the active plan, rename, delete. Confirm when switching plans or adding a new plan while there are unsaved changes.
+- **Your plan** panel: courses in the working selection, grouped by session; remove one course or clear all.
+- **Create plan:** If you have courses selected (or unsaved edits on the active plan), the new-plan form offers **Save to plan** (name + save current selection). Otherwise **Add** creates an empty named plan and clears the working selection.
+- Disclaimer in the plans UI: plans are browser-local; verify requirements with your advisor.
 
 ### 7.5 Admin / tag management
 - **No custom admin UI in v1.** Maintainers use Supabase's built-in table editor to upload CSV data, edit tags, and manage allowlisted admin emails.
@@ -238,7 +240,7 @@ Status detail: `docs/PROJECT_STATUS.md`.
 3. **Course browser:** ✅ Search + filters (session, day, time, units, bid/permission, category, requirement tag).
 4. **Calendar:** ✅ Weekly grid + add/remove + **session-aware** conflict detection. Single-column layout: calendar → requirements → plan → collapsible filters → catalog (see `docs/PROJECT_STATUS.md`).
 5. **Tag unit tracker:** ✅ Live units per requirement tag for courses in the active plan (all seven tags, no thresholds; §7.3).
-6. **Plans + polish:** ✅ Save/load/duplicate/CSV export in `localStorage`. Plan UI polish. Disclaimer copy surfaced.
+6. **Plans + polish:** ✅ Named plans in `localStorage` (save, switch, rename, delete). Plans menu + Your plan panel. Disclaimer copy surfaced.
 
 **After milestone 6:** App is **deployed on Vercel** and treated as launched. Share the production URL with friends for feedback; fix bugs in follow-up tasks. **Public promotion** (student channels, demo video, shopping-period push) is a separate **marketing** step when ready — not milestones 7–8 in the build plan.
 

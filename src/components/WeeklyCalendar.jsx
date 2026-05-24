@@ -254,6 +254,8 @@ export default function WeeklyCalendar({
   hasSelection,
   fallYear = null,
   springYear = null,
+  collapsible = true,
+  fillViewport = false,
   expanded = true,
   onToggle = () => {},
 }) {
@@ -364,9 +366,11 @@ export default function WeeklyCalendar({
   }, [viewOptions, calendarView, fallYear, springYear, selectedCourses])
 
   const sectionLayoutClass = `flex flex-col border-b ${calendarTone.section} lg:min-h-0 ${
-    hasSelection && expanded
-      ? 'shrink-0 lg:min-h-0 lg:flex-1 lg:overflow-hidden'
-      : 'shrink-0'
+    fillViewport && hasSelection
+      ? 'min-h-0 flex-1 overflow-hidden'
+      : hasSelection && expanded
+        ? 'shrink-0 lg:min-h-0 lg:flex-1 lg:overflow-hidden'
+        : 'shrink-0'
   }`
 
   const gridSharedProps = {
@@ -435,7 +439,11 @@ export default function WeeklyCalendar({
         <SectionHeader
           tone="calendar"
           title="Weekly calendar"
-          subtitle="Select courses below to plan your weekly schedule."
+          subtitle={
+            fillViewport
+              ? 'Add courses in the Courses tab to build your schedule.'
+              : 'Select courses below to plan your weekly schedule.'
+          }
         />
         <div className="flex flex-1 flex-col justify-center px-4 py-10">
           <p className="text-center text-xs text-gray-400">
@@ -454,24 +462,41 @@ export default function WeeklyCalendar({
     >
       <div className={`border-b ${calendarTone.header}`}>
         <div className="flex flex-col gap-2 px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
-          <button
-            type="button"
-            onClick={onToggle}
-            aria-expanded={expanded}
-            className="flex min-w-0 cursor-pointer items-start gap-2 text-left sm:flex-1 sm:items-center"
-          >
-            <CollapseChevron open={expanded} />
-            <div className="min-w-0 flex-1">
-              <h2 className="text-sm font-semibold text-yale-950">
-                Weekly calendar
-              </h2>
-              <p className="mt-0.5 text-xs leading-snug text-yale-700">
-                {periodSubtitle}
-              </p>
+          {collapsible ? (
+            <button
+              type="button"
+              onClick={onToggle}
+              aria-expanded={expanded}
+              className="flex min-w-0 cursor-pointer items-start gap-2 text-left sm:flex-1 sm:items-center"
+            >
+              <CollapseChevron open={expanded} />
+              <div className="min-w-0 flex-1">
+                <h2 className="text-sm font-semibold text-yale-950">
+                  Weekly calendar
+                </h2>
+                <p className="mt-0.5 text-xs leading-snug text-yale-700">
+                  {periodSubtitle}
+                </p>
+              </div>
+            </button>
+          ) : (
+            <div className="flex min-w-0 flex-1 items-start gap-2 sm:items-center">
+              <div className="min-w-0 flex-1">
+                <h2 className="text-sm font-semibold text-yale-950">
+                  Weekly calendar
+                </h2>
+                <p className="mt-0.5 text-xs leading-snug text-yale-700">
+                  {periodSubtitle}
+                </p>
+              </div>
             </div>
-          </button>
+          )}
           {sessionTabs ? (
-            <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5 pl-6 sm:pl-0">
+            <div
+              className={`flex shrink-0 flex-wrap items-center justify-end gap-1.5 ${
+                collapsible ? 'pl-6 sm:pl-0' : ''
+              }`}
+            >
               {sessionTabs}
               {mixedNonOverlappingSessions ? <SessionTabHint /> : null}
             </div>
@@ -480,7 +505,11 @@ export default function WeeklyCalendar({
       </div>
 
       {expanded ? (
-        <div className="flex shrink-0 flex-col lg:min-h-0 lg:flex-1 lg:overflow-hidden">
+        <div
+          className={`flex shrink-0 flex-col lg:min-h-0 lg:flex-1 lg:overflow-hidden ${
+            fillViewport ? 'min-h-0 flex-1 overflow-y-auto' : ''
+          }`}
+        >
           {timedCourses.length === 0 ? (
             <p className="shrink-0 px-4 py-10 text-center text-sm text-gray-600 lg:flex-1 lg:content-center">
               None of your selected courses have a weekly meeting time, so nothing

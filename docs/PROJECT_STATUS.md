@@ -56,11 +56,12 @@
 
 ### Milestone 6 — Named plans + polish ✅ (approved May 2026)
 
-- **Saved plans** bar between Requirements and Your plan: switch plans, save/update, duplicate, download CSV, delete
+- **Plans menu** in header (`PlansMenu` + `SavedPlansPanel`): create, switch active plan, save, rename, delete
+- **Your plan** panel (`PlanPanel`): working course list, remove, clear all, save when dirty
 - Plans stored in browser `localStorage` (`src/lib/planStorage.js`); reload restores last active plan
-- Unsaved-changes warning when switching plans or starting a new plan
-- Shared disclaimer copy (`src/components/Disclaimer.jsx`) in Requirements + plan save area
-- Removed “saving comes later” placeholder in Your plan footer
+- Unsaved-changes warning when switching plans or adding a plan while dirty
+- Shared disclaimer copy (`src/components/Disclaimer.jsx`) in plans UI + requirements
+- No plan CSV/JSON export (simpler v1)
 
 ---
 
@@ -74,6 +75,20 @@
 | **Later** | Wider promotion (GroupMe, student gov, demo video, etc.) when you choose — not a separate engineering milestone. |
 
 Repo: `benjaminpascu/yale-som-course-planner`. Production env vars (`VITE_SUPABASE_*`) live in Vercel; never commit `.env`.
+
+---
+
+### Mobile layout — bottom navigation ✅ (May 2026)
+
+**Goal:** Same features as desktop; only layout changes below the `lg` breakpoint.
+
+| Tab | Content |
+|-----|---------|
+| **Calendar** | Weekly calendar → **Requirements** at bottom |
+| **Courses** | Search, filters, catalog |
+| **Plans** | Saved plans + **Your plan** |
+
+Desktop (`lg+`): unchanged — catalog sidebar + planning stack; **Plans** in header menu. Code: `MobileBottomNav.jsx`, `MobilePlansPanel.jsx`, `App.jsx`.
 
 ---
 
@@ -95,7 +110,8 @@ npm run dev
 ```
 
 - Header: academic year (from CSV `TermCode`), course/tag counts, link to [Yale SOM Course List](https://som.yale.edu/elective-core-courses)
-- Top → bottom: **Weekly calendar** (empty prompt until you add a course) → **Requirements** (tag units) → **Saved plans** → **Your plan** → **Search & filters** (collapsible) → **Course catalog**
+- **Desktop:** catalog sidebar (left) + stack (right): calendar → requirements → your plan. **Plans** via header menu.
+- **Mobile:** bottom tabs — Calendar / Courses / Plans (see mobile section above).
 - Click a catalog row to add/remove from plan; selected rows show light blue “In plan” styling
 - Rows that would overlap your plan show a red **Conflict** badge (still clickable)
 - **Calendar:** session tabs when your plan mixes terms (e.g. Fall 1 + Fall 2); full-term courses show on both mini-term tabs; overlapping courses render side by side
@@ -117,6 +133,7 @@ npm run import:data
 | May 2026 | Initial scaffold; Supabase; `courses_master_new.csv`; no-time warning in list |
 | May 2026 | Milestone 3 course browser; Milestone 4 calendar + session-aware conflicts |
 | May 2026 | Milestone 5 tag unit tracker; single-column Yale-themed UI; M6 next |
-| May 2026 | Milestone 6 named plans + localStorage + CSV export ✅ approved |
+| May 2026 | Milestone 6 named plans + localStorage ✅ approved |
+| May 2026 | Mobile bottom-nav layout agreed (Calendar / Courses / Plans); PRD plans §7.4 aligned to shipped UI |
 | May 2026 | Live on Vercel; private link sharing; promo when ready (no M7/M8 build stages) |
 | May 2026 | Calendar: side-by-side overlaps + session view tabs (`calendarLayout.js`, `calendarSessionView.js`) |
