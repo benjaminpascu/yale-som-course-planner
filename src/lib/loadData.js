@@ -1,4 +1,4 @@
-import coursesCsv from '../../docs/data-samples/courses_master_new.csv?raw'
+import coursesCsv from '../../docs/data-samples/courses_master_fall2026.csv?raw'
 import tagsCsv from '../../docs/data-samples/course_tags.csv?raw'
 import { dbRowToCourse, parseCoursesCsv } from './parseCourses'
 import { dbRowToTag, parseTagsCsv } from './parseTags'

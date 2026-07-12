@@ -35,7 +35,7 @@ if (!supabaseUrl || !serviceRoleKey) {
 
 const supabase = createClient(supabaseUrl, serviceRoleKey)
 
-const coursesPath = join(root, 'docs/data-samples/courses_master_new.csv')
+const coursesPath = join(root, 'docs/data-samples/courses_master_fall2026.csv')
 const tagsPath = join(root, 'docs/data-samples/course_tags.csv')
 
 const coursesText = readFileSync(coursesPath, 'utf8')
@@ -61,16 +61,15 @@ const termCodes = [...new Set(courses.map((c) => c.termCode).filter(Boolean))]
 console.log(`Parsed ${courses.length} visible courses across term(s): ${termCodes.join(', ')}`)
 console.log(`Parsed ${tags.length} tag mappings`)
 
-for (const termCode of termCodes) {
-  const { error: deleteError } = await supabase
-    .from('courses')
-    .delete()
-    .eq('term_code', termCode)
+// CSV is the full catalog — clear existing courses so old terms do not linger.
+const { error: deleteAllError } = await supabase
+  .from('courses')
+  .delete()
+  .not('course_id', 'is', null)
 
-  if (deleteError) {
-    console.error(`Failed to delete courses for term ${termCode}:`, deleteError.message)
-    process.exit(1)
-  }
+if (deleteAllError) {
+  console.error('Failed to clear courses table:', deleteAllError.message)
+  process.exit(1)
 }
 
 const courseRows = courses.map(courseToDbRow)
