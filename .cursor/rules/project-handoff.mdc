@@ -15,7 +15,8 @@ Before coding, read in order:
 
 - **One milestone or task = start a new Cursor agent** (new chat). Do not drag unrelated work across long threads.
 - Work one PRD milestone at a time; stop after each for user approval (`approve` before continuing).
-- Course data: only `docs/data-samples/courses_master_new.csv` (`days_clean`, `start_24h`, `end_24h`).
+- Course data: only `docs/data-samples/courses_master_fall2026.csv` (`days_clean`, `start_24h`, `end_24h`, inline `tags`).
 - Use `hasMeetingTime()` for calendar/conflict logic; untimed courses stay in the list but not on the calendar.
+- Do not hardcode requirement tag names; discover them from the CSV `tags` column.
 
 Do not commit unless the user asks. Never commit `.env`.

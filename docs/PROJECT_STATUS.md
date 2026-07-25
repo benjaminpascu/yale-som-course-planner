@@ -1,6 +1,6 @@
 # Project status
 
-**Last updated:** May 2026  
+**Last updated:** July 2026  
 **Purpose:** Handoff doc for new Cursor agents/chats. Update this when a milestone is approved.
 
 ---
@@ -10,30 +10,35 @@
 ### Milestone 1 — Scaffold + course list ✅
 
 - Vite + React + Tailwind in project root
-- Loads `docs/data-samples/courses_master_new.csv` (+ tags CSV)
+- Loads courses master CSV (+ inline tags)
 - Basic course list: number, title, faculty, schedule line, units, session
 - Amber warning for courses without weekly meeting time
 
 ### Milestone 2 — Data layer + Supabase ✅
 
-- Postgres tables: `courses`, `tags` (`supabase/migrations/`)
+- Postgres `courses` table (`supabase/migrations/`; tags are a column on `courses` as of migration `003`)
 - `npm run import:data` with column validation
-- App reads Supabase when `VITE_SUPABASE_*` in `.env`, else bundled CSVs
+- App reads Supabase when `VITE_SUPABASE_*` in `.env`, else bundled CSV
 - User has Supabase project configured locally
 
-### Data fix — `courses_master_new.csv` ✅
+### Data fix — scheduling columns ✅
 
 - Replaced unreliable `Timings *` / `Daytimes` columns with `days_clean`, `start_24h`, `end_24h`
 - Deleted old `courses_master.csv`
-- PRD §6.1 and §7.2 updated
-- ~480 courses in DB after import; ~371 with weekly times; ~109 without
+
+### Fall 2026 catalog + inline tags ✅ (July 2026)
+
+- Single source: `docs/data-samples/courses_master_fall2026.csv` (227 courses)
+- `tags` column: semicolon-separated names (e.g. `STEM`, `GBS Req`, `STEM;GBS Req`)
+- Removed separate `course_tags.csv` / app join on tags table
+- Requirement tracker + filters discover tag names from data (no hardcoded tag list)
 
 ---
 
 ### Milestone 3 — Course browser ✅
 
 - Search (number, title, faculty, description)
-- Filters: session, day, time range, units, bid/permission, category, requirement tag
+- Filters: session, day, time range, units, bid/permission, category, requirement tag (from data)
 - Row UI: bid/permission badge, syllabus link, amber no-time warning
 - Session labels with full-term footnote
 
@@ -48,9 +53,10 @@
 
 ### Milestone 5 — Tag unit tracker ✅
 
-- **Requirements** panel: all seven Yale requirement tags always shown; sums **units** (not course count)
+- **Requirements** panel: one row per unique tag found in the catalog; sums **units** (not course count)
 - Live update as courses are added/removed from the working plan
 - Hover tooltip lists contributing courses and units per tag
+- Optional student-set unit targets (“Set targets”)
 - Student-maintained disclaimer (§7.3)
 - Code: `src/components/TagUnitTracker.jsx`, `src/lib/tagUnitTracker.js`
 
@@ -137,3 +143,4 @@ npm run import:data
 | May 2026 | Mobile bottom-nav layout agreed (Calendar / Courses / Plans); PRD plans §7.4 aligned to shipped UI |
 | May 2026 | Live on Vercel; private link sharing; promo when ready (no M7/M8 build stages) |
 | May 2026 | Calendar: side-by-side overlaps + session view tabs (`calendarLayout.js`, `calendarSessionView.js`) |
+| July 2026 | Fall 2026 CSV; inline `tags` column; removed separate tags CSV/table; dynamic requirement UI |

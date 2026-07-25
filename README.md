@@ -23,8 +23,7 @@ Use a **new Cursor agent** (fresh chat) per milestone or focused task — see PR
 
 | File | Role |
 |------|------|
-| `docs/data-samples/courses_master_new.csv` | Course catalog (source of truth) |
-| `docs/data-samples/course_tags.csv` | Requirement tag mappings |
+| `docs/data-samples/courses_master_fall2026.csv` | Course catalog + inline `tags` column (source of truth) |
 
 ## License
 

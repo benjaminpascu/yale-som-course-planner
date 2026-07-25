@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   createEmptyFilters,
-  buildTagsByCourseNumber,
   filterCourses,
   getTimeRangeError,
   hasActiveFilters,
@@ -10,7 +9,10 @@ import {
   uniqueSessions,
   uniqueUnits,
 } from '../lib/filterCourses'
-import { getCourseRequirementTags } from '../lib/requirementTags'
+import {
+  getCourseRequirementTags,
+  uniqueRequirementTags,
+} from '../lib/requirementTags'
 import { getConflictingCourseIds } from '../lib/scheduleConflicts'
 import { sectionTone } from '../lib/sectionTheme'
 import CourseFilters from './CourseFilters'
@@ -104,7 +106,6 @@ function CatalogSearchBar({
 
 export default function CourseBrowser({
   courses,
-  tags,
   selectedIds,
   selectedCourses = [],
   onToggleCourse,
@@ -117,22 +118,21 @@ export default function CourseBrowser({
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [expandedCourseId, setExpandedCourseId] = useState(null)
 
-  const tagsByCourseNumber = useMemo(
-    () => buildTagsByCourseNumber(tags),
-    [tags],
-  )
-
   const sessions = useMemo(() => uniqueSessions(courses), [courses])
   const categories = useMemo(() => uniqueCategories(courses), [courses])
   const unitValues = useMemo(() => uniqueUnits(courses), [courses])
   const bidValues = useMemo(() => uniqueBidOrPermission(courses), [courses])
+  const requirementTags = useMemo(
+    () => uniqueRequirementTags(courses),
+    [courses],
+  )
 
   const timeRangeError = useMemo(() => getTimeRangeError(filters), [filters])
 
   const filtered = useMemo(() => {
     if (timeRangeError) return []
-    return filterCourses(courses, filters, tagsByCourseNumber)
-  }, [courses, filters, tagsByCourseNumber, timeRangeError])
+    return filterCourses(courses, filters)
+  }, [courses, filters, timeRangeError])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
 
@@ -183,10 +183,7 @@ export default function CourseBrowser({
   function getCourseRowProps(course) {
     return {
       course,
-      requirementTagCodes: getCourseRequirementTags(
-        course.courseNumber,
-        tagsByCourseNumber,
-      ),
+      requirementTagCodes: getCourseRequirementTags(course),
       isSelected: selectedIds.has(course.courseId),
       hasConflict: conflictingIds.has(course.courseId),
       isExpanded: expandedCourseId === course.courseId,
@@ -214,6 +211,7 @@ export default function CourseBrowser({
     categories,
     unitValues,
     bidValues,
+    requirementTags,
     filters,
     fallYear,
     springYear,

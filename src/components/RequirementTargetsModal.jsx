@@ -1,60 +1,59 @@
 import { useEffect, useId, useState } from 'react'
-import {
-  REQUIREMENT_TAG_CODES,
-  REQUIREMENT_TAG_LABELS,
-} from '../lib/requirementTags'
 import { normalizeRequirementTargets } from '../lib/requirementTargets'
 import { TagDisclaimer } from './Disclaimer'
 import RequirementTag from './RequirementTag'
 
 /**
  * @param {Record<string, string>} draft
- * @param {RequirementTargets} targets
+ * @param {import('../lib/requirementTargets.js').RequirementTargets} targets
+ * @param {string[]} tagNames
  */
-function draftFromTargets(targets) {
+function draftFromTargets(targets, tagNames) {
   /** @type {Record<string, string>} */
   const draft = {}
-  for (const code of REQUIREMENT_TAG_CODES) {
-    const value = targets[code]
-    draft[code] = value != null && value > 0 ? String(value) : ''
+  for (const name of tagNames) {
+    const value = targets[name]
+    draft[name] = value != null && value > 0 ? String(value) : ''
   }
   return draft
 }
 
 /**
  * @param {Record<string, string>} draft
+ * @param {string[]} tagNames
  */
-function targetsFromDraft(draft) {
+function targetsFromDraft(draft, tagNames) {
   /** @type {import('../lib/requirementTargets.js').RequirementTargets} */
   const next = {}
-  for (const code of REQUIREMENT_TAG_CODES) {
-    const raw = draft[code]?.trim()
+  for (const name of tagNames) {
+    const raw = draft[name]?.trim()
     if (!raw) continue
     const n = Number(raw)
     if (!Number.isFinite(n) || n <= 0) continue
-    next[code] = n
+    next[name] = n
   }
-  return normalizeRequirementTargets(next)
+  return normalizeRequirementTargets(next, tagNames)
 }
 
 export default function RequirementTargetsModal({
   open,
   targets,
+  tagNames = [],
   onClose,
   onSave,
 }) {
   const titleId = useId()
-  const [draft, setDraft] = useState(() => draftFromTargets(targets))
+  const [draft, setDraft] = useState(() => draftFromTargets(targets, tagNames))
 
   useEffect(() => {
-    if (open) setDraft(draftFromTargets(targets))
-  }, [open, targets])
+    if (open) setDraft(draftFromTargets(targets, tagNames))
+  }, [open, targets, tagNames])
 
   if (!open) return null
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    onSave(targetsFromDraft(draft))
+    onSave(targetsFromDraft(draft, tagNames))
     onClose()
   }
 
@@ -81,78 +80,85 @@ export default function RequirementTargetsModal({
               Requirement targets
             </h2>
             <p className="mt-0.5 text-xs leading-snug text-gray-600">
-              Enter units needed per requirement. Only rows with a target show
-              in your overview.
+              Optional unit targets for progress (e.g. 2 / 6). All tags from the
+              catalog always appear in the overview.
             </p>
           </div>
 
           <div className="px-4 pb-2 pt-2">
-            <div
-              className="flex items-end justify-between gap-2 border-b border-gray-200 pb-1"
-              aria-hidden
-            >
-              <span className="min-w-0 text-xs font-bold text-gray-900">
-                Requirement
-              </span>
-              <div className="flex shrink-0 items-end gap-0.5">
-                <span className="w-[4.5rem] text-center text-xs font-bold text-gray-900">
-                  Units
-                </span>
-                <span className="w-7 shrink-0" />
-              </div>
-            </div>
-            <ul>
-              {REQUIREMENT_TAG_CODES.map((tagCode) => {
-                const label = REQUIREMENT_TAG_LABELS[tagCode] ?? tagCode
-                const hasValue = (draft[tagCode] ?? '').trim() !== ''
-                return (
-                  <li
-                    key={tagCode}
-                    className="flex items-center justify-between gap-2 border-b border-gray-100 py-1.5 last:border-b-0"
-                  >
-                    <RequirementTag tagCode={tagCode} />
-                    <div className="flex shrink-0 items-center gap-0.5">
-                      <label
-                        className="sr-only"
-                        htmlFor={`req-target-${tagCode}`}
+            {tagNames.length === 0 ? (
+              <p className="py-3 text-sm text-gray-600">
+                No requirement tags in this catalog yet.
+              </p>
+            ) : (
+              <>
+                <div
+                  className="flex items-end justify-between gap-2 border-b border-gray-200 pb-1"
+                  aria-hidden
+                >
+                  <span className="min-w-0 text-xs font-bold text-gray-900">
+                    Requirement
+                  </span>
+                  <div className="flex shrink-0 items-end gap-0.5">
+                    <span className="w-[4.5rem] text-center text-xs font-bold text-gray-900">
+                      Units
+                    </span>
+                    <span className="w-7 shrink-0" />
+                  </div>
+                </div>
+                <ul>
+                  {tagNames.map((tagName) => {
+                    const hasValue = (draft[tagName] ?? '').trim() !== ''
+                    return (
+                      <li
+                        key={tagName}
+                        className="flex items-center justify-between gap-2 border-b border-gray-100 py-1.5 last:border-b-0"
                       >
-                        Target units for {label}
-                      </label>
-                      <input
-                        id={`req-target-${tagCode}`}
-                        type="number"
-                        inputMode="decimal"
-                        min="0"
-                        step="0.5"
-                        placeholder="—"
-                        value={draft[tagCode] ?? ''}
-                        onChange={(event) =>
-                          setDraft((prev) => ({
-                            ...prev,
-                            [tagCode]: event.target.value,
-                          }))
-                        }
-                        className="w-[4.5rem] rounded border border-gray-300 px-2 py-1 text-right text-sm tabular-nums text-gray-900 focus:border-yale-600 focus:outline-none focus:ring-1 focus:ring-yale-600"
-                      />
-                      <button
-                        type="button"
-                        disabled={!hasValue}
-                        onClick={() =>
-                          setDraft((prev) => ({
-                            ...prev,
-                            [tagCode]: '',
-                          }))
-                        }
-                        aria-label={`Clear ${label}`}
-                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded border border-gray-200 text-sm font-medium leading-none text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800 disabled:cursor-not-allowed disabled:border-transparent disabled:opacity-25"
-                      >
-                        <span aria-hidden>−</span>
-                      </button>
-                    </div>
-                  </li>
-                )
-              })}
-            </ul>
+                        <RequirementTag tagCode={tagName} />
+                        <div className="flex shrink-0 items-center gap-0.5">
+                          <label
+                            className="sr-only"
+                            htmlFor={`req-target-${tagName}`}
+                          >
+                            Target units for {tagName}
+                          </label>
+                          <input
+                            id={`req-target-${tagName}`}
+                            type="number"
+                            inputMode="decimal"
+                            min="0"
+                            step="0.5"
+                            placeholder="—"
+                            value={draft[tagName] ?? ''}
+                            onChange={(event) =>
+                              setDraft((prev) => ({
+                                ...prev,
+                                [tagName]: event.target.value,
+                              }))
+                            }
+                            className="w-[4.5rem] rounded border border-gray-300 px-2 py-1 text-right text-sm tabular-nums text-gray-900 focus:border-yale-600 focus:outline-none focus:ring-1 focus:ring-yale-600"
+                          />
+                          <button
+                            type="button"
+                            disabled={!hasValue}
+                            onClick={() =>
+                              setDraft((prev) => ({
+                                ...prev,
+                                [tagName]: '',
+                              }))
+                            }
+                            aria-label={`Clear ${tagName}`}
+                            className="flex h-7 w-7 shrink-0 items-center justify-center rounded border border-gray-200 text-sm font-medium leading-none text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800 disabled:cursor-not-allowed disabled:border-transparent disabled:opacity-25"
+                          >
+                            <span aria-hidden>−</span>
+                          </button>
+                        </div>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </>
+            )}
           </div>
 
           <div className="border-t border-gray-200 bg-gray-50 px-4 py-2.5">

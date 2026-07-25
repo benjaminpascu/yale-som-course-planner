@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { buildTagsByCourseNumber } from '../lib/filterCourses'
 import { sectionTone } from '../lib/sectionTheme'
 import { formatCourseHeading } from '../lib/courseDisplay'
 import { formatSessionLabel } from '../lib/sessionDisplay'
@@ -11,11 +10,11 @@ import {
   getViewportBottomInsetPx,
 } from '../lib/portaledTooltip'
 import {
-  configuredTargetTagCodes,
   formatRequirementProgress,
   loadRequirementTargets,
   persistRequirementTargets,
 } from '../lib/requirementTargets'
+import { uniqueRequirementTags } from '../lib/requirementTags'
 import {
   computeTagUnitTotals,
   formatTagUnits,
@@ -25,10 +24,10 @@ import RequirementTargetsModal from './RequirementTargetsModal'
 import SectionHeader from './SectionHeader'
 
 const REQUIREMENTS_SUBTITLE =
-  'Progress toward unit targets for your selected plan. Tap or hover a requirement for details.'
+  'Units per requirement tag for your selected plan. Tap or hover a requirement for details.'
 
 const EMPTY_HINT =
-  'No requirements yet. Use Add requirements to set your targets.'
+  'No requirement tags in this catalog yet.'
 
 /** Desktop: fixed body height so tag rows never push the calendar layout. Mobile: auto height. */
 const REQUIREMENTS_BODY_CLASS =
@@ -51,7 +50,7 @@ function AddRequirementsButton({ onClick, inverse = false }) {
           : 'shrink-0 rounded border border-yale-300 bg-white px-2.5 py-1 text-xs font-medium text-yale-900 hover:bg-yale-50'
       }
     >
-      Add requirements
+      Set targets
     </button>
   )
 }
@@ -85,7 +84,8 @@ function RequirementTagItem({ row, fallYear, springYear }) {
   const tooltipRef = useRef(null)
   const hideTimerRef = useRef(null)
   const hasContributors = row.contributors.length > 0
-  const metTarget = row.totalUnits >= row.targetUnits
+  const hasTarget = row.targetUnits != null && row.targetUnits > 0
+  const metTarget = hasTarget && row.totalUnits >= row.targetUnits
   const [tooltipOpen, setTooltipOpen] = useState(false)
   const [tooltipStyle, setTooltipStyle] = useState(null)
 
@@ -166,6 +166,10 @@ function RequirementTagItem({ row, fallYear, springYear }) {
 
   useEffect(() => () => cancelHideTooltip(), [cancelHideTooltip])
 
+  const unitsLabel = hasTarget
+    ? formatRequirementProgress(row.totalUnits, row.targetUnits)
+    : formatTagUnits(row.totalUnits)
+
   return (
     <>
       <li
@@ -179,8 +183,8 @@ function RequirementTagItem({ row, fallYear, springYear }) {
         onFocus={hasContributors ? openTooltip : undefined}
         onBlur={hasContributors ? scheduleHideTooltip : undefined}
       >
-                <div className="flex min-w-0 items-start justify-between gap-2">
-          <RequirementTag tagCode={row.tagCode} muted={row.totalUnits <= 0} />
+        <div className="flex min-w-0 items-start justify-between gap-2">
+          <RequirementTag tagCode={row.tagCode} />
           <span
             className={
               metTarget
@@ -190,7 +194,7 @@ function RequirementTagItem({ row, fallYear, springYear }) {
                   : 'shrink-0 text-sm tabular-nums text-gray-400'
             }
           >
-            {formatRequirementProgress(row.totalUnits, row.targetUnits)}
+            {unitsLabel}
           </span>
         </div>
       </li>
@@ -249,36 +253,37 @@ function RequirementsGrid({ rows, fallYear, springYear }) {
 
 export default function TagUnitTracker({
   selectedCourses,
-  tags,
+  courses = [],
   fallYear = null,
   springYear = null,
 }) {
-  const [targets, setTargets] = useState(() => loadRequirementTargets())
+  const tagNames = useMemo(() => uniqueRequirementTags(courses), [courses])
+  const [targets, setTargets] = useState(() =>
+    loadRequirementTargets(tagNames),
+  )
   const [modalOpen, setModalOpen] = useState(false)
 
-  const tagsByCourseNumber = useMemo(
-    () => buildTagsByCourseNumber(tags),
-    [tags],
-  )
+  useEffect(() => {
+    setTargets(loadRequirementTargets(tagNames))
+  }, [tagNames])
 
   const totals = useMemo(
-    () => computeTagUnitTotals(selectedCourses, tagsByCourseNumber),
-    [selectedCourses, tagsByCourseNumber],
+    () => computeTagUnitTotals(selectedCourses, tagNames),
+    [selectedCourses, tagNames],
   )
 
-  const visibleRows = useMemo(() => {
-    const codes = new Set(configuredTargetTagCodes(targets))
-    return totals
-      .filter((row) => codes.has(row.tagCode))
-      .map((row) => ({
+  const visibleRows = useMemo(
+    () =>
+      totals.map((row) => ({
         ...row,
-        targetUnits: targets[row.tagCode],
-      }))
-  }, [totals, targets])
+        targetUnits: targets[row.tagCode] ?? null,
+      })),
+    [totals, targets],
+  )
 
   const handleSaveTargets = (nextTargets) => {
     setTargets(nextTargets)
-    persistRequirementTargets(nextTargets)
+    persistRequirementTargets(nextTargets, tagNames)
   }
 
   const reqTone = sectionTone('requirements')
@@ -306,6 +311,7 @@ export default function TagUnitTracker({
       <RequirementTargetsModal
         open={modalOpen}
         targets={targets}
+        tagNames={tagNames}
         onClose={() => setModalOpen(false)}
         onSave={handleSaveTargets}
       />

@@ -1,8 +1,4 @@
-import { REQUIREMENT_TAG_CODES } from './requirementTags.js'
-
 const STORAGE_KEY = 'yale-som-course-planner-requirement-targets'
-
-const VALID_TAG_SET = new Set(REQUIREMENT_TAG_CODES)
 
 /**
  * @typedef {Partial<Record<string, number>>} RequirementTargets
@@ -15,44 +11,60 @@ export function createEmptyRequirementTargets() {
 
 /**
  * @param {unknown} raw
+ * @param {Iterable<string>} [knownTags] — when provided, drop targets for unknown names
  * @returns {RequirementTargets}
  */
-export function normalizeRequirementTargets(raw) {
+export function normalizeRequirementTargets(raw, knownTags) {
   if (!raw || typeof raw !== 'object') return createEmptyRequirementTargets()
+
+  const known =
+    knownTags == null ? null : new Set([...knownTags].map((t) => String(t)))
 
   /** @type {RequirementTargets} */
   const out = {}
   for (const [key, value] of Object.entries(raw)) {
-    if (!VALID_TAG_SET.has(key)) continue
+    const name = key.trim()
+    if (!name) continue
+    if (known && !known.has(name)) continue
     const n = typeof value === 'number' ? value : Number(value)
     if (!Number.isFinite(n) || n <= 0) continue
-    out[key] = n
+    out[name] = n
   }
   return out
 }
 
-/** @returns {RequirementTargets} */
-export function loadRequirementTargets() {
+/**
+ * @param {Iterable<string>} [knownTags]
+ * @returns {RequirementTargets}
+ */
+export function loadRequirementTargets(knownTags) {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return createEmptyRequirementTargets()
-    return normalizeRequirementTargets(JSON.parse(raw))
+    return normalizeRequirementTargets(JSON.parse(raw), knownTags)
   } catch {
     return createEmptyRequirementTargets()
   }
 }
 
-/** @param {RequirementTargets} targets */
-export function persistRequirementTargets(targets) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizeRequirementTargets(targets)))
+/**
+ * @param {RequirementTargets} targets
+ * @param {Iterable<string>} [knownTags]
+ */
+export function persistRequirementTargets(targets, knownTags) {
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(normalizeRequirementTargets(targets, knownTags)),
+  )
 }
 
 /**
  * @param {RequirementTargets} targets
+ * @param {string[]} knownTags
  * @returns {string[]}
  */
-export function configuredTargetTagCodes(targets) {
-  return REQUIREMENT_TAG_CODES.filter((code) => (targets[code] ?? 0) > 0)
+export function configuredTargetTagCodes(targets, knownTags) {
+  return knownTags.filter((name) => (targets[name] ?? 0) > 0)
 }
 
 /**

@@ -30,24 +30,6 @@ export function getTimeRangeError(filters) {
 }
 
 /**
- * @param {{ courseNumber: string, tagCode: string }[]} tags
- * @returns {Map<string, Set<string>>}
- */
-export function buildTagsByCourseNumber(tags) {
-  const map = new Map()
-  for (const tag of tags) {
-    if (!tag.courseNumber || !tag.tagCode) continue
-    let set = map.get(tag.courseNumber)
-    if (!set) {
-      set = new Set()
-      map.set(tag.courseNumber, set)
-    }
-    set.add(tag.tagCode)
-  }
-  return map
-}
-
-/**
  * @param {string} query
  * @param {import('./parseCourses').Course} course
  */
@@ -77,9 +59,8 @@ function matchesSearch(query, course) {
  *   categories: Set<string>
  *   tagCodes: Set<string>
  * }} filters
- * @param {Map<string, Set<string>>} tagsByCourseNumber
  */
-export function courseMatchesFilters(course, filters, tagsByCourseNumber) {
+export function courseMatchesFilters(course, filters) {
   const search = filters.search.trim().toLowerCase()
   if (!matchesSearch(search, course)) return false
 
@@ -103,11 +84,10 @@ export function courseMatchesFilters(course, filters, tagsByCourseNumber) {
   }
 
   if (filters.tagCodes.size > 0) {
-    const courseTags = tagsByCourseNumber.get(course.courseNumber)
-    if (!courseTags) return false
+    const courseTags = course.tags ?? []
     let hasTag = false
-    for (const code of filters.tagCodes) {
-      if (courseTags.has(code)) {
+    for (const tag of filters.tagCodes) {
+      if (courseTags.includes(tag)) {
         hasTag = true
         break
       }
@@ -141,12 +121,9 @@ export function courseMatchesFilters(course, filters, tagsByCourseNumber) {
 /**
  * @param {import('./parseCourses').Course[]} courses
  * @param {Parameters<typeof courseMatchesFilters>[1]} filters
- * @param {Map<string, Set<string>>} tagsByCourseNumber
  */
-export function filterCourses(courses, filters, tagsByCourseNumber) {
-  return courses.filter((course) =>
-    courseMatchesFilters(course, filters, tagsByCourseNumber),
-  )
+export function filterCourses(courses, filters) {
+  return courses.filter((course) => courseMatchesFilters(course, filters))
 }
 
 /** @param {import('./parseCourses').Course[]} courses */

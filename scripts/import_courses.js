@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 /**
- * Import courses and tags from docs/data-samples/ into Supabase.
+ * Import courses from docs/data-samples/ into Supabase.
  *
  * Requires .env with SUPABASE_URL (or VITE_SUPABASE_URL) and SUPABASE_SERVICE_ROLE_KEY.
  *
- * Courses: deletes existing rows for each term_code in the CSV, then inserts fresh rows.
- * Tags: upserts on (course_number, tag_code) — does not delete tags missing from the CSV.
+ * Courses: clears the courses table, then inserts fresh rows (including inline tags).
  */
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -13,7 +12,6 @@ import { fileURLToPath } from 'node:url'
 import { config } from 'dotenv'
 import { createClient } from '@supabase/supabase-js'
 import { courseToDbRow, parseCoursesCsv } from '../src/lib/parseCourses.js'
-import { parseTagsCsv, tagToDbRow } from '../src/lib/parseTags.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const root = join(__dirname, '..')
@@ -36,13 +34,9 @@ if (!supabaseUrl || !serviceRoleKey) {
 const supabase = createClient(supabaseUrl, serviceRoleKey)
 
 const coursesPath = join(root, 'docs/data-samples/courses_master_fall2026.csv')
-const tagsPath = join(root, 'docs/data-samples/course_tags.csv')
-
 const coursesText = readFileSync(coursesPath, 'utf8')
-const tagsText = readFileSync(tagsPath, 'utf8')
 
 let courses = parseCoursesCsv(coursesText)
-const tags = parseTagsCsv(tagsText)
 
 // SOM CSV can repeat the same Course ID (e.g. two section rows); keep the last row.
 const byCourseId = new Map()
@@ -57,9 +51,10 @@ if (byCourseId.size < courses.length) {
 }
 
 const termCodes = [...new Set(courses.map((c) => c.termCode).filter(Boolean))]
+const taggedCount = courses.filter((c) => c.tags.length > 0).length
 
 console.log(`Parsed ${courses.length} visible courses across term(s): ${termCodes.join(', ')}`)
-console.log(`Parsed ${tags.length} tag mappings`)
+console.log(`${taggedCount} courses have at least one tag`)
 
 // CSV is the full catalog — clear existing courses so old terms do not linger.
 const { error: deleteAllError } = await supabase
@@ -86,20 +81,4 @@ for (let i = 0; i < courseRows.length; i += BATCH) {
 }
 
 console.log(`Inserted ${courseRows.length} courses`)
-
-const tagRows = tags.map(tagToDbRow)
-
-for (let i = 0; i < tagRows.length; i += BATCH) {
-  const batch = tagRows.slice(i, i + BATCH)
-  const { error } = await supabase
-    .from('tags')
-    .upsert(batch, { onConflict: 'course_number,tag_code' })
-
-  if (error) {
-    console.error(`Failed to upsert tags (batch ${i / BATCH + 1}):`, error.message)
-    process.exit(1)
-  }
-}
-
-console.log(`Upserted ${tagRows.length} tags`)
 console.log('Import complete.')

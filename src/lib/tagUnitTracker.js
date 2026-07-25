@@ -1,9 +1,5 @@
 import { termCodeToSemester } from './academicYear.js'
 import { formatCourseUnits } from './courseDisplay.js'
-import {
-  REQUIREMENT_TAG_CODES,
-  REQUIREMENT_TAG_LABELS,
-} from './requirementTags.js'
 import { compareSessions } from './sessionDisplay.js'
 
 /** @param {number} units */
@@ -65,14 +61,15 @@ export function formatSemesterBreakdown(bySemester, years = {}) {
 }
 
 /**
- * Live units per Yale requirement tag for courses in the active plan.
- * A course with multiple tags contributes its full units toward each tag.
+ * Live units per requirement tag for courses in the active plan.
+ * Tag names come from `tagNames` (discovered from the catalog), not hardcoded.
+ * Each selected course (course_id / section) is counted once via its own `tags`.
  *
  * @param {import('./parseCourses.js').Course[]} selectedCourses
- * @param {Map<string, Set<string>>} tagsByCourseNumber
+ * @param {string[]} tagNames
  */
-export function computeTagUnitTotals(selectedCourses, tagsByCourseNumber) {
-  return REQUIREMENT_TAG_CODES.map((tagCode) => {
+export function computeTagUnitTotals(selectedCourses, tagNames) {
+  return tagNames.map((tagName) => {
     const contributors = []
     /** @type {Map<string, { units: number, contributors: typeof contributors }>} */
     const bySession = new Map()
@@ -80,8 +77,7 @@ export function computeTagUnitTotals(selectedCourses, tagsByCourseNumber) {
     let totalUnits = 0
 
     for (const course of selectedCourses) {
-      const courseTags = tagsByCourseNumber.get(course.courseNumber)
-      if (!courseTags?.has(tagCode)) continue
+      if (!course.tags?.includes(tagName)) continue
       totalUnits += course.units
 
       const entry = {
@@ -123,8 +119,8 @@ export function computeTagUnitTotals(selectedCourses, tagsByCourseNumber) {
       })
 
     return {
-      tagCode,
-      label: REQUIREMENT_TAG_LABELS[tagCode] ?? tagCode,
+      tagCode: tagName,
+      label: tagName,
       totalUnits,
       contributors,
       bySemester,

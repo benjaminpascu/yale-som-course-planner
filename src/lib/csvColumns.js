@@ -1,4 +1,4 @@
-/** Columns required in courses_master_new.csv */
+/** Columns required in courses_master_fall2026.csv */
 export const REQUIRED_COURSE_COLUMNS = [
   'Course ID',
   'Course Number',
@@ -22,12 +22,7 @@ export const REQUIRED_COURSE_COLUMNS = [
   'start_24h',
   'end_24h',
   'Visible',
-]
-
-export const REQUIRED_TAG_COLUMNS = [
-  'course_number',
-  'tag_code',
-  'tag_label',
+  'tags',
 ]
 
 /**

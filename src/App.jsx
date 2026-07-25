@@ -25,7 +25,6 @@ const YALE_COURSE_LIST_URL = 'https://som.yale.edu/elective-core-courses'
 
 function App() {
   const [courses, setCourses] = useState([])
-  const [tags, setTags] = useState([])
   const [status, setStatus] = useState('loading')
   const [error, setError] = useState(null)
   const [planStore, setPlanStore] = useState(() => loadPlanStore())
@@ -40,9 +39,8 @@ function App() {
 
   useEffect(() => {
     loadAppData()
-      .then(({ courses: loadedCourses, tags: loadedTags }) => {
+      .then(({ courses: loadedCourses }) => {
         setCourses(loadedCourses)
-        setTags(loadedTags)
         setStatus('ready')
       })
       .catch((err) => {
@@ -239,7 +237,7 @@ function App() {
     hasSelection: selectedIds.size > 0,
     fallYear,
     springYear,
-    tags,
+    courses,
     activePlanId: planStore.activePlanId,
     activePlanName: activePlan?.name ?? null,
     isDirty,
@@ -339,7 +337,6 @@ function App() {
         <aside className="flex min-h-0 flex-col overflow-hidden border-r-2 border-yale-600">
           <CourseBrowser
             courses={courses}
-            tags={tags}
             selectedIds={selectedIds}
             selectedCourses={selectedCourses}
             onToggleCourse={toggleCourse}
@@ -359,7 +356,6 @@ function App() {
         {mobileTab === 'catalog' ? (
           <CourseBrowser
             courses={courses}
-            tags={tags}
             selectedIds={selectedIds}
             selectedCourses={selectedCourses}
             onToggleCourse={toggleCourse}

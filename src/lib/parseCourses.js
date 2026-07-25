@@ -36,6 +36,16 @@ function splitCsvList(value) {
   return raw.split(',').map((part) => part.trim()).filter(Boolean)
 }
 
+/** Semicolon-separated tag names from the courses CSV `tags` column. */
+export function parseTagsField(value) {
+  if (Array.isArray(value)) {
+    return value.map((part) => String(part).trim()).filter(Boolean)
+  }
+  const raw = value?.trim()
+  if (!raw) return []
+  return raw.split(';').map((part) => part.trim()).filter(Boolean)
+}
+
 /** @param {string | undefined} value */
 function optionalTime(value) {
   const raw = value?.trim()
@@ -80,6 +90,7 @@ function rowToCourse(row) {
     startTime: optionalTime(row.start_24h),
     endTime: optionalTime(row.end_24h),
     visible: row.Visible === '1',
+    tags: parseTagsField(row.tags),
   }
 }
 
@@ -107,6 +118,7 @@ export function courseToDbRow(course) {
     start_time: course.startTime,
     end_time: course.endTime,
     visible: course.visible,
+    tags: course.tags ?? [],
   }
 }
 
@@ -134,11 +146,12 @@ export function dbRowToCourse(row) {
     startTime: row.start_time,
     endTime: row.end_time,
     visible: row.visible,
+    tags: parseTagsField(row.tags),
   }
 }
 
 /**
- * Parse courses_master_new.csv into app course objects.
+ * Parse courses_master_fall2026.csv into app course objects.
  * Only includes rows where Visible === "1".
  * @param {string} csvText
  * @param {{ validate?: boolean }} [options]

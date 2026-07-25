@@ -5,7 +5,6 @@ import {
   hasSelectedFullTermSession,
   isFullTermSession,
 } from '../lib/sessionDisplay'
-import { REQUIREMENT_TAG_CODES } from '../lib/requirementTags'
 import FilterCheckboxGroup from './FilterCheckboxGroup'
 import RequirementTag from './RequirementTag'
 import TimeRangeSelect from './TimeRangeSelect'
@@ -24,6 +23,7 @@ export default function CourseFilters({
   categories,
   unitValues,
   bidValues,
+  requirementTags = [],
   filters,
   fallYear = null,
   springYear = null,
@@ -49,10 +49,10 @@ export default function CourseFilters({
   }))
   const categoryOptions = categories.map((c) => ({ id: c, label: c }))
   const bidOptions = bidValues
-  const tagOptions = REQUIREMENT_TAG_CODES.map((code) => ({
-    id: code,
-    label: code,
-    renderLabel: () => <RequirementTag tagCode={code} />,
+  const tagOptions = requirementTags.map((name) => ({
+    id: name,
+    label: name,
+    renderLabel: () => <RequirementTag tagCode={name} />,
   }))
 
   return (

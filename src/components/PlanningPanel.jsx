@@ -13,7 +13,7 @@ export default function PlanningPanel({
   hasSelection,
   fallYear,
   springYear,
-  tags,
+  courses = [],
   activePlanId,
   activePlanName,
   isDirty,
@@ -41,7 +41,7 @@ export default function PlanningPanel({
       <div className="shrink-0">
         <TagUnitTracker
           selectedCourses={selectedCourses}
-          tags={tags}
+          courses={courses}
           fallYear={fallYear}
           springYear={springYear}
         />

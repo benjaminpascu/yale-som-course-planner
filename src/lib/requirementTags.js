@@ -1,24 +1,27 @@
-export { REQUIREMENT_TAG_LABELS } from './requirementTagTheme.js'
-
-/** Yale SOM requirement tag codes (PRD §6.2). */
-export const REQUIREMENT_TAG_CODES = [
-  'MGAM',
-  'MGBA',
-  'MGGB',
-  'MGGS',
-  'MGLD',
-  'MGMS',
-  'MGSR',
-]
+/**
+ * Requirement tags on a course (from the inline `tags` field), sorted for display.
+ *
+ * @param {{ tags?: string[] } | null | undefined} course
+ * @returns {string[]}
+ */
+export function getCourseRequirementTags(course) {
+  const tags = course?.tags
+  if (!Array.isArray(tags) || tags.length === 0) return []
+  return [...tags].sort((a, b) => a.localeCompare(b))
+}
 
 /**
- * Requirement tags on a course, in canonical display order.
+ * Unique tag names across the catalog (data-driven; not hardcoded).
  *
- * @param {string} courseNumber
- * @param {Map<string, Set<string>>} tagsByCourseNumber
+ * @param {{ tags?: string[] }[]} courses
+ * @returns {string[]}
  */
-export function getCourseRequirementTags(courseNumber, tagsByCourseNumber) {
-  const courseTags = tagsByCourseNumber.get(courseNumber)
-  if (!courseTags) return []
-  return REQUIREMENT_TAG_CODES.filter((code) => courseTags.has(code))
+export function uniqueRequirementTags(courses) {
+  const names = new Set()
+  for (const course of courses) {
+    for (const tag of course.tags ?? []) {
+      if (tag) names.add(tag)
+    }
+  }
+  return [...names].sort((a, b) => a.localeCompare(b))
 }

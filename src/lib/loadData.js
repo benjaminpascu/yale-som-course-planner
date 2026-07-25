@@ -1,13 +1,14 @@
 import coursesCsv from '../../docs/data-samples/courses_master_fall2026.csv?raw'
-import tagsCsv from '../../docs/data-samples/course_tags.csv?raw'
 import { dbRowToCourse, parseCoursesCsv } from './parseCourses'
-import { dbRowToTag, parseTagsCsv } from './parseTags'
 import { getSupabaseClient } from './supabaseClient'
 
 /**
- * Load course and tag data.
+ * Load course data (tags are inline on each course).
  * Uses Supabase when VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY are set;
- * otherwise loads bundled sample CSVs from docs/data-samples/.
+ * otherwise loads the bundled sample CSV from docs/data-samples/.
+ *
+ * If Supabase is missing the `courses.tags` column (migration 003 not applied),
+ * falls back to the local CSV so requirement filters still work.
  */
 export async function loadAppData() {
   const supabase = getSupabaseClient()
@@ -21,30 +22,33 @@ export async function loadAppData() {
 
 function loadFromLocalCsv() {
   const courses = parseCoursesCsv(coursesCsv)
-  const tags = parseTagsCsv(tagsCsv)
-  return { courses, tags, source: 'local' }
+  return { courses, source: 'local' }
 }
 
 async function loadFromSupabase(supabase) {
-  const [coursesResult, tagsResult] = await Promise.all([
-    supabase
-      .from('courses')
-      .select('*')
-      .eq('visible', true)
-      .order('course_number'),
-    supabase.from('tags').select('course_number, tag_code, tag_label'),
-  ])
+  const coursesResult = await supabase
+    .from('courses')
+    .select('*')
+    .eq('visible', true)
+    .order('course_number')
 
   if (coursesResult.error) {
     throw new Error(`Failed to load courses: ${coursesResult.error.message}`)
   }
-  if (tagsResult.error) {
-    throw new Error(`Failed to load tags: ${tagsResult.error.message}`)
+
+  const rows = coursesResult.data ?? []
+  const schemaHasTags = rows.length === 0 || rows.some((row) => 'tags' in row)
+
+  if (!schemaHasTags) {
+    console.warn(
+      'Supabase courses table has no tags column yet. Falling back to local CSV. ' +
+        'Run supabase/migrations/003_inline_course_tags.sql, then npm run import:data.',
+    )
+    return loadFromLocalCsv()
   }
 
   return {
-    courses: (coursesResult.data ?? []).map(dbRowToCourse),
-    tags: (tagsResult.data ?? []).map(dbRowToTag),
+    courses: rows.map(dbRowToCourse),
     source: 'supabase',
   }
 }

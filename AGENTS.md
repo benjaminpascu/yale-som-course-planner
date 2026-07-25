@@ -25,11 +25,12 @@ The user is a non-technical student. Explain clearly; ask explicitly when a prod
 |------|--------|
 | Milestone 1 — Scaffold + course list | ✅ Done |
 | Milestone 2 — Supabase + import | ✅ Done |
-| Course data fix (`courses_master_new.csv`) | ✅ Done |
+| Course data fix (`courses_master_new.csv`) | ✅ Done (superseded by Fall 2026) |
 | Milestone 3 — Search + filters | ✅ Done |
 | Milestone 4 — Calendar + conflicts | ✅ Done |
 | Milestone 5 — Tag unit tracker | ✅ Done |
 | Milestones 1–6 — Core product | ✅ Done |
+| **Fall 2026 data + inline tags** | ✅ Catalog + dynamic tags from CSV `tags` column |
 | **Live** | ✅ Vercel; share link privately; fix issues as feedback comes in |
 | **Wider promo** | When you choose (not a separate dev milestone) |
 
@@ -40,21 +41,21 @@ Full detail: **`docs/PROJECT_STATUS.md`**.
 | Data | Path |
 |------|------|
 | Product spec | `docs/PRD.md` |
-| **Courses (only file)** | `docs/data-samples/courses_master_new.csv` |
-| Tags | `docs/data-samples/course_tags.csv` |
-| Tag merge script (reference) | `scripts/build_tags.py` — do not modify unless asked |
-| Supabase schema | `supabase/migrations/001_initial_schema.sql`, `002_api_grants.sql` |
+| **Courses (only file)** | `docs/data-samples/courses_master_fall2026.csv` |
+| Tags | Inline `tags` column on that CSV (semicolon-separated names; not a separate file) |
+| Supabase schema | `supabase/migrations/001_initial_schema.sql`, `002_api_grants.sql`, `003_inline_course_tags.sql` |
 | Supabase setup steps | `docs/supabase-setup.md` |
 | Vercel deploy steps | `docs/vercel-setup.md` |
 
-**Do not use** `courses_master.csv` — it was removed; timing columns were unreliable.
+**Do not use** `courses_master.csv` / `courses_master_new.csv` / `course_tags.csv` — removed. Tags are no longer a separate table.
 
 ### Scheduling columns (courses CSV)
 
 Use only: `days_clean`, `start_24h`, `end_24h` → app fields `meetingDays`, `startTime`, `endTime`.
 
 - **`hasMeetingTime(course)`** in `src/lib/parseCourses.js` — true when all three are present.
-- ~111 courses have **no** weekly time: list normally, show amber **“No time defined — won't show on calendar”**, and **exclude** from calendar rendering and time-conflict checks (see PRD §6.1, §7.2).
+- Courses with **no** weekly time: list normally, show amber **“No time defined — won't show on calendar”**, and **exclude** from calendar rendering and time-conflict checks (see PRD §6.1, §7.2).
+- **`tags`** on each course: parse the CSV `tags` column by splitting on `;`. Do not hardcode tag names; discover unique tags from loaded courses.
 
 ## Commands
 
@@ -82,9 +83,8 @@ npm run build
 | Fall/spring catalog years + header label | `src/lib/academicYear.js`, `App.jsx` |
 | Session-aware conflicts | `src/lib/scheduleConflicts.js` |
 | Load data (Supabase or bundled CSV) | `src/lib/loadData.js` |
-| Parse courses + `hasMeetingTime` | `src/lib/parseCourses.js` |
+| Parse courses + `hasMeetingTime` + inline tags | `src/lib/parseCourses.js` |
 | Category typo aliases only (new CSV values pass through) | `src/lib/categoryDisplay.js` |
-| Parse tags | `src/lib/parseTags.js` |
 | CSV column validation | `src/lib/csvColumns.js` |
 | Supabase import CLI | `scripts/import_courses.js` |
 
