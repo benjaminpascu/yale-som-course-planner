@@ -12,6 +12,8 @@ const CATEGORY_ALIASES = {
   'Entreneurship & Private Equity': 'Entrepreneurship & Private Equity',
   'Entreprenurship & Private Equity': 'Entrepreneurship & Private Equity',
   PHD: 'PhD',
+  'MMG GBS': 'MMS GBS',
+  'Business and the Law': 'Business & the Law',
 }
 
 /**

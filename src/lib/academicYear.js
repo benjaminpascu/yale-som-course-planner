@@ -59,3 +59,29 @@ export function getSemesterCalendarYears(courses) {
 
   return { fallYear, springYear }
 }
+
+/**
+ * Display name for a TermCode, e.g. 202603 → "Fall 2026", 202701 → "Spring 2027".
+ *
+ * @param {string} termCode
+ * @returns {string}
+ */
+export function formatTermLabel(termCode) {
+  const semester = termCodeToSemester(termCode)
+  const year = termCodeToCalendarYear(termCode)
+  if (semester == null || year == null) return String(termCode ?? '')
+  const name = semester === 'fall' ? 'Fall' : 'Spring'
+  return `${name} ${year}`
+}
+
+/**
+ * Terms present in the catalog, oldest first (TermCode sorts chronologically).
+ *
+ * @param {{ termCode?: string }[]} courses
+ * @returns {{ id: string, label: string }[]}
+ */
+export function getCatalogTerms(courses) {
+  return [...new Set(courses.map((c) => c.termCode).filter(Boolean))]
+    .sort()
+    .map((termCode) => ({ id: termCode, label: formatTermLabel(termCode) }))
+}

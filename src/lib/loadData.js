@@ -1,11 +1,17 @@
-import coursesCsv from '../../docs/data-samples/courses_master_fall2026.csv?raw'
-import { dbRowToCourse, parseCoursesCsv } from './parseCourses'
+import fallCsv from '../../docs/data-samples/courses_master_fall2026.csv?raw'
+import springCsv from '../../docs/data-samples/courses_master_spring2027.csv?raw'
+import {
+  dbRowToCourse,
+  harmonizeSectionTags,
+  parseCoursesCsv,
+} from './parseCourses'
 import { getSupabaseClient } from './supabaseClient'
 
 /**
- * Load course data (tags are inline on each course).
+ * Load course data for every term (tags are inline on each course).
  * Uses Supabase when VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY are set;
- * otherwise loads the bundled sample CSV from docs/data-samples/.
+ * otherwise loads the bundled term CSVs from docs/data-samples/.
+ * Either way, sections of the same course share their requirement tags.
  *
  * If Supabase is missing the `courses.tags` column (migration 003 not applied),
  * falls back to the local CSV so requirement filters still work.
@@ -21,8 +27,8 @@ export async function loadAppData() {
 }
 
 function loadFromLocalCsv() {
-  const courses = parseCoursesCsv(coursesCsv)
-  return { courses, source: 'local' }
+  const courses = [fallCsv, springCsv].flatMap((csv) => parseCoursesCsv(csv))
+  return { courses: harmonizeSectionTags(courses), source: 'local' }
 }
 
 async function loadFromSupabase(supabase) {
@@ -48,7 +54,7 @@ async function loadFromSupabase(supabase) {
   }
 
   return {
-    courses: rows.map(dbRowToCourse),
+    courses: harmonizeSectionTags(rows.map(dbRowToCourse)),
     source: 'supabase',
   }
 }

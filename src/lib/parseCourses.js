@@ -151,7 +151,35 @@ export function dbRowToCourse(row) {
 }
 
 /**
- * Parse courses_master_fall2026.csv into app course objects.
+ * Give every section of a course (same Course Number + TermCode) the union of
+ * the tags found on any of its sections. Yale's export sometimes tags only one
+ * section (e.g. only the G1 section has `GBS Req`); a requirement belongs to
+ * the course, not the section. Tag names stay data-driven.
+ *
+ * @template {{ courseNumber: string, termCode: string, tags?: string[] }} T
+ * @param {T[]} courses
+ * @returns {T[]}
+ */
+export function harmonizeSectionTags(courses) {
+  const tagsByCourse = new Map()
+  const keyOf = (course) => `${course.termCode}|${course.courseNumber}`
+
+  for (const course of courses) {
+    const key = keyOf(course)
+    const tags = tagsByCourse.get(key) ?? new Set()
+    for (const tag of course.tags ?? []) tags.add(tag)
+    tagsByCourse.set(key, tags)
+  }
+
+  return courses.map((course) => {
+    const tags = tagsByCourse.get(keyOf(course))
+    if (tags.size === (course.tags?.length ?? 0)) return course
+    return { ...course, tags: [...tags] }
+  })
+}
+
+/**
+ * Parse one term CSV (e.g. courses_master_fall2026.csv) into app course objects.
  * Only includes rows where Visible === "1".
  * @param {string} csvText
  * @param {{ validate?: boolean }} [options]

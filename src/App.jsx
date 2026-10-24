@@ -5,7 +5,7 @@ import MobilePlansPanel from './components/MobilePlansPanel'
 import PlansMenu from './components/PlansMenu'
 import PlanningPanel from './components/PlanningPanel'
 import { SAVE_BUTTON } from './lib/sectionTheme'
-import { getSemesterCalendarYears } from './lib/academicYear'
+import { getCatalogTerms, getSemesterCalendarYears } from './lib/academicYear'
 import { loadAppData } from './lib/loadData'
 import {
   courseIdSetFromArray,
@@ -30,6 +30,7 @@ function App() {
   const [planStore, setPlanStore] = useState(() => loadPlanStore())
   const [selectedIds, setSelectedIds] = useState(() => new Set())
   const [mobileTab, setMobileTab] = useState('calendar')
+  const [catalogTermCode, setCatalogTermCode] = useState(null)
   const planHydratedRef = useRef(false)
 
   const validCourseIds = useMemo(
@@ -96,6 +97,13 @@ function App() {
     () => getSemesterCalendarYears(courses),
     [courses],
   )
+
+  const catalogTerms = useMemo(() => getCatalogTerms(courses), [courses])
+
+  /** Term shown in the course browser; defaults to the earliest term loaded. */
+  const activeTermCode = catalogTerms.some((t) => t.id === catalogTermCode)
+    ? catalogTermCode
+    : (catalogTerms[0]?.id ?? null)
 
   const toggleCourse = useCallback((courseId) => {
     setSelectedIds((prev) => {
@@ -342,6 +350,9 @@ function App() {
             onToggleCourse={toggleCourse}
             fallYear={fallYear}
             springYear={springYear}
+            terms={catalogTerms}
+            termCode={activeTermCode}
+            onTermChange={setCatalogTermCode}
           />
         </aside>
         <section className="flex min-h-0 flex-col overflow-hidden">
@@ -361,6 +372,9 @@ function App() {
             onToggleCourse={toggleCourse}
             fallYear={fallYear}
             springYear={springYear}
+            terms={catalogTerms}
+            termCode={activeTermCode}
+            onTermChange={setCatalogTermCode}
             fullHeight
           />
         ) : null}

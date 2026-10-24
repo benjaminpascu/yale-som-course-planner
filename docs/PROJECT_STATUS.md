@@ -1,6 +1,6 @@
 # Project status
 
-**Last updated:** July 2026  
+**Last updated:** October 2026  
 **Purpose:** Handoff doc for new Cursor agents/chats. Update this when a milestone is approved.
 
 ---
@@ -32,6 +32,16 @@
 - `tags` column: semicolon-separated names (e.g. `STEM`, `GBS Req`, `STEM;GBS Req`)
 - Removed separate `course_tags.csv` / app join on tags table
 - Requirement tracker + filters discover tag names from data (no hardcoded tag list)
+
+### Spring 2027 catalog + term selector (built Oct 2026, awaiting approval)
+
+- Second file: `docs/data-samples/courses_master_spring2027.csv` (217 rows, 216 visible, TermCode `202701`); same columns as fall
+- App + import script load both files into one list (416 visible courses)
+- **Term** switch (Fall 2026 / Spring 2027) at the top of the course catalog; filter options follow the selected term
+- Conflicts: different terms never conflict; spring-1/spring-2 behave like fall-1/fall-2; session dates outside the term year are ignored (MGT 640 typo)
+- Sections of the same course share requirement tags at load time (Yale tagged only some sections, e.g. only G1 with `GBS Req`)
+- Category typo aliases: `MMG GBS` → `MMS GBS`, `Business and the Law` → `Business & the Law`
+- **To do:** run `npm run import:data` so production (Supabase) gets spring
 
 ---
 
@@ -144,3 +154,4 @@ npm run import:data
 | May 2026 | Live on Vercel; private link sharing; promo when ready (no M7/M8 build stages) |
 | May 2026 | Calendar: side-by-side overlaps + session view tabs (`calendarLayout.js`, `calendarSessionView.js`) |
 | July 2026 | Fall 2026 CSV; inline `tags` column; removed separate tags CSV/table; dynamic requirement UI |
+| Oct 2026 | Spring 2027 CSV; combined catalog; term selector; term-aware conflicts; section tag harmonizing |

@@ -31,6 +31,7 @@ The user is a non-technical student. Explain clearly; ask explicitly when a prod
 | Milestone 5 — Tag unit tracker | ✅ Done |
 | Milestones 1–6 — Core product | ✅ Done |
 | **Fall 2026 data + inline tags** | ✅ Catalog + dynamic tags from CSV `tags` column |
+| **Spring 2027 data + term selector** | ✅ Built (Oct 2026), awaiting your approval; Supabase re-import pending |
 | **Live** | ✅ Vercel; share link privately; fix issues as feedback comes in |
 | **Wider promo** | When you choose (not a separate dev milestone) |
 
@@ -41,8 +42,8 @@ Full detail: **`docs/PROJECT_STATUS.md`**.
 | Data | Path |
 |------|------|
 | Product spec | `docs/PRD.md` |
-| **Courses (only file)** | `docs/data-samples/courses_master_fall2026.csv` |
-| Tags | Inline `tags` column on that CSV (semicolon-separated names; not a separate file) |
+| **Courses (one file per term)** | `docs/data-samples/courses_master_fall2026.csv`, `docs/data-samples/courses_master_spring2027.csv` (identical columns) |
+| Tags | Inline `tags` column on those CSVs (semicolon-separated names; not a separate file). Sections of one course share tags at load time (`harmonizeSectionTags`). |
 | Supabase schema | `supabase/migrations/001_initial_schema.sql`, `002_api_grants.sql`, `003_inline_course_tags.sql` |
 | Supabase setup steps | `docs/supabase-setup.md` |
 | Vercel deploy steps | `docs/vercel-setup.md` |
@@ -81,7 +82,8 @@ npm run build
 | Saved plans UI + localStorage | `src/components/PlansMenu.jsx`, `src/components/SavedPlansPanel.jsx`, `src/lib/planStorage.js` |
 | Section colors / in-plan highlight | `src/lib/sectionTheme.js` |
 | Fall/spring catalog years + header label | `src/lib/academicYear.js`, `App.jsx` |
-| Session-aware conflicts | `src/lib/scheduleConflicts.js` |
+| Session- and term-aware conflicts | `src/lib/scheduleConflicts.js` |
+| Catalog term selector | `CourseBrowser.jsx` (`TermSelector`), term list from `getCatalogTerms` in `academicYear.js` |
 | Load data (Supabase or bundled CSV) | `src/lib/loadData.js` |
 | Parse courses + `hasMeetingTime` + inline tags | `src/lib/parseCourses.js` |
 | Category typo aliases only (new CSV values pass through) | `src/lib/categoryDisplay.js` |

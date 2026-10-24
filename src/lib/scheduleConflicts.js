@@ -1,3 +1,4 @@
+import { termCodeToCalendarYear } from './academicYear'
 import { parseTimeToMinutes } from './courseDisplay'
 import { hasMeetingTime } from './parseCourses'
 
@@ -34,16 +35,30 @@ export function sessionsOverlapByCode(sessionA, sessionB) {
 }
 
 /**
+ * Session dates are usable when both are present and the start falls in the
+ * TermCode's calendar year (Yale's export has typos like 2026-03-22 for a
+ * Spring 2027 course). Otherwise conflicts fall back to session codes.
+ *
+ * @param {{ sessionStart?: string | null, sessionEnd?: string | null, termCode?: string }} course
+ */
+function hasUsableSessionDates(course) {
+  if (!course.sessionStart || !course.sessionEnd) return false
+  const termYear = termCodeToCalendarYear(course.termCode)
+  if (termYear == null) return true
+  return course.sessionStart.startsWith(String(termYear))
+}
+
+/**
+ * Courses in different terms (TermCode) never overlap. Within a term, compare
+ * session dates when usable, else session codes (`fall-1` vs `fall-2`, etc.).
+ *
  * @param {import('./parseCourses').Course} a
  * @param {import('./parseCourses').Course} b
  */
 export function sessionsOverlap(a, b) {
-  if (
-    a.sessionStart &&
-    a.sessionEnd &&
-    b.sessionStart &&
-    b.sessionEnd
-  ) {
+  if (a.termCode && b.termCode && a.termCode !== b.termCode) return false
+
+  if (hasUsableSessionDates(a) && hasUsableSessionDates(b)) {
     return dateRangesOverlap(
       a.sessionStart,
       a.sessionEnd,

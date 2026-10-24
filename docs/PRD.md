@@ -50,12 +50,19 @@ The tool **complements** the official site — it does not replace it as the aut
 
 ## 6. Data model
 
-Course rows are sourced from `docs/data-samples/courses_master_fall2026.csv`. That file includes standard SOM export columns, three pre-cleaned scheduling fields (`days_clean`, `start_24h`, `end_24h`), and an inline `tags` column. Session dates and a few other fields are still parsed on import.
+Course rows are sourced from **one CSV per term**, all with identical columns:
+
+| Term | File | TermCode |
+|---|---|---|
+| Fall 2026 | `docs/data-samples/courses_master_fall2026.csv` | `202603` |
+| Spring 2027 | `docs/data-samples/courses_master_spring2027.csv` | `202701` |
+
+The app (bundled CSV mode) and `npm run import:data` (Supabase mode) load **all** term files and combine them into one course list. Course IDs are unique across terms. Each file includes standard SOM export columns, three pre-cleaned scheduling fields (`days_clean`, `start_24h`, `end_24h`), and an inline `tags` column. Session dates and a few other fields are still parsed on import.
 
 There is **no separate tags table or tags CSV**. Requirement tags live on each course row.
 
 ### 6.1 `courses` table
-Sourced from `courses_master_fall2026.csv`. The CSV upload replaces the contents of this table for the relevant `term_code`.
+Sourced from the term CSVs above. `npm run import:data` replaces the whole table with the combined rows from every term file.
 
 | Field | Type | Source CSV column | Notes |
 |---|---|---|---|
@@ -82,6 +89,10 @@ Sourced from `courses_master_fall2026.csv`. The CSV upload replaces the contents
 | `visible` | boolean | `Visible` | Filter out rows where this isn't 1. |
 | `tags` | string[] | `tags` | Semicolon-separated string of tag names in the CSV, e.g. `STEM;GBS Req`. Empty string means no tags. Split on `;` on import. Tag names are user-defined and **not hardcoded in the app** — any tag added to the CSV appears automatically in the UI (filters, pills, requirement tracker). |
 
+**Section tag consistency:** A requirement tag belongs to the course, not the section. When loading, the app gives every section of a course (same `Course Number` + `TermCode`) the union of tags found on any of its sections — e.g. if only the `G1` section is tagged `GBS Req`, sections `01`/`02` get it too. Yale's export occasionally tags only one section; the CSVs are left as exported.
+
+**Bad session dates:** If a course's `session_start` is not in its TermCode's calendar year (e.g. `2026-03-22` on a Spring 2027 course), conflict checks ignore its dates and use the session code instead.
+
 **No weekly meeting time:** Some rows have empty `days_clean`, `start_24h`, and `end_24h` (PhD seminars, independent studies, etc.). The app must still list these courses and allow adding them to a plan, but must **not** render them on the calendar and must **not** include them in time-based conflict checks.
 
 ### 6.2 `plans` (client-side only, v1)
@@ -90,6 +101,7 @@ Stored in `localStorage`. A list of named plans, each containing a list of `cour
 ## 7. Features
 
 ### 7.1 Course browser (sidebar)
+- **Term selector** (e.g. *Fall 2026* / *Spring 2027*) at the top of the catalog, built from the TermCodes in the data. Defaults to the earliest term. The list and every filter's options (sessions, categories, units, etc.) show only the selected term; filter choices that don't exist in the newly selected term are cleared on switch. A single plan can mix courses from both terms.
 - Searchable list of all courses for the selected term.
 - Filters:
   - **Session** (`fall` / `fall-1` / `fall-2`, etc.) — primary filter, since students often plan by mini-term.
@@ -107,7 +119,8 @@ Stored in `localStorage`. A list of named plans, each containing a list of `cour
 ### 7.2 Weekly calendar
 - Mon–Fri grid, hours from ~8am to ~9pm.
 - Each selected course **with** `days_clean` / `start_24h` / `end_24h` renders as a block spanning its meeting times. Courses with no weekly meeting time (see §6.1) stay in the plan and course list but **do not** appear on the grid and are **excluded** from time-overlap conflict checks.
-- **Session-aware**: a `fall-1` course and a `fall-2` course at the same time slot **do not conflict** — they run in different halves of the semester. A full-semester `fall` course overlaps with both halves and conflicts with either.
+- **Session-aware**: a `fall-1` course and a `fall-2` course at the same time slot **do not conflict** — they run in different halves of the semester. A full-semester `fall` course overlaps with both halves and conflicts with either. Spring works the same way (`spring`, `spring-1`, `spring-2`).
+- **Term-aware**: courses from different terms (different `TermCode`) **never** conflict.
 - Conflict logic (timed courses only): two courses conflict if (a) their session date ranges overlap *and* (b) they share at least one meeting day *and* (c) their start–end times overlap.
 - Optional "view by session" toggle: show only `fall-1`, only `fall-2`, or both overlaid with visual distinction (e.g. striped pattern for `fall-2`).
 - Color-coded by tag, category, or user choice.
@@ -118,6 +131,7 @@ Stored in `localStorage`. A list of named plans, each containing a list of `cour
 ### 7.3 Tag unit tracker
 - Persistent panel showing **accumulated units per requirement tag** for courses in the active plan.
 - Updates live as courses are added/removed.
+- **Sums across terms:** a plan can hold Fall and Spring courses; each tag's total includes units from both terms (the tooltip breaks it down by term).
 - **Discover tags from data:** scan the `tags` column across the loaded catalog, split each value on `;`, and show **one row per unique tag name** found anywhere in the dataset. Do **not** hardcode tag names in code. If a new tag (e.g. `Leadership`) is added to the CSV, a row appears automatically.
 - Tags with **zero** units in the plan still display if they exist in the catalog.
 - Example display (exact names depend on the CSV):
@@ -144,7 +158,7 @@ Stored in `localStorage`. A list of named plans, each containing a list of `cour
 - Disclaimer in the plans UI: plans are browser-local; verify requirements with your advisor.
 
 ### 7.5 Admin / tag management
-- **No custom admin UI in v1.** Maintainers edit `docs/data-samples/courses_master_fall2026.csv` (including the `tags` column), run `npm run import:data` when using Supabase, and manage allowlisted admin emails in Supabase if needed.
+- **No custom admin UI in v1.** Maintainers edit the term CSVs in `docs/data-samples/` (`courses_master_fall2026.csv`, `courses_master_spring2027.csv`, including the `tags` column), run `npm run import:data` when using Supabase, and manage allowlisted admin emails in Supabase if needed.
 - README documents the semester workflow for the next maintainer (CSV edit/upload, handoff).
 
 ### 7.6 Hover detail popups (required UI pattern)
@@ -227,7 +241,7 @@ This project is built in **small increments** with human review between steps.
 ### Maintainer habits
 
 - Update **`docs/PROJECT_STATUS.md`** when a milestone is approved (mark done, set next).
-- Course catalog / tag changes: edit `courses_master_fall2026.csv` (including the `tags` column), run `npm run import:data` if using Supabase, verify in the app / Table Editor.
+- Course catalog / tag changes: edit the term CSV (`courses_master_fall2026.csv` or `courses_master_spring2027.csv`, including the `tags` column), run `npm run import:data` if using Supabase, verify in the app / Table Editor.
 
 ### Decision points
 

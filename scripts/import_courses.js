@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 /**
- * Import courses from docs/data-samples/ into Supabase.
+ * Import courses from every term CSV in docs/data-samples/ into Supabase.
  *
  * Requires .env with SUPABASE_URL (or VITE_SUPABASE_URL) and SUPABASE_SERVICE_ROLE_KEY.
  *
- * Courses: clears the courses table, then inserts fresh rows (including inline tags).
+ * Courses: clears the courses table, then inserts fresh rows (including inline tags)
+ * for all terms listed in COURSE_CSV_FILES.
  */
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -33,10 +34,14 @@ if (!supabaseUrl || !serviceRoleKey) {
 
 const supabase = createClient(supabaseUrl, serviceRoleKey)
 
-const coursesPath = join(root, 'docs/data-samples/courses_master_fall2026.csv')
-const coursesText = readFileSync(coursesPath, 'utf8')
+const COURSE_CSV_FILES = [
+  'docs/data-samples/courses_master_fall2026.csv',
+  'docs/data-samples/courses_master_spring2027.csv',
+]
 
-let courses = parseCoursesCsv(coursesText)
+let courses = COURSE_CSV_FILES.flatMap((file) =>
+  parseCoursesCsv(readFileSync(join(root, file), 'utf8')),
+)
 
 // SOM CSV can repeat the same Course ID (e.g. two section rows); keep the last row.
 const byCourseId = new Map()
@@ -56,7 +61,7 @@ const taggedCount = courses.filter((c) => c.tags.length > 0).length
 console.log(`Parsed ${courses.length} visible courses across term(s): ${termCodes.join(', ')}`)
 console.log(`${taggedCount} courses have at least one tag`)
 
-// CSV is the full catalog — clear existing courses so old terms do not linger.
+// The CSVs are the full catalog — clear existing courses so old terms do not linger.
 const { error: deleteAllError } = await supabase
   .from('courses')
   .delete()

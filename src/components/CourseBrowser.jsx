@@ -28,6 +28,46 @@ function toggleInSet(set, value) {
   return next
 }
 
+/** Keep only filter values that still exist in the newly selected term. */
+function keepAvailable(selected, available) {
+  const next = new Set([...selected].filter((value) => available.has(value)))
+  return next.size === selected.size ? selected : next
+}
+
+function TermSelector({ terms, termCode, onTermChange }) {
+  if (terms.length < 2) return null
+
+  return (
+    <div
+      className="flex items-center gap-2 border-b border-yale-150 px-3 py-1.5"
+      role="group"
+      aria-label="Term"
+    >
+      <span className="text-xs font-medium text-yale-800">Term</span>
+      <div className="inline-flex rounded-md border border-yale-200 bg-yale-50/80 p-0.5">
+        {terms.map((term) => {
+          const active = term.id === termCode
+          return (
+            <button
+              key={term.id}
+              type="button"
+              aria-pressed={active}
+              onClick={() => onTermChange(term.id)}
+              className={`rounded px-2.5 py-1 text-xs font-medium ${
+                active
+                  ? 'bg-yale-800 text-white shadow-sm'
+                  : 'text-yale-900 hover:bg-white'
+              }`}
+            >
+              {term.label}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 function formatCatalogSubtitle(filteredCount, rangeStart, rangeEnd, inPlanCount) {
   if (filteredCount === 0) {
     return `${filteredCount} matched · ${inPlanCount} in plan`
@@ -111,6 +151,9 @@ export default function CourseBrowser({
   onToggleCourse,
   fallYear = null,
   springYear = null,
+  terms = [],
+  termCode = null,
+  onTermChange,
   fullHeight = false,
 }) {
   const [filters, setFilters] = useState(createEmptyFilters)
@@ -118,28 +161,60 @@ export default function CourseBrowser({
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [expandedCourseId, setExpandedCourseId] = useState(null)
 
-  const sessions = useMemo(() => uniqueSessions(courses), [courses])
-  const categories = useMemo(() => uniqueCategories(courses), [courses])
-  const unitValues = useMemo(() => uniqueUnits(courses), [courses])
-  const bidValues = useMemo(() => uniqueBidOrPermission(courses), [courses])
-  const requirementTags = useMemo(
-    () => uniqueRequirementTags(courses),
-    [courses],
+  const termCourses = useMemo(
+    () =>
+      termCode ? courses.filter((c) => c.termCode === termCode) : courses,
+    [courses, termCode],
   )
+
+  const sessions = useMemo(() => uniqueSessions(termCourses), [termCourses])
+  const categories = useMemo(
+    () => uniqueCategories(termCourses),
+    [termCourses],
+  )
+  const unitValues = useMemo(() => uniqueUnits(termCourses), [termCourses])
+  const bidValues = useMemo(
+    () => uniqueBidOrPermission(termCourses),
+    [termCourses],
+  )
+  const requirementTags = useMemo(
+    () => uniqueRequirementTags(termCourses),
+    [termCourses],
+  )
+
+  // Switching terms: drop selected filter values the new term doesn't offer
+  // (e.g. a Fall 1 session filter), so no hidden filter empties the list.
+  useEffect(() => {
+    setFilters((prev) => {
+      const next = {
+        ...prev,
+        sessions: keepAvailable(prev.sessions, new Set(sessions)),
+        categories: keepAvailable(prev.categories, new Set(categories)),
+        units: keepAvailable(prev.units, new Set(unitValues)),
+        bidTypes: keepAvailable(
+          prev.bidTypes,
+          new Set(bidValues.map((b) => b.id)),
+        ),
+        tagCodes: keepAvailable(prev.tagCodes, new Set(requirementTags)),
+      }
+      const changed = Object.keys(next).some((key) => next[key] !== prev[key])
+      return changed ? next : prev
+    })
+  }, [sessions, categories, unitValues, bidValues, requirementTags])
 
   const timeRangeError = useMemo(() => getTimeRangeError(filters), [filters])
 
   const filtered = useMemo(() => {
     if (timeRangeError) return []
-    return filterCourses(courses, filters)
-  }, [courses, filters, timeRangeError])
+    return filterCourses(termCourses, filters)
+  }, [termCourses, filters, timeRangeError])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
 
   useEffect(() => {
     setPage(1)
     setExpandedCourseId(null)
-  }, [filters, timeRangeError])
+  }, [filters, timeRangeError, termCode])
 
   useEffect(() => {
     setExpandedCourseId(null)
@@ -223,6 +298,8 @@ export default function CourseBrowser({
     hasFilters: panelFiltersActive,
   }
 
+  const termSelectorProps = { terms, termCode, onTermChange }
+
   const searchBarProps = {
     search: filters.search,
     onSearchChange: (search) =>
@@ -260,6 +337,7 @@ export default function CourseBrowser({
           subtitle={catalogSubtitle}
         />
 
+        <TermSelector {...termSelectorProps} />
         <CatalogSearchBar {...searchBarProps} />
 
         <div className="min-h-0 flex-1 overflow-y-auto">
@@ -302,6 +380,7 @@ export default function CourseBrowser({
           subtitle={catalogSubtitle}
         />
 
+        <TermSelector {...termSelectorProps} />
         <CatalogSearchBar {...searchBarProps} inputId="course-search-mobile" />
 
         {filtered.length === 0 ? (

@@ -41,7 +41,7 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ...
 npm run import:data
 ```
 
-You should see a count for ~227 Fall 2026 courses (from `courses_master_fall2026.csv`). Tags are stored on each course row.
+You should see ~416 visible courses across terms `202603, 202701` (Fall 2026 from `courses_master_fall2026.csv` + Spring 2027 from `courses_master_spring2027.csv`). Tags are stored on each course row.
 
 ## 6. Run the app against Supabase
 
@@ -54,6 +54,6 @@ Open http://localhost:5173. The header should say **Data source: Supabase** (not
 ## Semester workflow (later)
 
 1. Export a new courses CSV from SOM for the term (include a `tags` column: semicolon-separated names, or empty).
-2. Replace `docs/data-samples/courses_master_fall2026.csv` (or point the import script at the new file).
+2. Add it to `docs/data-samples/` (e.g. `courses_master_fall2027.csv`) and list it in `COURSE_CSV_FILES` in `scripts/import_courses.js` and in `src/lib/loadData.js`. Remove old terms from both lists when they should disappear.
 3. Re-run `npm run import:data` (this replaces the courses table, including tags).
 4. No separate tags table — edit tags only in the CSV (or the `tags` column in Table Editor if needed).
