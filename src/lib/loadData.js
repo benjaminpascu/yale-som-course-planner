@@ -13,14 +13,19 @@ import { getSupabaseClient } from './supabaseClient'
  * otherwise loads the bundled term CSVs from docs/data-samples/.
  * Either way, sections of the same course share their requirement tags.
  *
- * If Supabase is missing the `courses.tags` column (migration 003 not applied),
- * falls back to the local CSV so requirement filters still work.
+ * Falls back to the bundled CSVs when Supabase is unreachable (e.g. the free
+ * project is paused) or is missing the `courses.tags` column (migration 003),
+ * so the site keeps working.
  */
 export async function loadAppData() {
   const supabase = getSupabaseClient()
 
   if (supabase) {
-    return loadFromSupabase(supabase)
+    try {
+      return await loadFromSupabase(supabase)
+    } catch (err) {
+      console.warn('Supabase unavailable; using bundled course CSVs.', err)
+    }
   }
 
   return loadFromLocalCsv()

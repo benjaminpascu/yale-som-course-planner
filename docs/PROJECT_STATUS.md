@@ -41,7 +41,8 @@
 - Conflicts: different terms never conflict; spring-1/spring-2 behave like fall-1/fall-2; session dates outside the term year are ignored (MGT 640 typo)
 - Sections of the same course share requirement tags at load time (Yale tagged only some sections, e.g. only G1 with `GBS Req`)
 - Category typo aliases: `MMG GBS` → `MMS GBS`, `Business and the Law` → `Business & the Law`
-- **To do:** run `npm run import:data` so production (Supabase) gets spring
+- Oct 2026: Supabase project host stopped resolving (paused/deleted free project), so the import failed. The app now falls back to the bundled CSVs whenever Supabase can't be reached, so live keeps working with both terms.
+- **To do:** restore the Supabase project (or update `VITE_SUPABASE_*` in `.env` + Vercel), then run `npm run import:data`
 
 ---
 
