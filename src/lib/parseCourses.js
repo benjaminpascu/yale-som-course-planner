@@ -94,62 +94,6 @@ function rowToCourse(row) {
   }
 }
 
-/** App course → Supabase `courses` row (snake_case). */
-export function courseToDbRow(course) {
-  return {
-    course_id: course.courseId,
-    course_number: course.courseNumber,
-    title: course.title,
-    description: course.description || null,
-    units: course.units,
-    term_code: course.termCode,
-    session: course.session,
-    session_start: course.sessionStart,
-    session_end: course.sessionEnd,
-    category: course.category || null,
-    course_type: course.courseType,
-    bid_or_permission: course.bidOrPermission || null,
-    faculty_name: course.faculty || null,
-    faculty_email: course.facultyEmail || null,
-    room: course.room || null,
-    section: course.section || null,
-    syllabus_url: course.syllabusUrl,
-    meeting_days: course.meetingDays,
-    start_time: course.startTime,
-    end_time: course.endTime,
-    visible: course.visible,
-    tags: course.tags ?? [],
-  }
-}
-
-/** Supabase row → app course (camelCase). */
-export function dbRowToCourse(row) {
-  return {
-    courseId: row.course_id,
-    courseNumber: row.course_number,
-    title: row.title,
-    description: row.description ?? '',
-    units: Number(row.units) || 0,
-    termCode: row.term_code,
-    session: row.session,
-    sessionStart: row.session_start,
-    sessionEnd: row.session_end,
-    category: row.category ?? '',
-    courseType: row.course_type ?? [],
-    bidOrPermission: row.bid_or_permission ?? '',
-    faculty: row.faculty_name ?? '',
-    facultyEmail: row.faculty_email ?? '',
-    room: row.room ?? '',
-    section: row.section ?? '',
-    syllabusUrl: row.syllabus_url,
-    meetingDays: row.meeting_days ?? [],
-    startTime: row.start_time,
-    endTime: row.end_time,
-    visible: row.visible,
-    tags: parseTagsField(row.tags),
-  }
-}
-
 /**
  * Give every section of a course (same Course Number + TermCode) the union of
  * the tags found on any of its sections. Yale's export sometimes tags only one

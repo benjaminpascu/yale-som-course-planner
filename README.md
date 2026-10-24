@@ -4,10 +4,8 @@ Student-run web app for browsing Yale SOM courses, building a weekly schedule, a
 
 ## For humans
 
-1. Copy `.env.example` → `.env` and add Supabase keys (optional for local-only dev).
-2. `npm install && npm run dev`
-3. See [docs/supabase-setup.md](docs/supabase-setup.md) for database setup.
-4. See [docs/vercel-setup.md](docs/vercel-setup.md) to deploy on Vercel.
+1. `npm install && npm run dev` (no database or environment variables needed)
+2. See [docs/vercel-setup.md](docs/vercel-setup.md) to deploy on Vercel.
 
 ## For Cursor agents (new chat)
 
@@ -23,7 +21,10 @@ Use a **new Cursor agent** (fresh chat) per milestone or focused task — see PR
 
 | File | Role |
 |------|------|
-| `docs/data-samples/courses_master_fall2026.csv` | Course catalog + inline `tags` column (source of truth) |
+| `docs/data-samples/courses_master_fall2026.csv` | Fall 2026 catalog + inline `tags` column (source of truth) |
+| `docs/data-samples/courses_master_spring2027.csv` | Spring 2027 catalog, same columns (source of truth) |
+
+The CSVs are bundled into the app at build time. To update courses, edit a CSV and push to `main`; Vercel redeploys.
 
 ## License
 

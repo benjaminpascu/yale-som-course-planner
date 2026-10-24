@@ -6,9 +6,8 @@ One-time setup. After this, every push to `main` on GitHub redeploys automatical
 
 - GitHub repo: `benjaminpascu/yale-som-course-planner` (already pushed)
 - A [Vercel](https://vercel.com) account (sign in with GitHub)
-- Supabase **Project URL** and **anon public** key (same as local `.env` — see [supabase-setup.md](./supabase-setup.md))
 
-You do **not** put `SUPABASE_SERVICE_ROLE_KEY` on Vercel (import script only, runs on your laptop).
+No database and no environment variables: course data is the CSVs in `docs/data-samples/`, bundled into the build.
 
 ---
 
@@ -23,35 +22,16 @@ You do **not** put `SUPABASE_SERVICE_ROLE_KEY` on Vercel (import script only, ru
 
 Leave these as-is unless Vercel shows something different.
 
-4. **Do not click Deploy yet** — add environment variables first (step 2).
-
 ---
 
-## 2. Environment variables
-
-Still on the import screen (or later: Project → **Settings** → **Environment Variables**):
-
-| Name | Value | Environments |
-|------|--------|----------------|
-| `VITE_SUPABASE_URL` | `https://xxxx.supabase.co` from Supabase → Settings → API | Production, Preview, Development |
-| `VITE_SUPABASE_ANON_KEY` | **anon public** key from the same page | Production, Preview, Development |
-
-Copy from your local `.env` if you already run the app against Supabase locally.
-
-**Important:** Names must match exactly (including `VITE_` prefix). Vite only exposes variables that start with `VITE_`.
-
----
-
-## 3. Deploy
+## 2. Deploy
 
 1. Click **Deploy**.
 2. Wait ~1–2 minutes. Open the `.vercel.app` URL Vercel gives you.
 
-If the first deploy ran **without** env vars, add them in Settings → Environment Variables, then **Deployments** → ⋮ on latest → **Redeploy**.
-
 ---
 
-## 4. Smoke test
+## 3. Smoke test
 
 On the live URL:
 
@@ -60,13 +40,9 @@ On the live URL:
 - Add a course → appears in **Your plan** and on the calendar (if timed)
 - **Saved plans** → save a name → refresh → plan still there
 
-If the catalog is empty or errors mention Supabase, check env vars and redeploy.
-
-**Without Supabase env vars:** the app still builds and uses bundled CSVs from the repo (~480 courses). Supabase is recommended so you can refresh data via `npm run import:data` without redeploying.
-
 ---
 
-## 5. Share the link
+## 4. Share the link
 
 - Production URL: `https://your-project.vercel.app` (or a custom domain under **Settings → Domains**)
 - Send that URL to friends; no `npm run dev` needed on their side
@@ -78,10 +54,7 @@ If the catalog is empty or errors mention Supabase, check env vars and redeploy.
 1. Push to `main` on GitHub (or merge a PR).
 2. Vercel rebuilds automatically.
 
-Course data changes:
-
-1. Update CSV locally → `npm run import:data` (uses service role key on your machine).
-2. No Vercel redeploy needed for data-only updates (data lives in Supabase).
+Course data changes: edit the CSV in `docs/data-samples/`, commit, and push — same as a code change.
 
 ---
 
@@ -90,9 +63,8 @@ Course data changes:
 | Problem | Fix |
 |---------|-----|
 | Build fails on Vercel | Open the failed deployment log; usually a missing dependency or build error. Run `npm run build` locally first. |
-| Blank catalog / Supabase error | Add or fix `VITE_SUPABASE_*` env vars; redeploy. |
+| Blank catalog / "Could not load data" | A CSV is missing a required column (see `src/lib/csvColumns.js`); the error names it. Fix the CSV and push. |
 | Old UI after push | Hard refresh (Cmd+Shift+R) or check Vercel deployment finished. |
-| RLS / permission errors | Run `supabase/migrations/002_api_grants.sql` in Supabase SQL Editor. |
 
 ---
 

@@ -20,6 +20,7 @@
 - `npm run import:data` with column validation
 - App reads Supabase when `VITE_SUPABASE_*` in `.env`, else bundled CSV
 - User has Supabase project configured locally
+- **Removed Oct 2026** — the app now reads only the bundled CSVs (see Spring 2027 section)
 
 ### Data fix — scheduling columns ✅
 
@@ -41,8 +42,7 @@
 - Conflicts: different terms never conflict; spring-1/spring-2 behave like fall-1/fall-2; session dates outside the term year are ignored (MGT 640 typo)
 - Sections of the same course share requirement tags at load time (Yale tagged only some sections, e.g. only G1 with `GBS Req`)
 - Category typo aliases: `MMG GBS` → `MMS GBS`, `Business and the Law` → `Business & the Law`
-- Oct 2026: Supabase project host stopped resolving (paused/deleted free project), so the import failed. The app now falls back to the bundled CSVs whenever Supabase can't be reached, so live keeps working with both terms.
-- **To do:** restore the Supabase project (or update `VITE_SUPABASE_*` in `.env` + Vercel), then run `npm run import:data`
+- Oct 2026: Supabase project host stopped resolving (paused free project), which took the live catalog down. Supabase was removed entirely: no database, no env vars, no import script. Course data = the CSVs, bundled at build time; push to `main` to update.
 
 ---
 
@@ -91,7 +91,7 @@
 | **Now** | App is live. Send the Vercel URL to friends for real-world use; fix bugs and polish in small follow-up tasks (new Cursor chat per issue is fine). |
 | **Later** | Wider promotion (GroupMe, student gov, demo video, etc.) when you choose — not a separate engineering milestone. |
 
-Repo: `benjaminpascu/yale-som-course-planner`. Production env vars (`VITE_SUPABASE_*`) live in Vercel; never commit `.env`.
+Repo: `benjaminpascu/yale-som-course-planner`. No environment variables needed.
 
 ---
 
@@ -135,11 +135,7 @@ npm run dev
 - Most rows: `Mo,We · 13:00–16:00` style times
 - Some rows: semester date range + **No time defined — won't show on calendar**
 
-Re-import after CSV changes:
-
-```bash
-npm run import:data
-```
+After CSV changes: check locally with `npm run dev`, then push to `main` (Vercel redeploys).
 
 ---
 
@@ -156,3 +152,4 @@ npm run import:data
 | May 2026 | Calendar: side-by-side overlaps + session view tabs (`calendarLayout.js`, `calendarSessionView.js`) |
 | July 2026 | Fall 2026 CSV; inline `tags` column; removed separate tags CSV/table; dynamic requirement UI |
 | Oct 2026 | Spring 2027 CSV; combined catalog; term selector; term-aware conflicts; section tag harmonizing |
+| Oct 2026 | Removed Supabase (paused project broke live); app reads bundled CSVs only |

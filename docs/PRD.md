@@ -57,12 +57,12 @@ Course rows are sourced from **one CSV per term**, all with identical columns:
 | Fall 2026 | `docs/data-samples/courses_master_fall2026.csv` | `202603` |
 | Spring 2027 | `docs/data-samples/courses_master_spring2027.csv` | `202701` |
 
-The app (bundled CSV mode) and `npm run import:data` (Supabase mode) load **all** term files and combine them into one course list. Course IDs are unique across terms. Each file includes standard SOM export columns, three pre-cleaned scheduling fields (`days_clean`, `start_24h`, `end_24h`), and an inline `tags` column. Session dates and a few other fields are still parsed on import.
+The app bundles **all** term files at build time and combines them into one course list (no database). Course IDs are unique across terms. Each file includes standard SOM export columns, three pre-cleaned scheduling fields (`days_clean`, `start_24h`, `end_24h`), and an inline `tags` column. Session dates and a few other fields are still parsed on import.
 
 There is **no separate tags table or tags CSV**. Requirement tags live on each course row.
 
-### 6.1 `courses` table
-Sourced from the term CSVs above. `npm run import:data` replaces the whole table with the combined rows from every term file.
+### 6.1 Course fields
+Parsed from the term CSVs above (`src/lib/parseCourses.js`). Field names below are the original schema names; in app code they are camelCase (e.g. `courseNumber`, `meetingDays`).
 
 | Field | Type | Source CSV column | Notes |
 |---|---|---|---|
@@ -158,7 +158,7 @@ Stored in `localStorage`. A list of named plans, each containing a list of `cour
 - Disclaimer in the plans UI: plans are browser-local; verify requirements with your advisor.
 
 ### 7.5 Admin / tag management
-- **No custom admin UI in v1.** Maintainers edit the term CSVs in `docs/data-samples/` (`courses_master_fall2026.csv`, `courses_master_spring2027.csv`, including the `tags` column), run `npm run import:data` when using Supabase, and manage allowlisted admin emails in Supabase if needed.
+- **No custom admin UI in v1.** Maintainers edit the term CSVs in `docs/data-samples/` (`courses_master_fall2026.csv`, `courses_master_spring2027.csv`, including the `tags` column) and push to `main`; Vercel redeploys.
 - README documents the semester workflow for the next maintainer (CSV edit/upload, handoff).
 
 ### 7.6 Hover detail popups (required UI pattern)
@@ -191,7 +191,7 @@ When adding a new hover detail popup elsewhere, copy this pattern — do not rei
 ## 8. Tech stack
 
 - **Frontend:** React + Vite, deployed on Vercel. Tailwind for styling. Likely a calendar library like FullCalendar or a simple custom grid (decide at calendar milestone).
-- **Backend / data:** Supabase (Postgres + Storage + Auth, all free tier). No custom backend code; site reads directly via Supabase's JS client.
+- **Backend / data:** None. Course CSVs are bundled into the static site at build time. (Supabase was used until Oct 2026 and removed: the free project paused itself and took the live catalog down, and it added nothing a CSV + push doesn't.)
 - **State:** React state for the active plan; localStorage for saved plans.
 - **Repo:** Public GitHub repo, MIT license. README documents setup and handoff.
 
@@ -199,7 +199,7 @@ When adding a new hover detail popup elsewhere, copy this pattern — do not rei
 
 This is a student project that needs to outlive its creator.
 
-- Sign up for Vercel, Supabase, and GitHub using a shared email (e.g. `yalesom.planner@gmail.com`), not a personal Yale account.
+- Sign up for Vercel and GitHub using a shared email (e.g. `yalesom.planner@gmail.com`), not a personal Yale account.
 - README includes: how to upload a new CSV each semester, how to edit the inline `tags` column, how to add a new admin.
 - Tag the v1 release on GitHub so future maintainers have a known-good baseline.
 - Mention the project in a handoff doc to the next year's student government tech lead.
@@ -220,7 +220,7 @@ This is a student project that needs to outlive its creator.
 Status detail: `docs/PROJECT_STATUS.md`.
 
 1. **Scaffold + course list:** ✅ Vite + React + Tailwind. Load courses master CSV. Basic course list; amber warning when no weekly meeting time.
-2. **Data layer + Supabase:** ✅ Schema, importer, app reads Supabase (or bundled CSV fallback). See `docs/supabase-setup.md`.
+2. **Data layer:** ✅ CSV parsing with column validation. (Originally Supabase + importer; removed Oct 2026 — app reads bundled CSVs only.)
 3. **Course browser:** ✅ Search + filters (session, day, time, units, bid/permission, category, requirement tag from data).
 4. **Calendar:** ✅ Weekly grid + add/remove + **session-aware** conflict detection. Single-column layout: calendar → requirements → plan → collapsible filters → catalog (see `docs/PROJECT_STATUS.md`).
 5. **Tag unit tracker:** ✅ Live units per requirement tag for courses in the active plan (tags discovered from CSV; §7.3).
@@ -241,7 +241,7 @@ This project is built in **small increments** with human review between steps.
 ### Maintainer habits
 
 - Update **`docs/PROJECT_STATUS.md`** when a milestone is approved (mark done, set next).
-- Course catalog / tag changes: edit the term CSV (`courses_master_fall2026.csv` or `courses_master_spring2027.csv`, including the `tags` column), run `npm run import:data` if using Supabase, verify in the app / Table Editor.
+- Course catalog / tag changes: edit the term CSV (`courses_master_fall2026.csv` or `courses_master_spring2027.csv`, including the `tags` column), check with `npm run dev`, then push to `main`.
 
 ### Decision points
 

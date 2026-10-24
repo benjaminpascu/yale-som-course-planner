@@ -24,14 +24,14 @@ The user is a non-technical student. Explain clearly; ask explicitly when a prod
 | Item | Status |
 |------|--------|
 | Milestone 1 — Scaffold + course list | ✅ Done |
-| Milestone 2 — Supabase + import | ✅ Done |
+| Milestone 2 — Data layer | ✅ Done (Supabase removed Oct 2026; CSV only) |
 | Course data fix (`courses_master_new.csv`) | ✅ Done (superseded by Fall 2026) |
 | Milestone 3 — Search + filters | ✅ Done |
 | Milestone 4 — Calendar + conflicts | ✅ Done |
 | Milestone 5 — Tag unit tracker | ✅ Done |
 | Milestones 1–6 — Core product | ✅ Done |
 | **Fall 2026 data + inline tags** | ✅ Catalog + dynamic tags from CSV `tags` column |
-| **Spring 2027 data + term selector** | ✅ Built (Oct 2026), awaiting your approval; Supabase re-import pending |
+| **Spring 2027 data + term selector** | ✅ Live (Oct 2026) |
 | **Live** | ✅ Vercel; share link privately; fix issues as feedback comes in |
 | **Wider promo** | When you choose (not a separate dev milestone) |
 
@@ -44,8 +44,6 @@ Full detail: **`docs/PROJECT_STATUS.md`**.
 | Product spec | `docs/PRD.md` |
 | **Courses (one file per term)** | `docs/data-samples/courses_master_fall2026.csv`, `docs/data-samples/courses_master_spring2027.csv` (identical columns) |
 | Tags | Inline `tags` column on those CSVs (semicolon-separated names; not a separate file). Sections of one course share tags at load time (`harmonizeSectionTags`). |
-| Supabase schema | `supabase/migrations/001_initial_schema.sql`, `002_api_grants.sql`, `003_inline_course_tags.sql` |
-| Supabase setup steps | `docs/supabase-setup.md` |
 | Vercel deploy steps | `docs/vercel-setup.md` |
 
 **Do not use** `courses_master.csv` / `courses_master_new.csv` / `course_tags.csv` — removed. Tags are no longer a separate table.
@@ -61,14 +59,13 @@ Use only: `days_clean`, `start_24h`, `end_24h` → app fields `meetingDays`, `st
 ## Commands
 
 ```bash
-cd "/Users/benjaminpascu/Documents/Cursor/Course planner"
+cd "/Users/benjaminpascu/Documents/Vibe Coding/Cursor/Course planner"
 npm install
 npm run dev              # http://localhost:5173 (or next free port)
-npm run import:data      # load CSV → Supabase (needs .env)
 npm run build
 ```
 
-`.env` is gitignored. Copy from `.env.example` (Supabase URL, publishable key, secret key).
+No database or environment variables. Course data is the CSVs in `docs/data-samples/`, bundled at build time; to update courses, edit a CSV and push to `main`.
 
 ## Key code locations
 
@@ -84,16 +81,15 @@ npm run build
 | Fall/spring catalog years + header label | `src/lib/academicYear.js`, `App.jsx` |
 | Session- and term-aware conflicts | `src/lib/scheduleConflicts.js` |
 | Catalog term selector | `CourseBrowser.jsx` (`TermSelector`), term list from `getCatalogTerms` in `academicYear.js` |
-| Load data (Supabase or bundled CSV) | `src/lib/loadData.js` |
+| Load data (bundled term CSVs) | `src/lib/loadData.js` |
 | Parse courses + `hasMeetingTime` + inline tags | `src/lib/parseCourses.js` |
 | Category typo aliases only (new CSV values pass through) | `src/lib/categoryDisplay.js` |
 | CSV column validation | `src/lib/csvColumns.js` |
-| Supabase import CLI | `scripts/import_courses.js` |
 
 ## Tech stack
 
-Vite + React + Tailwind + Supabase (`@supabase/supabase-js`). No custom backend. Saved plans in `localStorage` — `src/lib/planStorage.js`, `src/components/PlanManager.jsx`.
+Vite + React + Tailwind. No backend or database (Supabase removed Oct 2026). Saved plans in `localStorage` — `src/lib/planStorage.js`, `src/components/PlanManager.jsx`.
 
 ## Git / deploy
 
-GitHub: `benjaminpascu/yale-som-course-planner`. **Production:** Vercel (link shared directly; no separate beta vs launch deploy). Do not commit `.env`. Only create git commits when the user asks.
+GitHub: `benjaminpascu/yale-som-course-planner`. **Production:** Vercel (link shared directly; no separate beta vs launch deploy). Only create git commits when the user asks.

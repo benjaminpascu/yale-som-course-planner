@@ -1,65 +1,13 @@
 import fallCsv from '../../docs/data-samples/courses_master_fall2026.csv?raw'
 import springCsv from '../../docs/data-samples/courses_master_spring2027.csv?raw'
-import {
-  dbRowToCourse,
-  harmonizeSectionTags,
-  parseCoursesCsv,
-} from './parseCourses'
-import { getSupabaseClient } from './supabaseClient'
+import { harmonizeSectionTags, parseCoursesCsv } from './parseCourses'
 
 /**
- * Load course data for every term (tags are inline on each course).
- * Uses Supabase when VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY are set;
- * otherwise loads the bundled term CSVs from docs/data-samples/.
- * Either way, sections of the same course share their requirement tags.
- *
- * Falls back to the bundled CSVs when Supabase is unreachable (e.g. the free
- * project is paused) or is missing the `courses.tags` column (migration 003),
- * so the site keeps working.
+ * Load course data for every term from the CSVs bundled with the app
+ * (docs/data-samples/). Tags are inline on each course; sections of the same
+ * course share their requirement tags.
  */
 export async function loadAppData() {
-  const supabase = getSupabaseClient()
-
-  if (supabase) {
-    try {
-      return await loadFromSupabase(supabase)
-    } catch (err) {
-      console.warn('Supabase unavailable; using bundled course CSVs.', err)
-    }
-  }
-
-  return loadFromLocalCsv()
-}
-
-function loadFromLocalCsv() {
   const courses = [fallCsv, springCsv].flatMap((csv) => parseCoursesCsv(csv))
-  return { courses: harmonizeSectionTags(courses), source: 'local' }
-}
-
-async function loadFromSupabase(supabase) {
-  const coursesResult = await supabase
-    .from('courses')
-    .select('*')
-    .eq('visible', true)
-    .order('course_number')
-
-  if (coursesResult.error) {
-    throw new Error(`Failed to load courses: ${coursesResult.error.message}`)
-  }
-
-  const rows = coursesResult.data ?? []
-  const schemaHasTags = rows.length === 0 || rows.some((row) => 'tags' in row)
-
-  if (!schemaHasTags) {
-    console.warn(
-      'Supabase courses table has no tags column yet. Falling back to local CSV. ' +
-        'Run supabase/migrations/003_inline_course_tags.sql, then npm run import:data.',
-    )
-    return loadFromLocalCsv()
-  }
-
-  return {
-    courses: harmonizeSectionTags(rows.map(dbRowToCourse)),
-    source: 'supabase',
-  }
+  return { courses: harmonizeSectionTags(courses) }
 }

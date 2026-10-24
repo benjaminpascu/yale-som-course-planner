@@ -1,7 +1,7 @@
 /**
  * Optional typo/duplicate fixes for course categories (front end only).
  *
- * - CSV and Supabase keep the raw `Course Category` string.
+ * - The CSVs keep the raw `Course Category` string.
  * - `normalizeCategory` only rewrites values listed in CATEGORY_ALIASES.
  * - Any other value passes through unchanged so new academic-year categories
  *   appear automatically in filters, course rows, and the calendar.
