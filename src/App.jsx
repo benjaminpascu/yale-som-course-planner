@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import CourseBrowser from './components/CourseBrowser'
 import MobileBottomNav from './components/MobileBottomNav'
 import MobilePlansPanel from './components/MobilePlansPanel'
+import ContactMenu from './components/ContactMenu'
 import PlansMenu from './components/PlansMenu'
 import PlanningPanel from './components/PlanningPanel'
 import { SAVE_BUTTON } from './lib/sectionTheme'
@@ -312,30 +313,33 @@ function App() {
               ) : null}
             </p>
           </div>
-          <div className="flex shrink-0 flex-col items-end gap-2">
-            {planStore.activePlanId && isDirty ? (
-              <button
-                type="button"
-                onClick={() => handleSavePlan(planStore.activePlanId)}
-                className={`rounded-md px-3 py-2 text-sm font-medium lg:hidden ${SAVE_BUTTON}`}
-              >
-                Save plan
-              </button>
-            ) : null}
-            <div className="hidden lg:block">
-              <PlansMenu
-                plans={planStore.plans}
-                courses={courses}
-                activePlanId={planStore.activePlanId}
-                activePlanName={activePlan?.name ?? null}
-                hasSelection={selectedIds.size > 0}
-                isDirty={isDirty}
-                onAddPlan={handleAddPlan}
-                onSelectPlan={handleSelectPlan}
-                onSavePlan={handleSavePlan}
-                onRenamePlan={handleRenamePlan}
-                onDeletePlan={handleDeletePlan}
-              />
+          <div className="flex shrink-0 items-stretch gap-2">
+            <ContactMenu />
+            <div className="flex items-stretch gap-2">
+              {planStore.activePlanId && isDirty ? (
+                <button
+                  type="button"
+                  onClick={() => handleSavePlan(planStore.activePlanId)}
+                  className={`rounded-md px-3 py-2 text-sm font-medium lg:hidden ${SAVE_BUTTON}`}
+                >
+                  Save plan
+                </button>
+              ) : null}
+              <div className="hidden lg:block">
+                <PlansMenu
+                  plans={planStore.plans}
+                  courses={courses}
+                  activePlanId={planStore.activePlanId}
+                  activePlanName={activePlan?.name ?? null}
+                  hasSelection={selectedIds.size > 0}
+                  isDirty={isDirty}
+                  onAddPlan={handleAddPlan}
+                  onSelectPlan={handleSelectPlan}
+                  onSavePlan={handleSavePlan}
+                  onRenamePlan={handleRenamePlan}
+                  onDeletePlan={handleDeletePlan}
+                />
+              </div>
             </div>
           </div>
         </div>

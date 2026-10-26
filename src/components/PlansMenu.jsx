@@ -51,8 +51,8 @@ export default function PlansMenu({
   const menuId = 'plans-menu-panel'
 
   return (
-    <div ref={rootRef} className="relative shrink-0">
-      <div className="flex flex-wrap items-center justify-end gap-2">
+    <div ref={rootRef} className="relative flex h-full shrink-0">
+      <div className="flex flex-wrap items-stretch justify-end gap-2">
         {activePlanId && isDirty ? (
           <button
             type="button"
@@ -95,7 +95,7 @@ export default function PlansMenu({
           id={menuId}
           role="dialog"
           aria-label="Manage plans"
-          className="absolute right-0 z-50 mt-2 max-h-[min(32rem,calc(100dvh-8rem))] w-[min(32rem,calc(100vw-2rem))] overflow-y-auto rounded-lg border border-yale-200 bg-white shadow-xl"
+          className="absolute right-0 top-full z-50 mt-2 max-h-[min(32rem,calc(100dvh-8rem))] w-[min(32rem,calc(100vw-2rem))] overflow-y-auto rounded-lg border border-yale-200 bg-white shadow-xl"
         >
           <div className="sticky top-0 z-10 flex items-center justify-between border-b border-yale-150 bg-white px-4 py-2.5">
             <p className="text-sm font-semibold text-yale-950">Manage plans</p>
