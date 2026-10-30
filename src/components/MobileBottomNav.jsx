@@ -2,6 +2,7 @@ const TABS = [
   { id: 'calendar', label: 'Calendar' },
   { id: 'catalog', label: 'Courses' },
   { id: 'plans', label: 'Plans' },
+  { id: 'compare', label: 'Compare' },
 ]
 
 export default function MobileBottomNav({ activeTab, onChange }) {
@@ -11,7 +12,7 @@ export default function MobileBottomNav({ activeTab, onChange }) {
       className="fixed inset-x-0 bottom-0 z-50 border-t border-yale-950 bg-yale-900 pb-[env(safe-area-inset-bottom)] lg:hidden"
       aria-label="Main"
     >
-      <div className="grid grid-cols-3">
+      <div className="grid grid-cols-4">
         {TABS.map((tab) => {
           const active = activeTab === tab.id
           return (

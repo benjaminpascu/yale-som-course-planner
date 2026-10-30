@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import CourseBrowser from './components/CourseBrowser'
+import CompareView from './components/compare/CompareView'
+import { useCompareStore } from './components/compare/useCompareStore'
 import MobileBottomNav from './components/MobileBottomNav'
 import MobilePlansPanel from './components/MobilePlansPanel'
 import ContactMenu from './components/ContactMenu'
@@ -24,6 +26,37 @@ import {
 
 const YALE_COURSE_LIST_URL = 'https://som.yale.edu/elective-core-courses'
 
+const VIEWS = [
+  { id: 'planner', label: 'Planner' },
+  { id: 'compare', label: 'Compare courses' },
+]
+
+/** Desktop page tabs under the header title. */
+function ViewTabs({ view, onChange }) {
+  return (
+    <nav className="mt-3 hidden gap-5 lg:flex" aria-label="Views">
+      {VIEWS.map((v) => {
+        const active = v.id === view
+        return (
+          <button
+            key={v.id}
+            type="button"
+            onClick={() => onChange(v.id)}
+            aria-current={active ? 'page' : undefined}
+            className={`border-b-2 pb-1 text-sm font-semibold ${
+              active
+                ? 'border-white text-white'
+                : 'border-transparent text-yale-200 hover:text-white'
+            }`}
+          >
+            {v.label}
+          </button>
+        )
+      })}
+    </nav>
+  )
+}
+
 function App() {
   const [courses, setCourses] = useState([])
   const [status, setStatus] = useState('loading')
@@ -31,6 +64,9 @@ function App() {
   const [planStore, setPlanStore] = useState(() => loadPlanStore())
   const [selectedIds, setSelectedIds] = useState(() => new Set())
   const [mobileTab, setMobileTab] = useState('calendar')
+  const [view, setView] = useState('planner')
+  // One compare store for both layouts, so desktop and mobile never diverge.
+  const compare = useCompareStore()
   const [catalogTermCode, setCatalogTermCode] = useState(null)
   const planHydratedRef = useRef(false)
 
@@ -304,19 +340,22 @@ function App() {
                 Yale SOM Course List
               </a>
             </p>
-            <p className="mt-2 text-xs text-yale-100 lg:hidden">
-              <span className="font-medium text-white">
-                {activePlan?.name ?? 'No plan selected'}
-              </span>
-              {isDirty ? (
-                <span className="font-medium text-amber-300"> · unsaved</span>
-              ) : null}
-            </p>
+            <ViewTabs view={view} onChange={setView} />
+            {mobileTab !== 'compare' ? (
+              <p className="mt-2 text-xs text-yale-100 lg:hidden">
+                <span className="font-medium text-white">
+                  {activePlan?.name ?? 'No plan selected'}
+                </span>
+                {isDirty ? (
+                  <span className="font-medium text-amber-300"> · unsaved</span>
+                ) : null}
+              </p>
+            ) : null}
           </div>
           <div className="flex shrink-0 items-stretch gap-2">
             <ContactMenu />
             <div className="flex items-stretch gap-2">
-              {planStore.activePlanId && isDirty ? (
+              {planStore.activePlanId && isDirty && mobileTab !== 'compare' ? (
                 <button
                   type="button"
                   onClick={() => handleSavePlan(planStore.activePlanId)}
@@ -325,7 +364,7 @@ function App() {
                   Save plan
                 </button>
               ) : null}
-              <div className="hidden lg:block">
+              <div className={view === 'planner' ? 'hidden lg:block' : 'hidden'}>
                 <PlansMenu
                   plans={planStore.plans}
                   courses={courses}
@@ -345,7 +384,25 @@ function App() {
         </div>
       </header>
 
-      <main className="hidden min-h-0 w-full flex-1 grid-cols-1 bg-white lg:grid lg:grid-cols-[22rem_minmax(0,1fr)] lg:overflow-hidden">
+      {view === 'compare' ? (
+        <div className="hidden min-h-0 flex-1 lg:flex">
+          <CompareView
+            compare={compare}
+            courses={courses}
+            terms={catalogTerms}
+            termCode={activeTermCode}
+            onTermChange={setCatalogTermCode}
+            fallYear={fallYear}
+            springYear={springYear}
+          />
+        </div>
+      ) : null}
+
+      <main
+        className={`hidden min-h-0 w-full flex-1 grid-cols-1 bg-white lg:grid-cols-[22rem_minmax(0,1fr)] lg:overflow-hidden ${
+          view === 'planner' ? 'lg:grid' : ''
+        }`}
+      >
         <aside className="flex min-h-0 flex-col overflow-hidden border-r-2 border-yale-600">
           <CourseBrowser
             courses={courses}
@@ -383,6 +440,18 @@ function App() {
           />
         ) : null}
         {mobileTab === 'plans' ? <MobilePlansPanel {...plansPanelProps} /> : null}
+        {mobileTab === 'compare' ? (
+          <CompareView
+            compare={compare}
+            courses={courses}
+            terms={catalogTerms}
+            termCode={activeTermCode}
+            onTermChange={setCatalogTermCode}
+            fallYear={fallYear}
+            springYear={springYear}
+            variant="mobile"
+          />
+        ) : null}
       </div>
 
       <MobileBottomNav activeTab={mobileTab} onChange={setMobileTab} />

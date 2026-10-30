@@ -13,6 +13,7 @@ import {
   getCourseRequirementTags,
   uniqueRequirementTags,
 } from '../lib/requirementTags'
+import { courseGroupKey } from '../lib/compareGroups'
 import { getConflictingCourseIds } from '../lib/scheduleConflicts'
 import { sectionTone } from '../lib/sectionTheme'
 import CourseFilters from './CourseFilters'
@@ -68,11 +69,29 @@ function TermSelector({ terms, termCode, onTermChange }) {
   )
 }
 
-function formatCatalogSubtitle(filteredCount, rangeStart, rangeEnd, inPlanCount) {
+function formatCatalogSubtitle(filteredCount, rangeStart, rangeEnd, selectedLabel) {
   if (filteredCount === 0) {
-    return `${filteredCount} matched · ${inPlanCount} in plan`
+    return `${filteredCount} matched · ${selectedLabel}`
   }
-  return `Showing ${rangeStart}–${rangeEnd} of ${filteredCount} matched · ${inPlanCount} in plan`
+  return `Showing ${rangeStart}–${rangeEnd} of ${filteredCount} matched · ${selectedLabel}`
+}
+
+/** Compare mode: one row per course group (first matching section), with section counts. */
+function dedupeByGroup(courses, allTermCourses) {
+  const sectionCounts = new Map()
+  for (const course of allTermCourses) {
+    const key = courseGroupKey(course)
+    sectionCounts.set(key, (sectionCounts.get(key) ?? 0) + 1)
+  }
+  const seen = new Set()
+  const rows = []
+  for (const course of courses) {
+    const key = courseGroupKey(course)
+    if (seen.has(key)) continue
+    seen.add(key)
+    rows.push(course)
+  }
+  return { rows, sectionCounts }
 }
 
 function CatalogPagination({ page, totalPages, onPageChange }) {
@@ -155,7 +174,12 @@ export default function CourseBrowser({
   termCode = null,
   onTermChange,
   fullHeight = false,
+  /** `compare`: tick courses for Compare Courses instead of adding to the plan. */
+  mode = 'plan',
+  compareSelectedKeys = null,
+  onToggleCompareKey,
 }) {
+  const compareMode = mode === 'compare'
   const [filters, setFilters] = useState(createEmptyFilters)
   const [page, setPage] = useState(1)
   const [filtersOpen, setFiltersOpen] = useState(false)
@@ -204,10 +228,13 @@ export default function CourseBrowser({
 
   const timeRangeError = useMemo(() => getTimeRangeError(filters), [filters])
 
-  const filtered = useMemo(() => {
-    if (timeRangeError) return []
-    return filterCourses(termCourses, filters)
-  }, [termCourses, filters, timeRangeError])
+  const { filtered, sectionCounts } = useMemo(() => {
+    if (timeRangeError) return { filtered: [], sectionCounts: null }
+    const matches = filterCourses(termCourses, filters)
+    if (!compareMode) return { filtered: matches, sectionCounts: null }
+    const { rows, sectionCounts: counts } = dedupeByGroup(matches, termCourses)
+    return { filtered: rows, sectionCounts: counts }
+  }, [termCourses, filters, timeRangeError, compareMode])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
 
@@ -251,11 +278,29 @@ export default function CourseBrowser({
   }, [filters])
 
   const conflictingIds = useMemo(
-    () => getConflictingCourseIds(courses, selectedIds),
-    [courses, selectedIds],
+    () =>
+      compareMode ? new Set() : getConflictingCourseIds(courses, selectedIds),
+    [courses, selectedIds, compareMode],
   )
 
   function getCourseRowProps(course) {
+    if (compareMode) {
+      const key = courseGroupKey(course)
+      return {
+        course,
+        requirementTagCodes: getCourseRequirementTags(course),
+        isSelected: compareSelectedKeys?.has(key) ?? false,
+        hasConflict: false,
+        isExpanded: expandedCourseId === course.courseId,
+        onExpandToggle: () =>
+          setExpandedCourseId((id) =>
+            id === course.courseId ? null : course.courseId,
+          ),
+        onTogglePlan: () => onToggleCompareKey(key),
+        selectionMode: 'compare',
+        sectionCount: sectionCounts?.get(key) ?? 1,
+      }
+    }
     return {
       course,
       requirementTagCodes: getCourseRequirementTags(course),
@@ -315,7 +360,9 @@ export default function CourseBrowser({
     filtered.length,
     rangeStart,
     rangeEnd,
-    selectedCourses.length,
+    compareMode
+      ? `${compareSelectedKeys?.size ?? 0} selected`
+      : `${selectedCourses.length} in plan`,
   )
 
   useEffect(() => {
