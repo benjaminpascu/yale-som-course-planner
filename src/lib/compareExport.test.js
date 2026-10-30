@@ -10,6 +10,7 @@ import {
   decide,
   getTermData,
   setNote,
+  setProfessorRating,
   setRating,
 } from './compareStorage'
 
@@ -38,15 +39,22 @@ const g622 = {
   sessions: ['fall'],
 }
 
+// MGT 611's professor rating (9) and MGT 802's (7) come from the shared professor ratings.
+const PROFESSORS = setProfessorRating(
+  setProfessorRating(createEmptyCompareStore(), 'Monachou, Faidra / Other, Prof', 9),
+  'Jensen, Kyle',
+  7,
+).professors
+
 function fallTerm() {
   let s = createEmptyCompareStore()
   s = decide(s, FALL, '622', 'maybe')
   s = decide(s, FALL, '611', 'yes')
   s = decide(s, FALL, '802', 'yes')
-  for (const [id, v] of [['interesting', 8], ['useful', 8], ['professor', 9]]) {
+  for (const [id, v] of [['interesting', 8], ['useful', 8]]) {
     s = setRating(s, FALL, '611', id, v)
   }
-  for (const [id, v] of [['interesting', 9], ['useful', 9], ['professor', 7]]) {
+  for (const [id, v] of [['interesting', 9], ['useful', 9]]) {
     s = setRating(s, FALL, '802', id, v)
   }
   s = setNote(s, FALL, '802', ODD_NOTE)
@@ -54,7 +62,11 @@ function fallTerm() {
 }
 
 describe('buildShortlistSheet', () => {
-  const { header, rows } = buildShortlistSheet({ groups: [g622, g611, g802], term: fallTerm() })
+  const { header, rows } = buildShortlistSheet({
+    groups: [g622, g611, g802],
+    term: fallTerm(),
+    professors: PROFESSORS,
+  })
 
   test('columns: rank, number, title, professor, session, status, one per criterion, score, note', () => {
     expect(header).toEqual([
@@ -107,6 +119,7 @@ describe('buildCompareWorkbook', () => {
     const workbook = await buildCompareWorkbook(ExcelJS, {
       groups: [g622, g611, g802],
       term: fallTerm(),
+      professors: PROFESSORS,
     })
     const reread = new ExcelJS.Workbook()
     await reread.xlsx.load(await workbook.xlsx.writeBuffer())

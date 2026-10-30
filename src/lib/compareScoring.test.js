@@ -1,6 +1,8 @@
 import { describe, expect, test } from 'vitest'
 import {
+  courseRatings,
   normalizeWeights,
+  professorKey,
   parseScoreInput,
   parseWeightInput,
   rankCourses,
@@ -113,12 +115,33 @@ describe('scoreToCommit', () => {
   })
 })
 
+describe('professor ratings are shared by professor', () => {
+  test('professorKey: one professor, a team (order-independent), or none', () => {
+    expect(professorKey({ professors: ['Zimmerman, Seth'] })).toBe('Zimmerman, Seth')
+    expect(professorKey({ professors: ['Seim, Katja', 'Zimmerman, Seth'] })).toBe(
+      professorKey({ professors: ['Zimmerman, Seth', 'Seim, Katja'] }),
+    )
+    expect(professorKey({ professors: [] })).toBeNull()
+  })
+
+  test('courseRatings fills the Professor criterion from the professor rating', () => {
+    const term = { ratings: { a: { interesting: 7, professor: 2 } } }
+    const group = { key: 'a', professors: ['Zimmerman, Seth'] }
+    expect(courseRatings(group, term, { 'Zimmerman, Seth': 9 })).toEqual({
+      interesting: 7,
+      professor: 9,
+    })
+    expect(courseRatings(group, term, {})).toEqual({ interesting: 7 })
+    expect(courseRatings({ key: 'b', professors: [] }, term, { '': 5 })).toEqual({})
+  })
+})
+
 describe('rankCourses', () => {
   const groups = [{ key: 'a' }, { key: 'b' }, { key: 'c' }]
 
   test('scored courses highest first; unscored are counted, not ranked', () => {
     const ratings = { a: { i: 5 }, b: { i: 9 } }
-    const { ranked, unscored } = rankCourses(groups, ratings, C)
+    const { ranked, unscored } = rankCourses(groups, (g) => ratings[g.key], C)
     expect(ranked.map((r) => [r.group.key, r.score])).toEqual([
       ['b', 9],
       ['a', 5],
@@ -127,7 +150,8 @@ describe('rankCourses', () => {
   })
 
   test('ties keep shortlist order', () => {
-    const { ranked } = rankCourses(groups, { a: { i: 7 }, c: { i: 7 } }, C)
+    const ratings = { a: { i: 7 }, c: { i: 7 } }
+    const { ranked } = rankCourses(groups, (g) => ratings[g.key], C)
     expect(ranked.map((r) => r.group.key)).toEqual(['a', 'c'])
   })
 })

@@ -3,6 +3,25 @@
  * decimals meant to add up to 1. Ratings: `{ [criterionId]: 1..10 }` per course.
  */
 
+/** The criterion whose rating belongs to the professor, shared across courses and terms. */
+export const PROFESSOR_CRITERION_ID = 'professor'
+
+/** Who a professor rating belongs to: one name, or a co-teaching team (order-independent). */
+export function professorKey(group) {
+  if (!group.professors?.length) return null
+  return [...group.professors].sort((a, b) => a.localeCompare(b)).join(' / ')
+}
+
+/** A course's ratings, with the Professor criterion taken from the shared professor rating. */
+export function courseRatings(group, term, professors) {
+  const own = { ...(term.ratings[group.key] ?? {}) }
+  delete own[PROFESSOR_CRITERION_ID]
+  const key = professorKey(group)
+  const rating = key == null ? undefined : professors[key]
+  if (typeof rating === 'number') own[PROFESSOR_CRITERION_ID] = rating
+  return own
+}
+
 const EMPTY_TONE = { bg: '#ffffff', fg: '#1a1f2b', bd: '#c5ced9' }
 const TONE_BANDS = [
   { max: 2, bg: '#f6d4cf', fg: '#7a1810', bd: '#e3a197' },
@@ -77,12 +96,16 @@ export function scoreToCommit(text, valueAtFocus) {
   return parsed === undefined ? valueAtFocus : parsed
 }
 
-/** Scored courses, highest weighted score first (ties keep shortlist order). */
-export function rankCourses(groups, ratings, criteria) {
+/**
+ * Scored courses, highest weighted score first (ties keep shortlist order).
+ *
+ * @param {(group) => object | undefined} getRatings  ratings for one course
+ */
+export function rankCourses(groups, getRatings, criteria) {
   const scored = []
   let unscored = 0
   for (const group of groups) {
-    const score = weightedScore(ratings[group.key], criteria)
+    const score = weightedScore(getRatings(group), criteria)
     if (score == null) unscored += 1
     else scored.push({ group, score })
   }

@@ -1,11 +1,15 @@
-import { normalizeWeights } from './compareScoring'
+import { PROFESSOR_CRITERION_ID, normalizeWeights } from './compareScoring'
 
 /**
  * Compare Courses data in localStorage, kept separately per term. All
  * updaters are pure (return a new store). Data for courses missing from the
  * catalog is kept, never pruned.
  *
- * Store: { version: 2, terms: { [termCode]: TermData } }
+ * Store: {
+ *   version: 2,
+ *   terms: { [termCode]: TermData },
+ *   professors: { [professorKey]: 1..10 }   // shared by every course and term
+ * }
  * TermData: {
  *   decisions: { [courseKey]: 'yes' | 'maybe' | 'no' },
  *   history:   courseKey[]            // decision order, newest last (undo)
@@ -27,7 +31,7 @@ export const DEFAULT_CRITERIA = [
 ]
 
 export function createEmptyCompareStore() {
-  return { version: STORE_VERSION, terms: {} }
+  return { version: STORE_VERSION, terms: {}, professors: {} }
 }
 
 function createEmptyTermData() {
@@ -140,7 +144,12 @@ export function loadCompareStore(storage) {
       normalizeTerm(data),
     ]),
   )
-  return { store: { version: STORE_VERSION, terms }, recovered: false }
+  const professors = Object.fromEntries(
+    Object.entries(isPlainObject(raw.professors) ? raw.professors : {}).filter(([, v]) =>
+      isRating(v),
+    ),
+  )
+  return { store: { version: STORE_VERSION, terms, professors }, recovered: false }
 }
 
 /** @returns {boolean} false when the browser refused to save */
@@ -232,9 +241,13 @@ export function addCriterion(store, termCode, name) {
     return { store, error: 'duplicate' }
   }
   const n = criteria.length
+  // A criterion named "Professor" (if none exists) is the shared professor column again.
+  const isProfessor =
+    trimmed.toLowerCase() === 'professor' &&
+    !criteria.some((c) => c.id === PROFESSOR_CRITERION_ID)
   const next = [
     ...criteria.map((c) => ({ ...c, weight: (c.weight * n) / (n + 1) })),
-    { id: newCriterionId(), name: trimmed, weight: 1 / (n + 1) },
+    { id: isProfessor ? PROFESSOR_CRITERION_ID : newCriterionId(), name: trimmed, weight: 1 / (n + 1) },
   ]
   return { store: updateTerm(store, termCode, (term) => ({ ...term, criteria: next })) }
 }
@@ -276,4 +289,12 @@ export function fixWeights(store, termCode) {
     ...term,
     criteria: normalizeWeights(term.criteria),
   }))
+}
+
+/** Rate a professor (or co-teaching team) once; applies to all their courses, every term. */
+export function setProfessorRating(store, key, value) {
+  const professors = { ...store.professors }
+  if (value == null) delete professors[key]
+  else professors[key] = value
+  return { ...store, professors }
 }

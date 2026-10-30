@@ -7,9 +7,11 @@ import {
   removeCriterion,
   setCriterionWeight,
   setNote,
+  setProfessorRating,
   setRating,
   undoLastDecision,
 } from '../../lib/compareStorage'
+import { PROFESSOR_CRITERION_ID, professorKey } from '../../lib/compareScoring'
 import ScoreStep from './ScoreStep'
 import ShortlistStep from './ShortlistStep'
 
@@ -62,8 +64,21 @@ export default function CompareView({
     return error
   }
 
+  function handleRate(group, criterionId, value) {
+    if (criterionId === PROFESSOR_CRITERION_ID) {
+      const key = professorKey(group)
+      if (key != null) update((s) => setProfessorRating(s, key, value))
+      return
+    }
+    update((s) => setRating(s, termCode, group.key, criterionId, value))
+  }
+
   function handleRemoveCriterion(criterion) {
-    const n = countRatingsForCriterion(store, termCode, criterion.id)
+    // Professor ratings are shared and kept, so removing that column loses nothing.
+    const n =
+      criterion.id === PROFESSOR_CRITERION_ID
+        ? 0
+        : countRatingsForCriterion(store, termCode, criterion.id)
     const ratings = n === 1 ? '1 rating' : `${n} ratings`
     if (n > 0 && !window.confirm(`Remove '${criterion.name}'? This deletes ${ratings}.`)) return
     update((s) => removeCriterion(s, termCode, criterion.id))
@@ -91,8 +106,9 @@ export default function CompareView({
         <ScoreStep
           groups={groups}
           term={term}
+          professors={store.professors}
           termLabel={termLabel}
-          onRate={(key, id, value) => update((s) => setRating(s, termCode, key, id, value))}
+          onRate={handleRate}
           onNote={(key, text) => update((s) => setNote(s, termCode, key, text))}
           onDecide={handleDecide}
           onAddCriterion={handleAddCriterion}

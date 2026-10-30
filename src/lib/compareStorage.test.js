@@ -8,6 +8,7 @@ import {
   removeCriterion,
   setCriterionWeight,
   setNote,
+  setProfessorRating,
   setRating,
   createEmptyCompareStore,
   decide,
@@ -251,5 +252,35 @@ describe('criteria', () => {
     expect(weights(store)).toEqual([0.55, 0.45, 0.2])
     store = fixWeights(store, FALL)
     expect(weights(store)).toEqual([0.4583, 0.375, 0.1667])
+  })
+})
+
+describe('shared professor ratings', () => {
+  test('stored once per professor, for every term, and saved', () => {
+    const storage = fake()
+    let store = setProfessorRating(createEmptyCompareStore(), 'Zimmerman, Seth', 8)
+    expect(store.professors).toEqual({ 'Zimmerman, Seth': 8 })
+    persistCompareStore(store, storage)
+    expect(loadCompareStore(storage).store.professors).toEqual({ 'Zimmerman, Seth': 8 })
+    store = setProfessorRating(store, 'Zimmerman, Seth', null)
+    expect(store.professors).toEqual({})
+  })
+
+  test('invalid stored professor ratings are dropped', () => {
+    const raw = { version: 2, terms: {}, professors: { a: 11, b: 4, c: 'x' } }
+    const { store } = loadCompareStore(fake({ [COMPARE_STORAGE_KEY]: JSON.stringify(raw) }))
+    expect(store.professors).toEqual({ b: 4 })
+  })
+
+  test('removing the Professor column keeps the shared professor ratings', () => {
+    let store = setProfessorRating(createEmptyCompareStore(), 'Zimmerman, Seth', 8)
+    store = removeCriterion(store, FALL, 'professor')
+    expect(store.professors).toEqual({ 'Zimmerman, Seth': 8 })
+  })
+
+  test('re-adding a criterion named "Professor" makes it the shared professor column again', () => {
+    let store = removeCriterion(createEmptyCompareStore(), FALL, 'professor')
+    store = addCriterion(store, FALL, 'professor').store
+    expect(getTermData(store, FALL).criteria.at(-1)).toMatchObject({ id: 'professor', name: 'professor' })
   })
 })

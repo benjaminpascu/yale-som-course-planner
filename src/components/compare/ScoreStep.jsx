@@ -1,6 +1,14 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { downloadCompareWorkbook } from '../../lib/compareExport'
-import { rankCourses, ratingTone, weightedScore, weightsNeedFix } from '../../lib/compareScoring'
+import {
+  PROFESSOR_CRITERION_ID,
+  courseRatings,
+  professorKey,
+  rankCourses,
+  ratingTone,
+  weightedScore,
+  weightsNeedFix,
+} from '../../lib/compareScoring'
 import { formatSessionLabel } from '../../lib/sessionDisplay'
 import RatingInput from './RatingInput'
 import WeightInput from './WeightInput'
@@ -76,7 +84,14 @@ function CriteriaHeader({ criteria, needsFix, onRemove, onWeight, onFixWeights }
           <span key={c.id} className={columnCell(i, 'h-6 items-center')}>
             {/* Same-width spacer before the name keeps it centered over its column, × right beside it. */}
             {criteria.length > 1 ? <span aria-hidden className="hidden w-3.5 flex-none sm:block" /> : null}
-            <span title={c.name} className={`min-w-0 truncate ${LABEL}`}>
+            <span
+              title={
+                c.id === PROFESSOR_CRITERION_ID
+                  ? `${c.name} — shared across courses with the same professor`
+                  : c.name
+              }
+              className={`min-w-0 truncate ${LABEL}`}
+            >
               {c.name}
             </span>
             {criteria.length > 1 ? (
@@ -127,9 +142,34 @@ function CriteriaHeader({ criteria, needsFix, onRemove, onWeight, onFixWeights }
   )
 }
 
-function ScoreRow({ group, term, rowIndex, open, onToggle, onRate, onNote, onDecide, rowRef }) {
-  const { criteria, ratings, notes, decisions } = term
-  const course = ratings[group.key] ?? {}
+/** Note box: starts at two lines, grows with the text, and can be dragged taller. */
+function NoteBox({ courseNumber, value, onChange }) {
+  const ref = useRef(null)
+  const grow = () => {
+    const el = ref.current
+    if (el && el.scrollHeight > el.clientHeight) el.style.height = `${el.scrollHeight + 2}px`
+  }
+  useLayoutEffect(grow, [])
+  return (
+    <textarea
+      ref={ref}
+      rows={2}
+      defaultValue={value}
+      onChange={(e) => {
+        onChange(e.target.value)
+        grow()
+      }}
+      placeholder="Add a note"
+      aria-label={`Note for ${courseNumber}`}
+      className="min-h-16 max-w-[520px] flex-[1_1_280px] resize-y rounded-md border border-[#c5ced9] bg-white px-2.5 py-2 text-sm leading-relaxed"
+    />
+  )
+}
+
+function ScoreRow({ group, term, professors, rowIndex, open, onToggle, onRate, onNote, onDecide, rowRef }) {
+  const { criteria, notes, decisions } = term
+  const course = courseRatings(group, term, professors)
+  const noProfessor = professorKey(group) == null
   const score = weightedScore(course, criteria)
   const note = notes[group.key] ?? ''
   const first = group.sections[0]
@@ -164,10 +204,11 @@ function ScoreRow({ group, term, rowIndex, open, onToggle, onRate, onNote, onDec
           <span key={c.id} className={columnCell(colIndex)}>
             <RatingInput
               value={course[c.id] ?? null}
-              onCommit={(v) => onRate(group.key, c.id, v)}
+              onCommit={(v) => onRate(group, c.id, v)}
               ariaLabel={`${c.name} rating for ${group.courseNumber}`}
               rowIndex={rowIndex}
               colIndex={colIndex}
+              disabled={c.id === PROFESSOR_CRITERION_ID && noProfessor}
             />
           </span>
         ))}
@@ -203,13 +244,7 @@ function ScoreRow({ group, term, rowIndex, open, onToggle, onRate, onNote, onDec
             ) : null}
           </p>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <input
-              defaultValue={note}
-              onChange={(e) => onNote(group.key, e.target.value)}
-              placeholder="Add a note"
-              aria-label={`Note for ${group.courseNumber}`}
-              className="h-9 max-w-[520px] flex-[1_1_280px] rounded-md border border-[#c5ced9] bg-white px-2.5 text-sm"
-            />
+            <NoteBox courseNumber={group.courseNumber} value={note} onChange={(text) => onNote(group.key, text)} />
             <span className="ml-auto flex items-center gap-1 text-sm text-[#5b6576]">
               <button type="button" onClick={() => onDecide(group.key, isYes ? 'maybe' : 'yes')} className="h-8 px-2 hover:text-yale-800">
                 {isYes ? 'Move to Maybe' : 'Move to Interested'}
@@ -226,12 +261,12 @@ function ScoreRow({ group, term, rowIndex, open, onToggle, onRate, onNote, onDec
   )
 }
 
-function ExportButton({ groups, term, termLabel }) {
+function ExportButton({ groups, term, professors, termLabel }) {
   const [state, setState] = useState('idle')
   async function handleExport() {
     setState('busy')
     try {
-      await downloadCompareWorkbook({ groups, term, termLabel })
+      await downloadCompareWorkbook({ groups, term, professors, termLabel })
       setState('idle')
     } catch (err) {
       console.error('Excel export failed', err)
@@ -252,8 +287,12 @@ function ExportButton({ groups, term, termLabel }) {
   )
 }
 
-function RankingCard({ shortlist, term, termLabel, onOpen }) {
-  const { ranked, unscored } = rankCourses(shortlist, term.ratings, term.criteria)
+function RankingCard({ shortlist, term, professors, termLabel, onOpen }) {
+  const { ranked, unscored } = rankCourses(
+    shortlist,
+    (group) => courseRatings(group, term, professors),
+    term.criteria,
+  )
   return (
     <aside className="flex min-w-0 flex-[1_1_300px] flex-col self-start rounded-lg border border-[#dde3ea] bg-white lg:max-w-[360px]">
       <h2 className="px-5 pt-3.5 pb-2.5 text-base font-bold">Ranking</h2>
@@ -289,7 +328,7 @@ function RankingCard({ shortlist, term, termLabel, onOpen }) {
         </p>
       ) : null}
       <div className="border-t border-[#e6eaf0] px-5 py-3.5">
-        <ExportButton groups={shortlist} term={term} termLabel={termLabel} />
+        <ExportButton groups={shortlist} term={term} professors={professors} termLabel={termLabel} />
       </div>
     </aside>
   )
@@ -299,6 +338,7 @@ function RankingCard({ shortlist, term, termLabel, onOpen }) {
 export default function ScoreStep({
   groups,
   term,
+  professors,
   termLabel,
   onRate,
   onNote,
@@ -387,6 +427,7 @@ export default function ScoreStep({
                   key={group.key}
                   group={group}
                   term={term}
+                  professors={professors}
                   rowIndex={rowIndex++}
                   open={openKey === group.key}
                   onToggle={() => setOpenKey((k) => (k === group.key ? null : group.key))}
@@ -403,7 +444,13 @@ export default function ScoreStep({
           ))}
         </div>
       </main>
-      <RankingCard shortlist={shortlist} term={term} termLabel={termLabel} onOpen={openFromRanking} />
+      <RankingCard
+        shortlist={shortlist}
+        term={term}
+        professors={professors}
+        termLabel={termLabel}
+        onOpen={openFromRanking}
+      />
     </div>
   )
 }

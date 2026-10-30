@@ -10,7 +10,7 @@ function toText(value) {
  * invalid input shows red and never replaces the earlier rating. Escape undoes
  * the edit; Arrow Up/Down and Enter move within the same column.
  */
-export default function RatingInput({ value, onCommit, ariaLabel, rowIndex, colIndex }) {
+export default function RatingInput({ value, onCommit, ariaLabel, rowIndex, colIndex, disabled = false }) {
   const [text, setText] = useState(toText(value))
   const [focused, setFocused] = useState(false)
   const valueAtFocus = useRef(value)
@@ -58,6 +58,8 @@ export default function RatingInput({ value, onCommit, ariaLabel, rowIndex, colI
       autoComplete="off"
       placeholder="–"
       value={text}
+      disabled={disabled}
+      title={disabled ? 'No professor listed' : undefined}
       aria-label={ariaLabel}
       aria-invalid={invalid || undefined}
       data-row={rowIndex}
@@ -77,7 +79,7 @@ export default function RatingInput({ value, onCommit, ariaLabel, rowIndex, colI
           ? undefined
           : { backgroundColor: tone.bg, color: tone.fg, borderColor: tone.bd }
       }
-      className={`h-9 w-16 rounded-md border text-center text-sm font-bold tabular-nums placeholder:font-normal placeholder:text-[#8a95a5] focus:outline-none focus:ring-2 focus:ring-yale-800 ${
+      className={`h-9 w-16 rounded-md border text-center text-sm font-bold tabular-nums placeholder:font-normal placeholder:text-[#8a95a5] focus:outline-none focus:ring-2 focus:ring-yale-800 disabled:cursor-not-allowed disabled:bg-[#f5f7fa] ${
         invalid ? 'border-red-400 bg-red-50 text-red-700' : ''
       }`}
     />

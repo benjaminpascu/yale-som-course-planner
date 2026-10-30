@@ -1,4 +1,4 @@
-import { rankCourses, ratingTone } from './compareScoring'
+import { courseRatings, rankCourses, ratingTone } from './compareScoring'
 import { formatSessionLabel } from './sessionDisplay'
 
 const STATUS_LABELS = { yes: 'Interested', maybe: 'Maybe' }
@@ -16,12 +16,14 @@ function criterionColumn(name) {
  * Sheet 1: the shortlist (Interested + Maybe), ranked by weighted score;
  * unscored courses last with no rank.
  *
- * @param {{ groups: object[], term: object }} args  groups = shortlisted courses
+ * @param {{ groups: object[], term: object, professors: object }} args
+ *   groups = shortlisted courses; professors = shared professor ratings
  */
-export function buildShortlistSheet({ groups, term }) {
-  const { criteria, ratings, notes, decisions } = term
+export function buildShortlistSheet({ groups, term, professors }) {
+  const { criteria, notes, decisions } = term
+  const ratingsOf = (group) => courseRatings(group, term, professors)
   const header = [...FIXED_COLUMNS, ...criteria.map((c) => criterionColumn(c.name)), 'Weighted score', 'Note']
-  const { ranked } = rankCourses(groups, ratings, criteria)
+  const { ranked } = rankCourses(groups, ratingsOf, criteria)
   const rankedKeys = new Set(ranked.map((r) => r.group.key))
   const ordered = [
     ...ranked,
@@ -34,7 +36,7 @@ export function buildShortlistSheet({ groups, term }) {
     group.professors.join(' / ') || null,
     group.sessions.map((s) => formatSessionLabel(s)).join(', ') || null,
     STATUS_LABELS[decisions[group.key]] ?? null,
-    ...criteria.map((c) => ratings[group.key]?.[c.id] ?? null),
+    ...criteria.map((c) => ratingsOf(group)[c.id] ?? null),
     score == null ? null : Math.round(score * 10) / 10,
     notes[group.key] ?? null,
   ])
@@ -68,10 +70,10 @@ function fill(cell, value) {
 }
 
 /** Two-sheet workbook. `ExcelJS` is passed in so the library stays lazy-loaded. */
-export async function buildCompareWorkbook(ExcelJS, { groups, term }) {
+export async function buildCompareWorkbook(ExcelJS, { groups, term, professors }) {
   const workbook = new ExcelJS.Workbook()
 
-  const shortlist = buildShortlistSheet({ groups, term })
+  const shortlist = buildShortlistSheet({ groups, term, professors })
   const sheet = workbook.addWorksheet('Shortlist')
   sheet.addRow(shortlist.header).font = { bold: true }
   const firstRating = FIXED_COLUMNS.length + 1
@@ -97,9 +99,9 @@ export async function buildCompareWorkbook(ExcelJS, { groups, term }) {
 }
 
 /** Load ExcelJS on demand, build the workbook, and download it. */
-export async function downloadCompareWorkbook({ groups, term, termLabel }) {
+export async function downloadCompareWorkbook({ groups, term, professors, termLabel }) {
   const ExcelJS = (await import('exceljs')).default
-  const workbook = await buildCompareWorkbook(ExcelJS, { groups, term })
+  const workbook = await buildCompareWorkbook(ExcelJS, { groups, term, professors })
   const buffer = await workbook.xlsx.writeBuffer()
   const blob = new Blob([buffer], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
