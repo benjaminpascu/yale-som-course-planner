@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Score and rank your shortlist</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f3f5f8}
+a{color:#00356b}a:hover{color:#002244}
+button,input{font-family:inherit}
+button{cursor:pointer}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield;appearance:textfield}
+</style>
+</helmet>
+<div style="font-family: Inter, system-ui, sans-serif; font-size: 14px; color: #1a1f2b; background: #f3f5f8; min-height: 900px">
+
+<header style="background: #002a54; color: #ffffff; padding: 0 32px; display: flex; flex-wrap: wrap; align-items: center; gap: 32px; min-height: 56px">
+<div style="font-size: 16px; font-weight: 700">Yale SOM Course Planner</div>
+<nav style="display: flex; gap: 4px; align-self: stretch">
+<a href="#" style="color: #c9d6e8; text-decoration: none; font-weight: 500; padding: 0 12px; display: flex; align-items: center">Planner</a>
+<a href="#" style="color: #ffffff; text-decoration: none; font-weight: 600; padding: 0 12px; display: flex; align-items: center; border-bottom: 3px solid #ffffff">Compare</a>
+</nav>
+<a href="#" style="margin-left: auto; display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; background: transparent; color: #ffffff; border: 1px solid rgba(255,255,255,0.45); border-radius: 999px; text-decoration: none; font-size: 14px; font-weight: 500">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H10l-4 3.5V17H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"></path></svg>Suggestions? Contact me</a>
+</header>
+
+<div style="background: #ffffff; border-bottom: 1px solid #dde3ea; padding: 0 32px">
+<ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch">
+<li><a href="Swipe.dc.html" style="display: flex; align-items: center; gap: 8px; padding: 16px 12px 13px; text-decoration: none; color: #1a1f2b; border-bottom: 3px solid transparent">
+<span style="width: 24px; height: 24px; border-radius: 50%; background: #e3ebf5; color: #00356b; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center">1</span>
+<span style="font-weight: 600">Shortlist</span><span style="color: #5b6576">98 left</span></a></li>
+<li aria-hidden="true" style="display: flex; align-items: center; color: #8a95a5">›</li>
+<li><a href="#" aria-current="page" style="display: flex; align-items: center; gap: 8px; padding: 16px 12px 13px; text-decoration: none; color: #00356b; border-bottom: 3px solid #00356b">
+<span style="width: 24px; height: 24px; border-radius: 50%; background: #00356b; color: #ffffff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center">2</span>
+<span style="font-weight: 700">Score and rank</span></a></li>
+</ol>
+</div>
+
+<div style="padding: 24px 32px 56px; display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; max-width: 1376px; margin: 0 auto">
+
+<main style="flex: 999 1 640px; min-width: 0; background: #ffffff; border: 1px solid #dde3ea; border-radius: 8px; overflow-x: auto">
+<div style="min-width: 700px">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 12px 4px 20px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 700">Your shortlist</h2>
+<button onClick="{{startAdd}}" style="border: 0; background: transparent; color: #00356b; font-size: 14px; font-weight: 600; height: 36px; padding: 0 8px">+ Add criterion</button>
+</div>
+
+<sc-if value="{{adding}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px 20px; border-bottom: 1px solid #e6eaf0; background: #f5f7fa">
+<label for="newcrit" style="font-size: 12px; font-weight: 600; color: #5b6576">New criterion</label>
+<input id="newcrit" type="text" value="{{draft}}" onChange="{{setDraft}}" onKeyDown="{{draftKey}}" placeholder="e.g. Workload, Career fit, Friends taking it" style="flex: 1 1 240px; max-width: 360px; height: 36px; box-sizing: border-box; border: 1px solid #c5ced9; border-radius: 6px; padding: 0 10px; font-size: 14px; background: #ffffff">
+<button onClick="{{addCrit}}" style="height: 36px; border: 0; background: #00356b; color: #ffffff; border-radius: 6px; padding: 0 14px; font-size: 14px; font-weight: 600">Add</button>
+<button onClick="{{cancelAdd}}" style="height: 36px; border: 0; background: transparent; color: #5b6576; font-size: 14px; padding: 0 8px">Cancel</button>
+</div>
+</sc-if>
+
+<div style="display: flex; align-items: flex-start; gap: 8px; padding: 14px 12px 10px 20px">
+<span style="flex: 1; min-width: 0; font-size: 12px; font-weight: 600; color: #5b6576; padding-top: 5px">Course</span>
+<sc-for list="{{hdr}}" as="h" hint-placeholder-count="3">
+<div style="width: 96px; position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px">
+<sc-if value="{{h.compact}}" hint-placeholder-val="{{false}}">
+<button onClick="{{h.edit}}" aria-expanded="{{h.editing}}" style="border: 0; background: transparent; padding: 2px 4px; border-radius: 4px; max-width: 96px; display: flex; flex-direction: column; align-items: center; gap: 2px; color: #5b6576">
+<span style="font-size: 12px; font-weight: 600; max-width: 88px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-bottom: 1px dashed #8a95a5">{{h.name}}</span>
+<span style="font-size: 12px; color: #5b6576; font-variant-numeric: tabular-nums">{{h.wText}}</span>
+</button>
+<sc-if value="{{h.editing}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; top: 44px; left: 50%; transform: translateX(-50%); z-index: 5; width: 200px; background: #ffffff; border: 1px solid #c5ced9; border-radius: 8px; box-shadow: 0 6px 20px rgba(16,24,40,0.12); padding: 12px; display: flex; flex-direction: column; gap: 10px; text-align: left">
+<span style="font-size: 14px; font-weight: 700">{{h.name}}</span>
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; color: #5b6576">Weight
+<input type="number" min="0" max="1" step="0.05" value="{{h.wStr}}" onChange="{{h.setW}}" style="width: 72px; height: 32px; box-sizing: border-box; border: 1px solid #c5ced9; border-radius: 6px; text-align: center; font-size: 14px; font-weight: 600; color: #1a1f2b"></label>
+<div style="display: flex; justify-content: space-between; align-items: center">
+<button onClick="{{h.remove}}" style="border: 0; background: transparent; color: #5b6576; font-size: 14px; padding: 0; height: 32px">Remove</button>
+<button onClick="{{h.edit}}" style="border: 1px solid #c5ced9; background: #ffffff; color: #00356b; border-radius: 6px; font-size: 14px; font-weight: 600; height: 32px; padding: 0 12px">Done</button>
+</div>
+</div>
+</sc-if>
+</sc-if>
+<sc-if value="{{h.plain}}" hint-placeholder-val="{{true}}">
+<span style="display: flex; align-items: center; gap: 2px; max-width: 96px">
+<span style="font-size: 12px; font-weight: 600; color: #5b6576; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{h.name}}</span>
+<button onClick="{{h.remove}}" aria-label="Remove {{h.name}}" style="flex: none; width: 24px; height: 24px; border: 0; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center">
+<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#8a95a5" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</span>
+</sc-if>
+<sc-if value="{{h.inline}}" hint-placeholder-val="{{true}}">
+<input type="number" min="0" max="1" step="0.05" value="{{h.wStr}}" onChange="{{h.setW}}" aria-label="Weight for {{h.name}}" style="width: 64px; height: 32px; box-sizing: border-box; border: 1px solid #dde3ea; background: #f5f7fa; border-radius: 6px; text-align: center; font-size: 14px; font-weight: 600; color: #1a1f2b; font-variant-numeric: tabular-nums">
+</sc-if>
+</div>
+</sc-for>
+<div style="width: 64px; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; padding-top: 5px">
+<span style="font-size: 12px; font-weight: 600; color: #5b6576; text-align: right; line-height: 1.3">Weighted<br>score</span>
+<sc-if value="{{showTotalHere}}" hint-placeholder-val="{{true}}">
+<sc-if value="{{totalOff}}" hint-placeholder-val="{{false}}"><button onClick="{{balance}}" style="border: 0; background: transparent; padding: 0; font-size: 12px; font-weight: 600; color: #9a4a00; text-align: right">Fix weights</button></sc-if>
+</sc-if>
+</div>
+<span style="width: 36px"></span>
+</div>
+
+<sc-if value="{{isRow}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px 8px 20px; background: #f5f7fa; border-top: 1px solid #e6eaf0">
+<span style="flex: 1; min-width: 0; font-size: 12px; font-weight: 600; color: #5b6576">Weight</span>
+<sc-for list="{{hdr}}" as="h" hint-placeholder-count="3">
+<span style="width: 96px; display: flex; justify-content: center">
+<input type="number" min="0" max="1" step="0.05" value="{{h.wStr}}" onChange="{{h.setW}}" aria-label="Weight for {{h.name}}" style="width: 64px; height: 32px; box-sizing: border-box; border: 1px solid #c5ced9; background: #ffffff; border-radius: 6px; text-align: center; font-size: 14px; font-weight: 600; color: #1a1f2b; font-variant-numeric: tabular-nums"></span>
+</sc-for>
+<span style="width: 64px; text-align: right">
+<sc-if value="{{totalOff}}" hint-placeholder-val="{{false}}"><button onClick="{{balance}}" style="border: 0; background: transparent; padding: 0; font-size: 12px; font-weight: 600; color: #9a4a00; text-align: right">Fix weights</button></sc-if>
+</span>
+<span style="width: 36px"></span>
+</div>
+</sc-if>
+
+<sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
+<div style="padding: 10px 20px 8px; background: #f5f7fa; border-top: 1px solid #e6eaf0; font-size: 12px; font-weight: 700; color: #5b6576">{{g.name}} · {{g.count}}</div>
+<sc-for list="{{g.items}}" as="c" hint-placeholder-count="4">
+<div style="border-top: 1px solid #e6eaf0; background: {{c.rowBg}}">
+<div style="display: flex; align-items: center; gap: 8px; padding: 12px 12px 12px 20px">
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<button onClick="{{c.toggle}}" aria-expanded="{{c.isOpen}}" style="border: 0; background: transparent; padding: 0; text-align: left; font-size: 14px; font-weight: 700; color: #1a1f2b; line-height: 1.35">{{c.name}}</button>
+<span style="font-size: 12px; color: #5b6576">{{c.sess}} · {{c.prof}}</span>
+<sc-if value="{{c.hasNote}}" hint-placeholder-val="{{false}}"><span style="font-size: 12px; font-style: italic; color: #1a1f2b">{{c.note}}</span></sc-if>
+</div>
+<sc-for list="{{c.crit}}" as="k" hint-placeholder-count="3">
+<span style="width: 96px; display: flex; justify-content: center">
+<input type="number" min="1" max="10" value="{{k.val}}" onChange="{{k.change}}" placeholder="–" aria-label="{{k.label}}" style="width: 64px; height: 36px; box-sizing: border-box; border: 1px solid {{k.bd}}; background: {{k.bg}}; color: {{k.fg}}; border-radius: 6px; text-align: center; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums"></span>
+</sc-for>
+<span style="width: 64px; text-align: right; font-size: 20px; font-weight: 700; color: #00356b; font-variant-numeric: tabular-nums">{{c.score}}</span>
+<button onClick="{{c.toggle}}" aria-label="Description and note" aria-expanded="{{c.isOpen}}" style="width: 36px; height: 36px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5b6576" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="transform: rotate({{c.rot}})"><path d="M6 9l6 6 6-6"></path></svg></button>
+</div>
+
+<sc-if value="{{c.isOpen}}" hint-placeholder-val="{{false}}">
+<div style="padding: 0 20px 16px; display: flex; flex-direction: column; gap: 12px">
+<p style="margin: 0; line-height: 1.6; max-width: 76ch">{{c.desc}} <a href="#" style="font-weight: 600; white-space: nowrap">Syllabus ↗</a></p>
+<div style="display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center">
+<label for="note-{{c.num}}" style="position: absolute; left: -9999px">Note</label>
+<input id="note-{{c.num}}" type="text" value="{{c.note}}" onChange="{{c.setNote}}" placeholder="Add a note" style="flex: 1 1 280px; max-width: 520px; height: 36px; box-sizing: border-box; border: 1px solid #c5ced9; border-radius: 6px; padding: 0 10px; font-size: 14px; color: #1a1f2b; background: #ffffff">
+<span style="margin-left: auto; display: flex; gap: 4px; align-items: center; color: #5b6576">
+<button onClick="{{c.move}}" style="border: 0; background: transparent; color: #5b6576; font-size: 14px; height: 32px; padding: 0 8px">{{c.moveLabel}}</button>
+<span aria-hidden="true">·</span>
+<button onClick="{{c.remove}}" style="border: 0; background: transparent; color: #5b6576; font-size: 14px; height: 32px; padding: 0 8px">Remove</button>
+</span>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</sc-for>
+</div>
+</main>
+
+<aside style="flex: 1 1 300px; max-width: 360px; min-width: 0; background: #ffffff; border: 1px solid #dde3ea; border-radius: 8px; display: flex; flex-direction: column">
+<h2 style="margin: 0; padding: 14px 20px 10px; font-size: 16px; font-weight: 700">Ranking</h2>
+<ol style="list-style: none; margin: 0; padding: 0">
+<sc-for list="{{rank}}" as="r" hint-placeholder-count="5">
+<li style="border-top: 1px solid #eef1f5">
+<button onClick="{{r.open}}" style="width: 100%; border: 0; background: transparent; text-align: left; display: flex; gap: 12px; align-items: center; padding: 10px 20px; color: #1a1f2b; font-size: 14px">
+<span style="width: 20px; font-weight: 600; color: #5b6576; font-variant-numeric: tabular-nums">{{r.i}}</span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 600; line-height: 1.35">{{r.title}}</span><span style="font-size: 12px; color: #5b6576">{{r.num}}</span></span>
+<span style="flex: none; width: 56px; height: 36px; box-sizing: border-box; border-radius: 6px; border: 1px solid {{r.bd}}; background: {{r.bg}}; color: {{r.fg}}; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums">{{r.score}}</span>
+</button>
+</li>
+</sc-for>
+</ol>
+<sc-if value="{{hasUnscored}}" hint-placeholder-val="{{true}}">
+<div style="padding: 10px 20px; font-size: 12px; color: #5b6576; border-top: 1px solid #eef1f5">{{unscoredText}}</div>
+</sc-if>
+<div style="padding: 14px 20px; border-top: 1px solid #e6eaf0">
+<button style="width: 100%; height: 40px; border: 1px solid #c5ced9; background: #ffffff; color: #1a1f2b; border-radius: 6px; font-size: 14px; font-weight: 600">Export to Excel</button>
+</div>
+</aside>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"variant":{"editor":"enum","options":["inline","row","compact"],"default":"inline"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const variant = this.props.variant ?? 'inline';
+    const st = this.state || {};
+    const open = st.open === undefined ? '' : st.open;
+    const base = [
+      { num: 'MGT 802', st: 'yes', sess: 'Fall 2', title: 'Large Language Models: Technology and Applications', prof: 'Kyle Jensen', desc: 'MGT 802 introduces students to the internal workings of large language models. The course begins with the basics of neural networks and progresses through recurrent neural networks, embeddings, transformers, training, and architectural alternatives. Each class session has three components: an on-paper quiz based on pre-class reading, a lecture, and a hands-on coding activity.' },
+      { num: 'MGT 611', st: 'yes', sess: 'Fall 1', title: 'Policy Modeling', prof: 'Faidra Monachou', desc: 'Policy modeling refers to applications of operations research and allied quantitative methods to policy problems. The idea is to capture key features of various policy issues with relatively simple “first-strike” models that provide support for decision making. Techniques include probabilistic models such as Bernoulli, Poisson, Markov and renewal processes, queueing theory, and epidemic modeling.' },
+      { num: 'MGT 510', st: 'yes', sess: 'Full fall', title: 'Data Analysis and Causal Inference', prof: 'Robert Jensen', desc: 'A set of practical but powerful statistical methods valuable across a range of professional and personal settings: data structure, sampling and data quality, then nonparametric regression, quantile regression, maximum likelihood and limited dependent variable models. Finally, causal inference, using techniques such as regression discontinuity designs and matching.' },
+      { num: 'MGT 532', st: 'yes', sess: 'Fall 2', title: 'Business Ethics', prof: 'Corey Cusimano', desc: 'Business is an activity in which parties exchange goods or services for valuable consideration. The goal of this course is to examine the ethical dimensions of such activities and develop skills for identifying and weighting ethical considerations at the individual, firm, and policy levels.' },
+      { num: 'MGT 805', st: 'yes', sess: 'Fall 1', title: 'Fixed Income Securities', prof: 'Saman Majd', desc: 'Fixed income markets are among the largest in the world and fixed income products are a key component of any investment strategy. This course covers the valuation and risk management of the key fixed income products: bonds, futures, forwards, and swaps.' },
+      { num: 'MGT 541', st: 'maybe', sess: 'Fall 1', title: 'Corporate Finance', prof: 'Heather Tookes', desc: 'Financial management from inside the corporation or operating entity. Topics covered include valuation and cost of capital, capital allocation, capital structure, debt management, bankruptcy and restructuring, mergers and acquisitions, and risk management.' },
+      { num: 'MGT 622', st: 'maybe', sess: 'Full fall', title: 'Game Theory', prof: 'Benjamin Polak', desc: 'An introduction to game theory and strategic thinking. Ideas such as dominance, backward induction, Nash equilibrium, commitment, credibility, asymmetric information, adverse selection, and signaling are applied to games played in class and to examples from economics, politics and the movies.' },
+      { num: 'MGT 649', st: 'maybe', sess: 'Fall 2', title: 'World Financial History', prof: 'William Goetzmann', desc: 'The history of finance from its earliest beginnings to the modern era, from the roots of financial crises and the origins of corporations to investment banking, sovereign debt, IPOs and central banking.' }
+    ];
+    const crits = st.crits || [
+      { id: 'i', name: 'Interesting', w: 0.35, wStr: '0.35' },
+      { id: 'u', name: 'Useful', w: 0.45, wStr: '0.45' },
+      { id: 'p', name: 'Professor', w: 0.2, wStr: '0.20' }
+    ];
+    const seed = {
+      'MGT 802': { i: 9, u: 9, p: 7 }, 'MGT 611': { i: 8, u: 8, p: 9 }, 'MGT 510': { i: 7, u: 8, p: 8 },
+      'MGT 532': { i: 8, u: 7, p: 6 }, 'MGT 805': { i: 6, u: 7, p: 8 }, 'MGT 541': { i: 5, u: 7 }
+    };
+    const scores = st.scores || seed;
+    const status = st.status || {};
+    const notes = st.notes || { 'MGT 802': 'Ask second-years about the weekly quizzes' };
+    const draft = st.draft || '';
+    const stOf = (c) => status[c.num] || c.st;
+    const live = base.filter((c) => stOf(c) !== 'out');
+    const total = crits.reduce((a, k) => a + (k.w || 0), 0);
+    const totalOk = Math.abs(total - 1) < 0.005;
+    const scoreOf = (num) => {
+      const s = scores[num] || {};
+      let tw = 0, sum = 0;
+      crits.forEach((k) => { if (s[k.id] && k.w > 0) { tw += k.w; sum += s[k.id] * k.w; } });
+      return tw ? sum / tw : null;
+    };
+    const tone = (v) => {
+      if (!v) return { bg: '#ffffff', fg: '#1a1f2b', bd: '#c5ced9' };
+      if (v <= 2) return { bg: '#f6d4cf', fg: '#7a1810', bd: '#e3a197' };
+      if (v <= 4) return { bg: '#fbe0c8', fg: '#7a3d0a', bd: '#ecbd92' };
+      if (v <= 6) return { bg: '#fcefc0', fg: '#634800', bd: '#e6d283' };
+      if (v <= 8) return { bg: '#d8eecd', fg: '#1f5a1c', bd: '#a6d295' };
+      return { bg: '#a9d99c', fg: '#0f420f', bd: '#7cbf6b' };
+    };
+    const fmt = (n) => (Math.round(n * 100) / 100).toFixed(2);
+    const setCrits = (next) => this.setState({ crits: next });
+    const normalize = (list) => {
+      const t = list.reduce((a, k) => a + (k.w || 0), 0) || 1;
+      return list.map((k) => { const w = (k.w || 0) / t; return Object.assign({}, k, { w: w, wStr: fmt(w) }); });
+    };
+    const setScore = (num, id, raw) => {
+      let v = parseInt(raw, 10); if (!(v >= 1)) v = 0; if (v > 10) v = 10;
+      const next = Object.assign({}, scores);
+      next[num] = Object.assign({}, next[num] || {}); next[num][id] = v;
+      this.setState({ scores: next });
+    };
+    const setStatus = (num, v) => {
+      const next = Object.assign({}, status); next[num] = v;
+      this.setState({ status: next, open: v === 'out' ? '' : open });
+    };
+    const setNote = (num, v) => {
+      const next = Object.assign({}, notes); next[num] = v;
+      this.setState({ notes: next });
+    };
+    const addCrit = () => {
+      const name = draft.trim(); if (!name) return;
+      const n = crits.length;
+      const scaled = crits.map((k) => Object.assign({}, k, { w: k.w * n / (n + 1) }));
+      const next = normalize(scaled.concat([{ id: 'c' + Date.now(), name: name, w: 1 / (n + 1) }]));
+      this.setState({ crits: next, draft: '', adding: false });
+    };
+    const view = (c) => {
+      const isOpen = c.num === open;
+      const sc = scoreOf(c.num);
+      const s = scores[c.num] || {};
+      const isYes = stOf(c) === 'yes';
+      const note = notes[c.num] || '';
+      return Object.assign({}, c, {
+        name: c.num + ' — ' + c.title,
+        isOpen: isOpen, rot: isOpen ? '180deg' : '0deg', rowBg: isOpen ? '#f8fafc' : '#ffffff',
+        score: sc !== null ? sc.toFixed(1) : '–',
+        note: note, hasNote: !!note && !isOpen,
+        setNote: (e) => setNote(c.num, e.target.value),
+        toggle: () => this.setState({ open: isOpen ? '' : c.num }),
+        move: () => setStatus(c.num, isYes ? 'maybe' : 'yes'),
+        moveLabel: isYes ? 'Move to Maybe' : 'Move to Interested',
+        remove: () => setStatus(c.num, 'out'),
+        crit: crits.map((k) => Object.assign({
+          label: k.name + ' score for ' + c.num,
+          val: s[k.id] ? String(s[k.id]) : '',
+          change: (e) => setScore(c.num, k.id, e.target.value)
+        }, tone(s[k.id])))
+      });
+    };
+    const yes = live.filter((c) => stOf(c) === 'yes').map(view);
+    const maybe = live.filter((c) => stOf(c) === 'maybe').map(view);
+    const groups = [];
+    if (yes.length) groups.push({ name: 'Interested', count: yes.length, items: yes });
+    if (maybe.length) groups.push({ name: 'Maybe', count: maybe.length, items: maybe });
+    const ranked = live.map((c) => ({ c: c, s: scoreOf(c.num) })).filter((x) => x.s !== null).sort((a, b) => b.s - a.s);
+    const rank = ranked.map((x, i) => ({
+      i: i + 1, title: x.c.title, num: x.c.num, score: x.s.toFixed(1), bg: tone(Math.round(x.s)).bg, fg: tone(Math.round(x.s)).fg, bd: tone(Math.round(x.s)).bd,
+      open: () => this.setState({ open: x.c.num })
+    }));
+    const unscored = live.length - ranked.length;
+    const editing = st.editing || '';
+    return {
+      isRow: variant === 'row',
+      showTotalHere: variant !== 'row',
+      hdr: crits.map((k, idx) => ({
+        name: k.name, wStr: k.wStr, wText: fmt(k.w),
+        inline: variant === 'inline', compact: variant === 'compact', plain: variant !== 'compact',
+        editing: editing === k.id,
+        edit: () => this.setState({ editing: editing === k.id ? '' : k.id }),
+        setW: (e) => {
+          const raw = e.target.value; let w = parseFloat(raw); if (!(w >= 0)) w = 0; if (w > 1) w = 1;
+          setCrits(crits.map((x, j) => j === idx ? Object.assign({}, x, { w: w, wStr: raw }) : x));
+        },
+        remove: () => { if (crits.length > 1) this.setState({ crits: normalize(crits.filter((_, j) => j !== idx)), editing: '' }); }
+      })),
+      totalOk: totalOk, totalOff: !totalOk, totalText: fmt(total),
+      balance: () => setCrits(normalize(crits)),
+      groups: groups, rank: rank,
+      hasUnscored: unscored > 0,
+      unscoredText: unscored === 1 ? '1 course not scored yet' : unscored + ' courses not scored yet',
+      adding: !!st.adding,
+      startAdd: () => this.setState({ adding: true }),
+      cancelAdd: () => this.setState({ adding: false, draft: '' }),
+      draft: draft,
+      setDraft: (e) => this.setState({ draft: e.target.value }),
+      draftKey: (e) => { if (e.key === 'Enter') addCrit(); },
+      addCrit: addCrit
+    };
+  }
+}
+</script>
+</body>
+</html>

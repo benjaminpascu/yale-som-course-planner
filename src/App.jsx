@@ -4,9 +4,10 @@ import CompareView from './components/compare/CompareView'
 import { useCompareStore } from './components/compare/useCompareStore'
 import MobileBottomNav from './components/MobileBottomNav'
 import MobilePlansPanel from './components/MobilePlansPanel'
-import ContactMenu from './components/ContactMenu'
+import NavBar from './components/NavBar'
 import PlansMenu from './components/PlansMenu'
 import PlanningPanel from './components/PlanningPanel'
+import { CompareStepTabs, SubBar, TermSwitch } from './components/SubBar'
 import { SAVE_BUTTON } from './lib/sectionTheme'
 import { getCatalogTerms, getSemesterCalendarYears } from './lib/academicYear'
 import { loadAppData } from './lib/loadData'
@@ -24,39 +25,6 @@ import {
   upsertPlan,
 } from './lib/planStorage'
 
-const YALE_COURSE_LIST_URL = 'https://som.yale.edu/elective-core-courses'
-
-const VIEWS = [
-  { id: 'planner', label: 'Planner' },
-  { id: 'compare', label: 'Compare courses' },
-]
-
-/** Desktop page tabs under the header title. */
-function ViewTabs({ view, onChange }) {
-  return (
-    <nav className="mt-3 hidden gap-5 lg:flex" aria-label="Views">
-      {VIEWS.map((v) => {
-        const active = v.id === view
-        return (
-          <button
-            key={v.id}
-            type="button"
-            onClick={() => onChange(v.id)}
-            aria-current={active ? 'page' : undefined}
-            className={`border-b-2 pb-1 text-sm font-semibold ${
-              active
-                ? 'border-white text-white'
-                : 'border-transparent text-yale-200 hover:text-white'
-            }`}
-          >
-            {v.label}
-          </button>
-        )
-      })}
-    </nav>
-  )
-}
-
 function App() {
   const [courses, setCourses] = useState([])
   const [status, setStatus] = useState('loading')
@@ -65,6 +33,7 @@ function App() {
   const [selectedIds, setSelectedIds] = useState(() => new Set())
   const [mobileTab, setMobileTab] = useState('calendar')
   const [view, setView] = useState('planner')
+  const [compareStep, setCompareStep] = useState('shortlist')
   // One compare store for both layouts, so desktop and mobile never diverge.
   const compare = useCompareStore()
   const [catalogTermCode, setCatalogTermCode] = useState(null)
@@ -291,6 +260,12 @@ function App() {
     onClearPlan: clearPlan,
   }
 
+  const termSwitchProps = {
+    terms: catalogTerms,
+    termCode: activeTermCode,
+    onTermChange: setCatalogTermCode,
+  }
+
   const plansPanelProps = {
     plans: planStore.plans,
     courses,
@@ -312,77 +287,61 @@ function App() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-gray-50 lg:h-dvh lg:overflow-hidden">
-      <header className="shrink-0 border-b border-yale-950 bg-yale-900 px-4 py-3 text-white sm:py-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <h1 className="text-xl font-semibold">
-              Yale SOM Course Planner
-            </h1>
-            <p className="mt-1 text-sm text-yale-100">
-              {fallYear != null && springYear != null ? (
-                <>
-                  Academic Year {fallYear}-{String(springYear).slice(-2)}
-                  <span aria-hidden className="px-1.5">
-                    ·
-                  </span>
-                </>
+      <NavBar mode={view} onModeChange={setView} />
+
+      {/* Desktop sub bar follows the header tabs. */}
+      <SubBar className="hidden lg:block">
+        {view === 'planner' ? (
+          <PlansMenu
+            plans={planStore.plans}
+            courses={courses}
+            activePlanId={planStore.activePlanId}
+            activePlanName={activePlan?.name ?? null}
+            hasSelection={selectedIds.size > 0}
+            isDirty={isDirty}
+            onAddPlan={handleAddPlan}
+            onSelectPlan={handleSelectPlan}
+            onSavePlan={handleSavePlan}
+            onRenamePlan={handleRenamePlan}
+            onDeletePlan={handleDeletePlan}
+          />
+        ) : (
+          <>
+            <CompareStepTabs step={compareStep} onStepChange={setCompareStep} />
+            <TermSwitch {...termSwitchProps} />
+          </>
+        )}
+      </SubBar>
+
+      {/* Phone sub bar follows the bottom-nav tab; plans are managed in the Plans tab. */}
+      <SubBar className="lg:hidden">
+        {mobileTab === 'compare' ? (
+          <>
+            <CompareStepTabs step={compareStep} onStepChange={setCompareStep} />
+            <TermSwitch {...termSwitchProps} />
+          </>
+        ) : (
+          <>
+            <p className="min-w-0 truncate text-sm text-[#1a1f2b]">
+              <span className="font-semibold">
+                {activePlan?.name ?? 'No plan selected'}
+              </span>
+              {isDirty ? (
+                <span className="font-medium text-amber-700"> · unsaved</span>
               ) : null}
-              {courses.length} courses loaded
             </p>
-            <p className="mt-0.5 text-xs text-yale-200">
-              Source:{' '}
-              <a
-                href={YALE_COURSE_LIST_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-white underline decoration-yale-200/80 underline-offset-2 hover:decoration-white"
+            {planStore.activePlanId && isDirty ? (
+              <button
+                type="button"
+                onClick={() => handleSavePlan(planStore.activePlanId)}
+                className={`h-9 rounded-md px-3 text-sm font-medium ${SAVE_BUTTON}`}
               >
-                Yale SOM Course List
-              </a>
-            </p>
-            <ViewTabs view={view} onChange={setView} />
-            {mobileTab !== 'compare' ? (
-              <p className="mt-2 text-xs text-yale-100 lg:hidden">
-                <span className="font-medium text-white">
-                  {activePlan?.name ?? 'No plan selected'}
-                </span>
-                {isDirty ? (
-                  <span className="font-medium text-amber-300"> · unsaved</span>
-                ) : null}
-              </p>
+                Save plan
+              </button>
             ) : null}
-          </div>
-          <div className="flex shrink-0 items-stretch gap-2">
-            <ContactMenu />
-            <div className="flex items-stretch gap-2">
-              {planStore.activePlanId && isDirty && mobileTab !== 'compare' ? (
-                <button
-                  type="button"
-                  onClick={() => handleSavePlan(planStore.activePlanId)}
-                  className={`rounded-md px-3 py-2 text-sm font-medium lg:hidden ${SAVE_BUTTON}`}
-                >
-                  Save plan
-                </button>
-              ) : null}
-              <div className={view === 'planner' ? 'hidden lg:block' : 'hidden'}>
-                <PlansMenu
-                  plans={planStore.plans}
-                  courses={courses}
-                  activePlanId={planStore.activePlanId}
-                  activePlanName={activePlan?.name ?? null}
-                  hasSelection={selectedIds.size > 0}
-                  isDirty={isDirty}
-                  onAddPlan={handleAddPlan}
-                  onSelectPlan={handleSelectPlan}
-                  onSavePlan={handleSavePlan}
-                  onRenamePlan={handleRenamePlan}
-                  onDeletePlan={handleDeletePlan}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+          </>
+        )}
+      </SubBar>
 
       {/* Always mounted (hidden with CSS) so search, filters and sort survive tab switches. */}
       <div

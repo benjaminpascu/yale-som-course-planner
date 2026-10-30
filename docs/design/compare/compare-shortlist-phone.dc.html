@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Shortlist on a phone</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#00356b}a:hover{color:#002244}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; font-family: Inter, system-ui, sans-serif; color: #1a1f2b; background: #f3f5f8; display: flex; flex-direction: column; overflow: hidden">
+
+<header style="background: #002a54; color: #ffffff; padding: 14px 16px 12px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: center">
+<div style="font-size: 16px; font-weight: 700">Compare</div>
+<div style="display: flex; align-items: center; gap: 12px">
+<span style="font-size: 12px; color: #c9d6e8; font-variant-numeric: tabular-nums">{{decided}} of 142</span>
+<a href="#" aria-label="Suggestions? Contact me" style="width: 36px; height: 36px; box-sizing: border-box; background: transparent; border: 1px solid rgba(255,255,255,0.45); border-radius: 999px; display: flex; align-items: center; justify-content: center">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H10l-4 3.5V17H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"></path></svg></a>
+</div>
+</div>
+<div style="height: 4px; background: #1d4673; border-radius: 2px; overflow: hidden"><div style="width: {{pct}}; height: 4px; background: #ffffff"></div></div>
+</header>
+
+<div style="display: flex; background: #ffffff; border-bottom: 1px solid #dde3ea">
+<a href="#" aria-current="page" style="flex: 1; text-align: center; padding: 12px 0 9px; font-size: 14px; font-weight: 700; color: #00356b; text-decoration: none; border-bottom: 3px solid #00356b">1 Shortlist</a>
+<a href="#" style="flex: 1; text-align: center; padding: 12px 0; font-size: 14px; font-weight: 500; color: #1a1f2b; text-decoration: none">2 Score · {{shortN}}</a>
+</div>
+
+<div style="flex: 1; min-height: 0; padding: 12px; display: flex; flex-direction: column">
+<sc-if value="{{has}}" hint-placeholder-val="{{true}}">
+<article style="flex: 1; min-height: 0; background: #ffffff; border: 1px solid #dde3ea; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto">
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<span style="font-size: 12px; font-weight: 500; border: 1px solid #c5ced9; border-radius: 4px; padding: 2px 8px">{{c.sess}}</span>
+<sc-for list="{{c.tags}}" as="t" hint-placeholder-count="1"><span style="font-size: 12px; font-weight: 600; color: #00356b; background: #e3ebf5; border-radius: 4px; padding: 3px 8px">{{t}}</span></sc-for>
+</div>
+<h1 style="margin: 0; font-size: 20px; font-weight: 700; line-height: 1.3">{{c.name}}</h1>
+<div style="font-size: 14px; color: #5b6576">{{c.prof}}</div>
+<div style="display: flex; flex-direction: column; gap: 3px">
+<span style="position: absolute; left: -9999px">{{c.daysText}}</span>
+<div aria-hidden="true" style="display: flex; gap: 10px; font-size: 14px">
+<sc-for list="{{c.days}}" as="d" hint-placeholder-count="5">
+<sc-if value="{{d.on}}" hint-placeholder-val="{{false}}"><span style="font-weight: 700; color: #00356b; border-bottom: 2px solid #00356b; padding-bottom: 1px">{{d.l}}</span></sc-if>
+<sc-if value="{{d.off}}" hint-placeholder-val="{{true}}"><span style="font-weight: 500; color: #b5bdc8; padding-bottom: 3px">{{d.l}}</span></sc-if>
+</sc-for>
+</div>
+<span style="font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums">{{c.time}}</span>
+</div>
+<div style="font-size: 12px; color: #5b6576">{{c.meta}}</div>
+<p style="margin: 0; font-size: 14px; line-height: 1.6; border-top: 1px solid #e6eaf0; padding-top: 12px">{{c.desc}}</p>
+<a href="#" style="font-size: 14px; font-weight: 600">Syllabus</a>
+</article>
+</sc-if>
+<sc-if value="{{done}}" hint-placeholder-val="{{false}}">
+<div style="flex: 1; background: #ffffff; border: 1px solid #dde3ea; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center">
+<div style="font-size: 20px; font-weight: 700">All decided</div>
+<div style="font-size: 14px; color: #5b6576">{{yesN}} interested · {{maybeN}} maybe</div>
+<a href="#" style="height: 48px; padding: 0 20px; border-radius: 8px; background: #00356b; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; display: flex; align-items: center">Score and rank</a>
+</div>
+</sc-if>
+</div>
+
+<div style="background: #ffffff; border-top: 1px solid #dde3ea; padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+<button onClick="{{no}}" style="height: 60px; border: 2px solid #c4321f; background: #fdeceb; color: #8f1d14; border-radius: 10px; font-size: 14px; font-weight: 700; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8f1d14" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>Not</button>
+<button onClick="{{maybe}}" style="height: 60px; border: 2px solid #c58a00; background: #fff4d6; color: #6b4700; border-radius: 10px; font-size: 14px; font-weight: 700; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b4700" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path></svg>Maybe</button>
+<button onClick="{{yes}}" style="height: 60px; border: 2px solid #1e7a3c; background: #e5f3e8; color: #145c2c; border-radius: 10px; font-size: 14px; font-weight: 700; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#145c2c" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Interested</button>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #5b6576; min-height: 32px">
+<span>{{last}}</span>
+<sc-if value="{{canUndo}}" hint-placeholder-val="{{false}}"><button onClick="{{undo}}" style="border: 0; background: transparent; color: #00356b; font-size: 12px; font-weight: 600; height: 32px; padding: 0 4px">Undo</button></sc-if>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const st = this.state || {};
+    const dec = st.dec || {};
+    const hist = st.hist || [];
+    const L = ['M','T','W','T','F'];
+    const NAMES = ['Mon','Tue','Wed','Thu','Fri'];
+    const mk = (num, sess, tags, title, prof, on, time, meta, desc) => ({
+      num: num, sess: sess, tags: tags, title: title, prof: prof, time: time, desc: desc,
+      name: num + ' — ' + title + ' (' + meta.split(' · ')[0].replace(' ', ' ') + ')',
+      meta: meta.split(' · ').slice(1).join(' · '),
+      days: L.map((l, i) => ({ l: l, on: on.indexOf(i) >= 0, off: on.indexOf(i) < 0 })),
+      daysText: 'Meets ' + on.map((i) => NAMES[i]).join(' and ')
+    });
+    const base = [
+      mk('MGT 622', 'Full fall', ['STEM'], 'Game Theory', 'Benjamin Polak', [1,3], '11:35–12:50', '4 units · Economics · Bid', 'An introduction to game theory and strategic thinking. Ideas such as dominance, backward induction, Nash equilibrium, evolutionary stability, commitment, credibility, asymmetric information, adverse selection, and signaling are applied to games played in class and to examples drawn from economics, politics, the movies, and elsewhere.'),
+      mk('MGT 656', 'Full fall', ['STEM'], 'Management of Software Development', 'Kyle Jensen', [0,2], '13:00–14:20', '4 units · Technology Management · Bid', 'Students in this course will learn how to manage software development teams through the process of building a basic web application. We will discuss “agile”, continuous delivery, “devops”, and related management practices.'),
+      mk('MGT 800', 'Fall 1', [], 'Crisis Management in Tech', 'Kathryn Guarini', [0,2], '10:05–11:25', '2 units · Technology Management · Bid', 'A crisis can strike at any time, and it can have major impacts on a business, its reputation, and its customers. Each session dives into real-world case studies encompassing data breaches, product failures, regulatory incidents, service disruptions, and cybersecurity attacks.'),
+      mk('MGT 817', 'Full fall', ['STEM'], 'Sports Analytics', 'Tobias Moskowitz', [1], '16:10–19:10', '4 units · Operations · Bid', 'How can you predict the fraction of games a baseball team will win from the number of runs scored for and against? We will tackle sports questions like these using probability models, statistics, decision analysis, and spreadsheets.'),
+      mk('MGT 843', 'Fall 2', [], 'Private Equity: The Deal', 'Song Ma', [0], '16:10–19:10', '2 units · Finance · Bid', 'A highly practical course that puts students in the seat of the private equity investor evaluating a live investment opportunity, following a single transaction from initial due diligence through final bid.')
+    ];
+    const label = { yes: 'Interested', maybe: 'Maybe', no: 'Not interested' };
+    const set = (num, kind) => {
+      const d = Object.assign({}, dec); d[num] = kind;
+      this.setState({ dec: d, hist: hist.concat([num]) });
+    };
+    const queue = base.filter((c) => !dec[c.num]);
+    const cur = queue[0] || null;
+    const tally = { yes: 5, maybe: 3, no: 36 };
+    Object.keys(dec).forEach((k) => { tally[dec[k]] += 1; });
+    const decided = tally.yes + tally.maybe + tally.no;
+    const lastNum = hist.length ? hist[hist.length - 1] : '';
+    return {
+      has: !!cur, done: !cur, c: cur || base[0],
+      no: () => { if (cur) set(cur.num, 'no'); },
+      maybe: () => { if (cur) set(cur.num, 'maybe'); },
+      yes: () => { if (cur) set(cur.num, 'yes'); },
+      undo: () => {
+        if (!hist.length) return;
+        const d = Object.assign({}, dec); delete d[lastNum];
+        this.setState({ dec: d, hist: hist.slice(0, -1) });
+      },
+      canUndo: hist.length > 0,
+      last: lastNum ? lastNum + ' · ' + label[dec[lastNum]] : '',
+      decided: decided, pct: Math.round(decided / 142 * 100) + '%',
+      yesN: tally.yes, maybeN: tally.maybe, shortN: tally.yes + tally.maybe
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -51,43 +51,36 @@ export default function PlansMenu({
   const menuId = 'plans-menu-panel'
 
   return (
-    <div ref={rootRef} className="relative flex h-full shrink-0">
-      <div className="flex flex-wrap items-stretch justify-end gap-2">
-        {activePlanId && isDirty ? (
-          <button
-            type="button"
-            onClick={() => onSavePlan(activePlanId)}
-            className={`rounded-md px-3 py-2 text-sm font-medium ${SAVE_BUTTON}`}
-          >
-            Save plan
-          </button>
-        ) : null}
+    <div ref={rootRef} className="relative flex shrink-0">
+      <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={() => setOpen((prev) => !prev)}
           aria-expanded={open}
           aria-haspopup="dialog"
           aria-controls={open ? menuId : undefined}
-          className="flex max-w-[min(100%,22rem)] flex-col items-end rounded-md border border-yale-600 bg-yale-800 px-3 py-2 text-left hover:bg-yale-700 sm:max-w-md"
+          className="flex h-9 max-w-[22rem] items-center gap-1.5 rounded-md border border-[#c5ced9] bg-white px-3 text-sm text-[#1a1f2b] hover:bg-yale-50"
         >
-          <span className="flex w-full items-center justify-end gap-1.5 text-sm font-semibold">
-            Plans
-            <span aria-hidden className="text-yale-200">
-              ▾
+          <span className="font-semibold">Plan:</span>
+          <span className="truncate">{label}</span>
+          {isDirty ? (
+            <span className="shrink-0 font-medium text-amber-700" title="Unsaved changes">
+              · unsaved
             </span>
-          </span>
-          <span className="mt-0.5 flex w-full items-center justify-end gap-1.5 truncate text-xs text-yale-100">
-            <span className="truncate">{label}</span>
-            {isDirty ? (
-              <span
-                className="shrink-0 font-medium text-amber-300"
-                title="Unsaved changes"
-              >
-                · unsaved
-              </span>
-            ) : null}
+          ) : null}
+          <span aria-hidden className="text-[#5b6576]">
+            ▾
           </span>
         </button>
+        {activePlanId && isDirty ? (
+          <button
+            type="button"
+            onClick={() => onSavePlan(activePlanId)}
+            className={`h-9 rounded-md px-3 text-sm font-medium ${SAVE_BUTTON}`}
+          >
+            Save plan
+          </button>
+        ) : null}
       </div>
 
       {open ? (
@@ -95,7 +88,7 @@ export default function PlansMenu({
           id={menuId}
           role="dialog"
           aria-label="Manage plans"
-          className="absolute right-0 top-full z-50 mt-2 max-h-[min(32rem,calc(100dvh-8rem))] w-[min(32rem,calc(100vw-2rem))] overflow-y-auto rounded-lg border border-yale-200 bg-white shadow-xl"
+          className="absolute left-0 top-full z-50 mt-2 max-h-[min(32rem,calc(100dvh-8rem))] w-[min(32rem,calc(100vw-2rem))] overflow-y-auto rounded-lg border border-yale-200 bg-white shadow-xl"
         >
           <div className="sticky top-0 z-10 flex items-center justify-between border-b border-yale-150 bg-white px-4 py-2.5">
             <p className="text-sm font-semibold text-yale-950">Manage plans</p>
