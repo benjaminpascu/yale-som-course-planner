@@ -111,7 +111,7 @@ export default function ContactMenu() {
             <div>
               <p className="font-medium text-gray-500">Slack</p>
               <p className="mt-0.5">
-                Message <span className="font-medium">{SLACK_HANDLE}</span>
+                Reach out to <span className="font-medium">{SLACK_HANDLE}</span>
               </p>
             </div>
           </div>
