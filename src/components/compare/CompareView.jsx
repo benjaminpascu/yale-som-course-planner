@@ -3,6 +3,8 @@ import { buildCourseGroups } from '../../lib/compareGroups'
 import { toggleSelected } from '../../lib/compareStorage'
 import CourseBrowser from '../CourseBrowser'
 import SectionHeader from '../SectionHeader'
+import CompareTable from './CompareTable'
+import CourseDetailModal from './CourseDetailModal'
 
 function RecoveredNotice({ onDismiss }) {
   return (
@@ -22,7 +24,17 @@ function RecoveredNotice({ onDismiss }) {
   )
 }
 
-function ComparePanel({ selectedGroups, emptyMessage }) {
+function ComparePanel({
+  selectedGroups,
+  emptyMessage,
+  store,
+  update,
+  saveFailed,
+  fallYear,
+  springYear,
+}) {
+  const [detailGroup, setDetailGroup] = useState(null)
+
   return (
     <section className="flex h-full min-h-0 flex-col bg-white">
       <SectionHeader tone="calendar" title="Compare courses" />
@@ -32,15 +44,31 @@ function ComparePanel({ selectedGroups, emptyMessage }) {
             {emptyMessage}
           </p>
         ) : (
-          <ul className="divide-y divide-gray-100 text-xs">
-            {selectedGroups.map((g) => (
-              <li key={g.key} className="px-4 py-2">
-                {g.courseNumber} — {g.title}
-              </li>
-            ))}
-          </ul>
+          <CompareTable
+            groups={selectedGroups}
+            store={store}
+            update={update}
+            onOpenDetails={setDetailGroup}
+          />
         )}
+        <p
+          className={`px-4 py-3 text-[11px] ${
+            saveFailed ? 'font-medium text-red-700' : 'text-gray-400'
+          }`}
+        >
+          {saveFailed
+            ? "Couldn't save — export to Excel to keep a copy."
+            : 'Saved in this browser only.'}
+        </p>
       </div>
+      {detailGroup ? (
+        <CourseDetailModal
+          group={detailGroup}
+          fallYear={fallYear}
+          springYear={springYear}
+          onClose={() => setDetailGroup(null)}
+        />
+      ) : null}
     </section>
   )
 }
@@ -59,7 +87,7 @@ export default function CompareView({
   springYear,
   variant = 'desktop',
 }) {
-  const { store, update, recovered, dismissRecovered } = compare
+  const { store, update, saveFailed, recovered, dismissRecovered } = compare
   const [mobileStep, setMobileStep] = useState('table')
 
   const termCourses = useMemo(
@@ -104,6 +132,15 @@ export default function CompareView({
     />
   )
 
+  const panelProps = {
+    selectedGroups,
+    store,
+    update,
+    saveFailed,
+    fallYear,
+    springYear,
+  }
+
   const notice = recovered ? <RecoveredNotice onDismiss={dismissRecovered} /> : null
 
   if (variant === 'mobile') {
@@ -129,7 +166,7 @@ export default function CompareView({
         {notice}
         <div className="min-h-0 flex-1">
           <ComparePanel
-            selectedGroups={selectedGroups}
+            {...panelProps}
             emptyMessage="Add courses to compare them."
           />
         </div>
@@ -155,7 +192,7 @@ export default function CompareView({
         {notice}
         <div className="min-h-0 flex-1">
           <ComparePanel
-            selectedGroups={selectedGroups}
+            {...panelProps}
             emptyMessage="Tick courses on the left to compare them."
           />
         </div>
