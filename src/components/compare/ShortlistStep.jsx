@@ -73,9 +73,9 @@ function CourseCard({ card, onSwipe }) {
         transform: dragX ? `translateX(${dragX}px) rotate(${dragX / 40}deg)` : undefined,
         transition: dragX ? 'none' : 'transform 150ms ease-out',
       }}
-      className="flex flex-col gap-5 rounded-xl border border-[#dde3ea] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.04)] sm:h-[min(600px,calc(100dvh-280px))] sm:min-h-[420px] sm:px-9 sm:py-8"
+      className="flex flex-col gap-5 rounded-xl border border-[#dde3ea] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.04)] sm:px-9 sm:py-8 lg:min-h-[300px] lg:flex-1"
     >
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap items-center gap-1.5">
         {card.session ? (
           <span className="rounded border border-[#c5ced9] px-2 py-0.5 text-xs font-medium">
             {card.session}
@@ -86,6 +86,7 @@ function CourseCard({ card, onSwipe }) {
             {tag}
           </span>
         ))}
+        {card.category ? <span className="ml-1 text-xs text-[#5b6576]">{card.category}</span> : null}
       </div>
 
       <div className="flex flex-wrap items-start justify-between gap-x-8 gap-y-4">
@@ -118,12 +119,12 @@ function CourseCard({ card, onSwipe }) {
         </div>
       </div>
 
-      {card.meta ? <p className="text-sm text-[#5b6576]">{card.meta}</p> : null}
       <div className="border-t border-[#e6eaf0]" />
-      {/* Fixed card height on desktop: the description scrolls so the buttons never move. */}
-      <div className="sm:min-h-0 sm:flex-1 sm:overflow-y-auto">
+      {/* Desktop: the card fills the space left on screen, so the page itself never scrolls
+          and the buttons stay put; only a long description scrolls inside the card. */}
+      <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
         {card.description ? (
-          <p className="max-w-[68ch] text-base leading-[1.65]">{card.description}</p>
+          <p className="max-w-[72ch] text-base leading-[1.65]">{card.description}</p>
         ) : null}
       </div>
       {card.syllabusUrl ? (
@@ -178,7 +179,7 @@ function Progress({ counts }) {
     { n: counts.no, label: 'Not interested', className: 'text-[#8f1d14]' },
   ]
   return (
-    <section aria-label="Progress" className="flex flex-col gap-3 border-t border-[#dde3ea] pt-5">
+    <section aria-label="Progress" className="flex shrink-0 flex-col gap-3 border-t border-[#dde3ea] pt-4">
       <div className="flex items-center gap-3 text-sm text-[#5b6576]">
         <span className="whitespace-nowrap tabular-nums">
           {counts.decided} of {counts.total} decided
@@ -226,7 +227,10 @@ export default function ShortlistStep({ groups, term, counts, termLabel, onDecid
   }, [current, onDecide])
 
   return (
-    <div ref={rootRef} className="mx-auto flex w-full max-w-[800px] flex-col gap-4 px-3 py-4 sm:px-8 sm:pt-8 sm:pb-14">
+    <div
+      ref={rootRef}
+      className="mx-auto flex w-full max-w-[880px] flex-col gap-4 px-3 py-4 sm:px-8 sm:pt-8 sm:pb-14 lg:min-h-0 lg:flex-1 lg:pt-6 lg:pb-6"
+    >
       {current ? (
         <>
           <CourseCard
@@ -234,7 +238,7 @@ export default function ShortlistStep({ groups, term, counts, termLabel, onDecid
             card={shortlistCard(current)}
             onSwipe={(decision) => onDecide(current.key, decision)}
           />
-          <div className="sticky bottom-[calc(3rem+env(safe-area-inset-bottom))] z-10 -mx-3 flex flex-col gap-1 border-t border-[#dde3ea] bg-white px-4 pt-3 pb-2 sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0">
+          <div className="sticky bottom-[calc(3rem+env(safe-area-inset-bottom))] z-10 -mx-3 flex shrink-0 flex-col gap-1 border-t border-[#dde3ea] bg-white px-4 pt-3 pb-2 sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0">
             <DecisionButtons onDecide={(d) => onDecide(current.key, d)} />
             <div className="flex min-h-9 items-center justify-between gap-2 text-sm text-[#5b6576]">
               <span>{lastLine}</span>

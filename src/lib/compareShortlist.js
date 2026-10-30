@@ -1,5 +1,5 @@
 import { normalizeCategory } from './categoryDisplay'
-import { WEEKDAYS, formatCourseUnits, normalizeBidType } from './courseDisplay'
+import { WEEKDAYS, formatCourseUnits } from './courseDisplay'
 import { formatSessionLabel } from './sessionDisplay'
 
 /** Groups in the saved Shortlist order; any without a place follow in catalog order. */
@@ -30,22 +30,6 @@ export function decisionCounts(groups, decisions) {
 
 const DAY_LETTERS = { Mo: 'M', Tu: 'T', We: 'W', Th: 'T', Fr: 'F' }
 const DAY_NAMES = { Mo: 'Monday', Tu: 'Tuesday', We: 'Wednesday', Th: 'Thursday', Fr: 'Friday' }
-const REGISTRATION_LABELS = { bid: 'Bid', permission: 'Permission', core: 'Core', open: null }
-
-function registrationLabel(raw) {
-  const type = normalizeBidType(raw)
-  return type in REGISTRATION_LABELS ? REGISTRATION_LABELS[type] : raw.trim()
-}
-
-/** "Economics · Bid"; a registration label that repeats the category is dropped. */
-function metaLine(section) {
-  const category = normalizeCategory(section.category)
-  const registration = registrationLabel(section.bidOrPermission ?? '')
-  const parts = [category]
-  if (registration && registration.toLowerCase() !== category.toLowerCase()) parts.push(registration)
-  return parts.filter(Boolean).join(' · ')
-}
-
 /**
  * Display fields for a Shortlist card. Sections don't matter here, so days,
  * time and links come from the first section; professors from all sections.
@@ -64,7 +48,7 @@ export function shortlistCard(group) {
     days,
     daysLabel: meetNames.length ? `Meets ${meetNames.join(' and ')}` : 'No weekly meeting time',
     time: first.startTime && first.endTime ? `${first.startTime}–${first.endTime}` : null,
-    meta: metaLine(first),
+    category: normalizeCategory(first.category),
     description: first.description,
     syllabusUrl: first.syllabusUrl ?? null,
   }

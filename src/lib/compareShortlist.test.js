@@ -66,7 +66,7 @@ function group(sections, extra = {}) {
 }
 
 describe('shortlistCard', () => {
-  test('heading, professor, days, time, meta and syllabus from the course', () => {
+  test('heading, professor, days, time, category and syllabus from the course', () => {
     const card = shortlistCard(group([section()]))
     expect(card.heading).toBe('MGT 537 — Inequality and Social Mobility')
     expect(card.units).toBe('(2 units)')
@@ -80,7 +80,8 @@ describe('shortlistCard', () => {
     ])
     expect(card.daysLabel).toBe('Meets Tuesday and Thursday')
     expect(card.time).toBe('10:05–11:25')
-    expect(card.meta).toBe('Economics · Bid')
+    expect(card.category).toBe('Economics')
+    expect(card).not.toHaveProperty('meta')
     expect(card.session).toBe('Fall 1')
     expect(card.syllabusUrl).toBe('https://example.edu/s.pdf')
   })
@@ -107,23 +108,14 @@ describe('shortlistCard', () => {
     )
     expect(card.time).toBeNull()
     expect(card.days.every((d) => !d.on)).toBe(true)
-    expect(card.meta).toBe('Economics')
     expect(card.syllabusUrl).toBeNull()
     expect(card.units).toBe('(1 unit)')
   })
 
-  test('registration that repeats the category is shown once', () => {
-    expect(
-      shortlistCard(group([section({ category: 'Core', bidOrPermission: 'core' })])).meta,
-    ).toBe('Core')
-  })
-
-  test('permission and other registration values', () => {
-    expect(shortlistCard(group([section({ bidOrPermission: 'permission' })])).meta).toBe(
-      'Economics · Permission',
+  test('category uses the display name; empty category is empty', () => {
+    expect(shortlistCard(group([section({ category: 'Business and the Law' })])).category).toBe(
+      'Business & the Law',
     )
-    expect(shortlistCard(group([section({ bidOrPermission: 'EMBA', category: '' })])).meta).toBe(
-      'EMBA',
-    )
+    expect(shortlistCard(group([section({ category: '' })])).category).toBe('')
   })
 })
