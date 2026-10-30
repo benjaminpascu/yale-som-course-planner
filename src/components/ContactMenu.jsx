@@ -81,42 +81,38 @@ export default function ContactMenu() {
           aria-label="Contact"
           className="absolute right-0 top-full z-50 mt-2 w-[min(20rem,calc(100vw-2rem))] rounded-lg border border-yale-200 bg-white p-4 text-sm text-yale-950 shadow-xl"
         >
-          <p className="font-semibold">Suggestions or found a bug?</p>
-          <p className="mt-1 text-gray-600">
+          <p className="italic text-gray-600">
             Made with love for the Yale community{' '}
-            <span role="img" aria-label="blue heart">
+            <span role="img" aria-label="blue heart" className="not-italic">
               💙
             </span>
           </p>
+          <p className="mt-2 font-semibold">Suggestions or found a bug?</p>
 
-          <div className="mt-4 space-y-3">
-            <div>
-              <p className="font-medium text-gray-500">Email</p>
-              <div className="mt-0.5 flex items-center justify-between gap-2">
-                <a
-                  href={mailto}
-                  className="truncate font-medium text-yale-700 underline underline-offset-2 hover:text-yale-900"
-                >
-                  {CONTACT_EMAIL}
-                </a>
-                <button
-                  type="button"
-                  onClick={handleCopyEmail}
-                  className="shrink-0 rounded border border-yale-200 px-2 py-0.5 font-medium text-yale-800 hover:bg-yale-50"
-                >
-                  {copied ? 'Copied' : 'Copy'}
-                </button>
-              </div>
+          <div className="mt-2 space-y-1.5">
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-gray-500">Email:</span>
+              <a
+                href={mailto}
+                className="min-w-0 truncate font-medium text-yale-700 underline underline-offset-2 hover:text-yale-900"
+              >
+                {CONTACT_EMAIL}
+              </a>
+              <button
+                type="button"
+                onClick={handleCopyEmail}
+                className="ml-auto shrink-0 rounded border border-yale-200 px-2 py-0.5 font-medium text-yale-800 hover:bg-yale-50"
+              >
+                {copied ? 'Copied' : 'Copy'}
+              </button>
             </div>
-            <div>
-              <p className="font-medium text-gray-500">Slack</p>
-              <p className="mt-0.5">
-                Reach out to <span className="font-medium">{SLACK_HANDLE}</span>
-              </p>
-            </div>
+            <p>
+              <span className="font-medium text-gray-500">Slack:</span>{' '}
+              <span className="font-medium">{SLACK_HANDLE}</span>
+            </p>
           </div>
 
-          <p className="mt-4 border-t border-yale-150 pt-3 text-gray-500">
+          <p className="mt-3 border-t border-yale-150 pt-2.5 text-gray-500">
             Course data:{' '}
             <a
               href={YALE_COURSE_LIST_URL}
