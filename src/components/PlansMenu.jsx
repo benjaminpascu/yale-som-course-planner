@@ -59,7 +59,7 @@ export default function PlansMenu({
           aria-expanded={open}
           aria-haspopup="dialog"
           aria-controls={open ? menuId : undefined}
-          className="flex h-9 max-w-[22rem] items-center gap-1.5 rounded-md border border-[#c5ced9] bg-white px-3 text-sm text-[#1a1f2b] hover:bg-yale-50"
+          className="flex h-9 max-w-[22rem] items-center gap-1.5 rounded-md border border-[#c3d2e6] bg-[#e3ebf5] px-3 text-sm text-yale-900 hover:bg-[#d4e1f0]"
         >
           <span className="font-semibold">Plan:</span>
           <span className="truncate">{label}</span>
@@ -68,7 +68,7 @@ export default function PlansMenu({
               · unsaved
             </span>
           ) : null}
-          <span aria-hidden className="text-[#5b6576]">
+          <span aria-hidden className="text-yale-800">
             ▾
           </span>
         </button>

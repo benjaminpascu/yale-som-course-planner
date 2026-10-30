@@ -82,7 +82,7 @@ No database or environment variables. Course data is the CSVs in `docs/data-samp
 | Section colors / in-plan highlight | `src/lib/sectionTheme.js` |
 | Fall/spring catalog years + header label | `src/lib/academicYear.js`, `App.jsx` |
 | Session- and term-aware conflicts | `src/lib/scheduleConflicts.js` |
-| Catalog term selector | `CourseBrowser.jsx` (`TermSelector`), term list from `getCatalogTerms` in `academicYear.js` |
+| Term selector (Fall / Spring) | `TermSwitch` in `src/components/SubBar.jsx` (top right of the sub bar, both modes); term list from `getCatalogTerms` in `academicYear.js` |
 | Load data (bundled term CSVs) | `src/lib/loadData.js` |
 | Parse courses + `hasMeetingTime` + inline tags | `src/lib/parseCourses.js` |
 | Category typo aliases only (new CSV values pass through) | `src/lib/categoryDisplay.js` |

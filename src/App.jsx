@@ -294,6 +294,13 @@ function App() {
     onTermChange: setCatalogTermCode,
   }
 
+  const compareStepTabsProps = {
+    step: compareStep,
+    onStepChange: setCompareStep,
+    leftCount: compareCounts.total - compareCounts.decided,
+    shortlistCount: compareCounts.yes + compareCounts.maybe,
+  }
+
   const plansPanelProps = {
     plans: planStore.plans,
     courses,
@@ -317,7 +324,7 @@ function App() {
     <div className="flex min-h-dvh flex-col bg-gray-50 lg:h-dvh lg:overflow-hidden">
       <NavBar mode={view} onModeChange={setView} />
 
-      {/* Desktop sub bar follows the header tabs. */}
+      {/* Sub bar: plan (Planner) or steps (Compare) on the left, term switch on the right. */}
       <SubBar className="hidden lg:block">
         {view === 'planner' ? (
           <PlansMenu
@@ -334,51 +341,33 @@ function App() {
             onDeletePlan={handleDeletePlan}
           />
         ) : (
-          <>
-            <CompareStepTabs
-              step={compareStep}
-              onStepChange={setCompareStep}
-              leftCount={compareCounts.total - compareCounts.decided}
-              shortlistCount={compareCounts.yes + compareCounts.maybe}
-            />
-            <TermSwitch {...termSwitchProps} />
-          </>
+          <CompareStepTabs {...compareStepTabsProps} />
         )}
+        <TermSwitch {...termSwitchProps} />
       </SubBar>
 
-      {/* Phone sub bar follows the bottom-nav tab; plans are managed in the Plans tab. */}
+      {/* Phones follow the bottom-nav tab; plans are managed in the Plans tab. */}
       <SubBar className="lg:hidden">
         {mobileTab === 'compare' ? (
-          <>
-            <CompareStepTabs
-              step={compareStep}
-              onStepChange={setCompareStep}
-              leftCount={compareCounts.total - compareCounts.decided}
-              shortlistCount={compareCounts.yes + compareCounts.maybe}
-            />
-            <TermSwitch {...termSwitchProps} />
-          </>
+          <CompareStepTabs {...compareStepTabsProps} />
         ) : (
-          <>
+          <div className="flex min-w-0 items-center gap-2">
             <p className="min-w-0 truncate text-sm text-[#1a1f2b]">
-              <span className="font-semibold">
-                {activePlan?.name ?? 'No plan selected'}
-              </span>
-              {isDirty ? (
-                <span className="font-medium text-amber-700"> · unsaved</span>
-              ) : null}
+              <span className="font-semibold">{activePlan?.name ?? 'No plan selected'}</span>
+              {isDirty ? <span className="font-medium text-amber-700"> · unsaved</span> : null}
             </p>
             {planStore.activePlanId && isDirty ? (
               <button
                 type="button"
                 onClick={() => handleSavePlan(planStore.activePlanId)}
-                className={`h-9 rounded-md px-3 text-sm font-medium ${SAVE_BUTTON}`}
+                className={`h-9 shrink-0 rounded-md px-3 text-sm font-medium ${SAVE_BUTTON}`}
               >
                 Save plan
               </button>
             ) : null}
-          </>
+          </div>
         )}
+        <TermSwitch {...termSwitchProps} />
       </SubBar>
 
       <main
@@ -394,9 +383,7 @@ function App() {
             onToggleCourse={toggleCourse}
             fallYear={fallYear}
             springYear={springYear}
-            terms={catalogTerms}
             termCode={activeTermCode}
-            onTermChange={setCatalogTermCode}
           />
         </aside>
         <section className="flex min-h-0 flex-col overflow-hidden">
@@ -418,9 +405,7 @@ function App() {
             onToggleCourse={toggleCourse}
             fallYear={fallYear}
             springYear={springYear}
-            terms={catalogTerms}
             termCode={activeTermCode}
-            onTermChange={setCatalogTermCode}
             fullHeight
           />
         ) : null}
