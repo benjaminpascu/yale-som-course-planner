@@ -1,19 +1,13 @@
 import { describe, expect, test } from 'vitest'
 import {
   COMPARE_STORAGE_KEY,
-  addCriterion,
-  countScoresForCriterion,
-  createDefaultCompareStore,
-  deleteCriterion,
+  DEFAULT_CRITERIA,
+  createEmptyCompareStore,
+  decide,
+  getTermData,
   loadCompareStore,
   persistCompareStore,
-  renameCriterion,
-  setCriterionWeight,
-  setNote,
-  setProfessorNote,
-  setProfessorRating,
-  setScore,
-  toggleSelected,
+  undoLastDecision,
 } from './compareStorage'
 
 function fake(data = {}) {
@@ -28,65 +22,81 @@ function fake(data = {}) {
   }
 }
 
+const FALL = '202603'
+const SPRING = '202701'
+
 describe('loadCompareStore', () => {
-  test('missing key gives defaults with three criteria', () => {
+  test('missing key gives an empty store; a term starts with default criteria', () => {
     const { store, recovered } = loadCompareStore(fake())
-    expect(store.criteria.map((c) => c.name)).toEqual(['Interesting', 'Useful', 'Professor'])
-    expect(store.criteria.map((c) => c.weight)).toEqual([5, 5, 5])
     expect(recovered).toBe(false)
+    const term = getTermData(store, FALL)
+    expect(term.decisions).toEqual({})
+    expect(term.criteria).toEqual(DEFAULT_CRITERIA)
+    expect(DEFAULT_CRITERIA.map((c) => [c.name, c.weight])).toEqual([
+      ['Interesting', 0.35],
+      ['Useful', 0.45],
+      ['Professor', 0.2],
+    ])
   })
 
   test('corrupt JSON is backed up, not lost', () => {
     const storage = fake({ [COMPARE_STORAGE_KEY]: '{not json' })
-    const { recovered, store } = loadCompareStore(storage)
-    expect(recovered).toBe(true)
-    expect(store.criteria).toHaveLength(3)
+    expect(loadCompareStore(storage).recovered).toBe(true)
     const backupKey = Object.keys(storage.data).find((k) =>
       k.startsWith(`${COMPARE_STORAGE_KEY}-backup-`),
     )
     expect(storage.data[backupKey]).toBe('{not json')
   })
 
-  test('newer version is backed up rather than misread', () => {
-    const raw = JSON.stringify({ version: 2 })
+  test('a store from another version is backed up rather than misread', () => {
+    const raw = JSON.stringify({ version: 1, criteria: [] })
     const storage = fake({ [COMPARE_STORAGE_KEY]: raw })
     expect(loadCompareStore(storage).recovered).toBe(true)
     expect(Object.values(storage.data).filter((v) => v === raw)).toHaveLength(2)
   })
 
-  test('normalize drops out-of-range scores and restores missing professor criterion', () => {
+  test('normalize drops invalid decisions and history entries without a decision', () => {
     const raw = {
-      version: 1,
-      criteria: [{ id: 'x', name: 'X', weight: 5, kind: 'manual' }],
-      selected: {},
-      scores: { k: { x: 11, y: 4, z: 7.5 } },
-      notes: {},
-      professors: {},
+      version: 2,
+      terms: {
+        [FALL]: {
+          decisions: { a: 'yes', b: 'nope', c: 'no' },
+          history: ['a', 'b', 'c', 'zzz'],
+        },
+      },
     }
     const { store } = loadCompareStore(fake({ [COMPARE_STORAGE_KEY]: JSON.stringify(raw) }))
-    expect(store.scores.k).toEqual({ y: 4 })
-    expect(store.criteria.filter((c) => c.kind === 'professor')).toHaveLength(1)
-    expect(store.criteria[0]).toMatchObject({ id: 'x', name: 'X' })
+    const term = getTermData(store, FALL)
+    expect(term.decisions).toEqual({ a: 'yes', c: 'no' })
+    expect(term.history).toEqual(['a', 'c'])
+    expect(term.criteria).toEqual(DEFAULT_CRITERIA)
   })
 
-  test('localStorage that throws on read gives defaults', () => {
-    const broken = {
-      getItem() {
-        throw new Error('blocked')
+  test('blocked localStorage (reading window.localStorage throws) falls back', () => {
+    const had = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
+    Object.defineProperty(globalThis, 'localStorage', {
+      configurable: true,
+      get() {
+        throw new Error('SecurityError')
       },
-      setItem() {},
+    })
+    try {
+      expect(loadCompareStore().store).toEqual(createEmptyCompareStore())
+      expect(persistCompareStore(createEmptyCompareStore())).toBe(false)
+    } finally {
+      if (had) Object.defineProperty(globalThis, 'localStorage', had)
+      else delete globalThis.localStorage
     }
-    expect(loadCompareStore(broken).store.criteria).toHaveLength(3)
   })
 })
 
 describe('persistCompareStore', () => {
-  test('round-trip keeps scores for courses not in the catalog', () => {
+  test('round-trips decisions per term', () => {
     const storage = fake()
-    const store = setScore(createDefaultCompareStore(), 'MGT 999|gone|ft', 'interesting', 7)
+    const store = decide(createEmptyCompareStore(), FALL, 'MGT 537|x|ft', 'yes')
     expect(persistCompareStore(store, storage)).toBe(true)
-    expect(loadCompareStore(storage).store.scores['MGT 999|gone|ft']).toEqual({
-      interesting: 7,
+    expect(getTermData(loadCompareStore(storage).store, FALL).decisions).toEqual({
+      'MGT 537|x|ft': 'yes',
     })
   })
 
@@ -96,107 +106,41 @@ describe('persistCompareStore', () => {
         throw new Error('quota')
       },
     }
-    expect(persistCompareStore(createDefaultCompareStore(), full)).toBe(false)
+    expect(persistCompareStore(createEmptyCompareStore(), full)).toBe(false)
   })
 })
 
-describe('updaters', () => {
-  test('toggleSelected is per term and keeps scores', () => {
-    let store = setScore(createDefaultCompareStore(), 'k', 'useful', 5)
-    store = toggleSelected(store, '202609', 'k')
-    expect(store.selected).toEqual({ 202609: ['k'] })
-    store = toggleSelected(store, '202609', 'k')
-    expect(store.selected['202609']).toEqual([])
-    expect(store.scores.k).toEqual({ useful: 5 })
+describe('decide and undo', () => {
+  test('decisions are kept per term', () => {
+    let store = decide(createEmptyCompareStore(), FALL, 'a', 'yes')
+    store = decide(store, SPRING, 'a', 'no')
+    expect(getTermData(store, FALL).decisions.a).toBe('yes')
+    expect(getTermData(store, SPRING).decisions.a).toBe('no')
   })
 
-  test('setScore null removes the score and empty course entry', () => {
-    let store = setScore(createDefaultCompareStore(), 'k', 'useful', 5)
-    store = setScore(store, 'k', 'useful', null)
-    expect(store.scores.k).toBeUndefined()
+  test('undo removes the most recent decision only', () => {
+    let store = decide(createEmptyCompareStore(), FALL, 'a', 'yes')
+    store = decide(store, FALL, 'b', 'maybe')
+    store = undoLastDecision(store, FALL)
+    expect(getTermData(store, FALL).decisions).toEqual({ a: 'yes' })
+    expect(getTermData(store, FALL).history).toEqual(['a'])
+  })
+
+  test('re-deciding a course moves it to the end of history', () => {
+    let store = decide(createEmptyCompareStore(), FALL, 'a', 'yes')
+    store = decide(store, FALL, 'b', 'no')
+    store = decide(store, FALL, 'a', 'maybe')
+    expect(getTermData(store, FALL).history).toEqual(['b', 'a'])
+  })
+
+  test('undo with nothing to undo returns the same store', () => {
+    const store = createEmptyCompareStore()
+    expect(undoLastDecision(store, FALL)).toBe(store)
   })
 
   test('updaters do not mutate the input store', () => {
-    const before = createDefaultCompareStore()
-    setScore(before, 'k', 'useful', 5)
-    toggleSelected(before, '202609', 'k')
-    expect(before.scores).toEqual({})
-    expect(before.selected).toEqual({})
-  })
-
-  test('setNote keeps text verbatim and blank removes', () => {
-    let store = setNote(createDefaultCompareStore(), 'k', ' line one\nline two ')
-    expect(store.notes.k).toBe(' line one\nline two ')
-    store = setNote(store, 'k', '   ')
-    expect(store.notes.k).toBeUndefined()
-  })
-
-  test('professor rating and note are independent', () => {
-    let store = setProfessorRating(createDefaultCompareStore(), 'Pinker, Edi', 8)
-    store = setProfessorNote(store, 'Pinker, Edi', 'great')
-    expect(store.professors['Pinker, Edi']).toEqual({ rating: 8, note: 'great' })
-    store = setProfessorRating(store, 'Pinker, Edi', null)
-    expect(store.professors['Pinker, Edi']).toEqual({ note: 'great' })
-    store = setProfessorNote(store, 'Pinker, Edi', '')
-    expect(store.professors['Pinker, Edi']).toBeUndefined()
-  })
-
-  test('deleteCriterion removes its scores; count first', () => {
-    let store = setScore(setScore(createDefaultCompareStore(), 'a', 'useful', 5), 'b', 'useful', 6)
-    store = setScore(store, 'a', 'interesting', 9)
-    expect(countScoresForCriterion(store, 'useful')).toBe(2)
-    store = deleteCriterion(store, 'useful')
-    expect(store.criteria.some((c) => c.id === 'useful')).toBe(false)
-    expect(store.scores.a).toEqual({ interesting: 9 })
-    expect(store.scores.b).toBeUndefined()
-  })
-
-  test('professor criterion cannot be deleted or renamed', () => {
-    const store = createDefaultCompareStore()
-    expect(deleteCriterion(store, 'professor')).toBe(store)
-    expect(renameCriterion(store, 'professor', 'Prof').store).toBe(store)
-  })
-
-  test('addCriterion rejects empty and duplicate names', () => {
-    const store = createDefaultCompareStore()
-    expect(addCriterion(store, '  ').error).toBe('empty')
-    expect(addCriterion(store, 'useful').error).toBe('duplicate')
-    const added = addCriterion(store, ' Networking ').store.criteria.at(-1)
-    expect(added).toMatchObject({ name: 'Networking', weight: 5, kind: 'manual' })
-    expect(typeof added.id).toBe('string')
-  })
-
-  test('renameCriterion keeps id and validates', () => {
-    const store = createDefaultCompareStore()
-    expect(renameCriterion(store, 'useful', 'Interesting').error).toBe('duplicate')
-    expect(renameCriterion(store, 'useful', '').error).toBe('empty')
-    const renamed = renameCriterion(store, 'useful', 'Career value').store
-    expect(renamed.criteria.find((c) => c.id === 'useful').name).toBe('Career value')
-  })
-
-  test('setCriterionWeight clamps to 0..10', () => {
-    let store = setCriterionWeight(createDefaultCompareStore(), 'useful', 12)
-    expect(store.criteria.find((c) => c.id === 'useful').weight).toBe(10)
-    store = setCriterionWeight(store, 'professor', 0)
-    expect(store.criteria.find((c) => c.id === 'professor').weight).toBe(0)
-  })
-})
-
-describe('blocked localStorage (reading window.localStorage throws)', () => {
-  test('load and persist fall back instead of throwing', () => {
-    const had = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
-    Object.defineProperty(globalThis, 'localStorage', {
-      configurable: true,
-      get() {
-        throw new Error('SecurityError')
-      },
-    })
-    try {
-      expect(loadCompareStore().store.criteria).toHaveLength(3)
-      expect(persistCompareStore(createDefaultCompareStore())).toBe(false)
-    } finally {
-      if (had) Object.defineProperty(globalThis, 'localStorage', had)
-      else delete globalThis.localStorage
-    }
+    const before = createEmptyCompareStore()
+    decide(before, FALL, 'a', 'yes')
+    expect(before).toEqual(createEmptyCompareStore())
   })
 })

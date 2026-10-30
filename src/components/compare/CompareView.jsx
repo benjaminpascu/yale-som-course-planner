@@ -1,23 +1,12 @@
-import { useCallback, useMemo, useState } from 'react'
-import { formatTermLabel } from '../../lib/academicYear'
-import { downloadCompareWorkbook } from '../../lib/compareExport'
-import { buildCourseGroups } from '../../lib/compareGroups'
-import { toggleSelected } from '../../lib/compareStorage'
-import CourseBrowser from '../CourseBrowser'
-import SectionHeader from '../SectionHeader'
-import CompareTable from './CompareTable'
-import CourseDetailModal from './CourseDetailModal'
-import SetupPanel from './SetupPanel'
-
-const HEADER_BUTTON =
-  'shrink-0 rounded border border-yale-300 bg-white px-2.5 py-1 text-xs font-medium text-yale-900 hover:bg-yale-50 disabled:cursor-not-allowed disabled:opacity-50'
+import { useCallback } from 'react'
+import { decide, undoLastDecision } from '../../lib/compareStorage'
+import ShortlistStep from './ShortlistStep'
 
 function RecoveredNotice({ onDismiss }) {
   return (
-    <div className="flex items-center justify-between gap-3 border-b border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-900">
+    <div className="flex items-center justify-between gap-3 border-b border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-900 sm:px-8">
       <span>
-        Your saved comparison couldn&apos;t be read. A backup was kept in this
-        browser.
+        Your saved comparison couldn&apos;t be read. A backup was kept in this browser.
       </span>
       <button
         type="button"
@@ -30,232 +19,51 @@ function RecoveredNotice({ onDismiss }) {
   )
 }
 
-function ExportButton({ groups, store, termLabel }) {
-  const [busy, setBusy] = useState(false)
-  const [failed, setFailed] = useState(false)
-
-  async function handleExport() {
-    setBusy(true)
-    setFailed(false)
-    try {
-      await downloadCompareWorkbook({ groups, store, termLabel })
-    } catch (err) {
-      console.error('Excel export failed', err)
-      setFailed(true)
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={handleExport}
-      disabled={busy || groups.length === 0}
-      className={`${HEADER_BUTTON} ${failed ? '!border-red-400 !text-red-700' : ''}`}
-    >
-      {busy ? 'Exporting…' : failed ? 'Export failed — retry' : 'Export'}
-    </button>
-  )
-}
-
-function ComparePanel({
-  termLabel,
-  courses,
-  selectedGroups,
-  emptyMessage,
-  store,
-  update,
-  saveFailed,
-  fallYear,
-  springYear,
-}) {
-  const [detailGroup, setDetailGroup] = useState(null)
-  const [setupOpen, setSetupOpen] = useState(false)
-  const comparedProfessors = useMemo(
-    () => [...new Set(selectedGroups.flatMap((g) => g.professors))],
-    [selectedGroups],
-  )
-
-  return (
-    <section className="flex h-full min-h-0 flex-col bg-white">
-      <SectionHeader tone="calendar" title="Compare courses">
-        <div className="flex gap-2">
-          <button type="button" onClick={() => setSetupOpen(true)} className={HEADER_BUTTON}>
-            Set up
-          </button>
-          <ExportButton groups={selectedGroups} store={store} termLabel={termLabel} />
-        </div>
-      </SectionHeader>
-      <div className="min-h-0 flex-1 overflow-auto">
-        {selectedGroups.length === 0 ? (
-          <p className="px-4 py-8 text-center text-sm text-gray-500">
-            {emptyMessage}
-          </p>
-        ) : (
-          <CompareTable
-            groups={selectedGroups}
-            store={store}
-            update={update}
-            onOpenDetails={setDetailGroup}
-          />
-        )}
-        <p
-          className={`px-4 py-3 text-[11px] ${
-            saveFailed ? 'font-medium text-red-700' : 'text-gray-400'
-          }`}
-        >
-          {saveFailed
-            ? "Couldn't save — export to Excel to keep a copy."
-            : 'Saved in this browser only.'}
-        </p>
-      </div>
-      <SetupPanel
-        open={setupOpen}
-        onClose={() => setSetupOpen(false)}
-        store={store}
-        update={update}
-        allCourses={courses}
-        comparedProfessors={comparedProfessors}
-      />
-      {detailGroup ? (
-        <CourseDetailModal
-          group={detailGroup}
-          fallYear={fallYear}
-          springYear={springYear}
-          onClose={() => setDetailGroup(null)}
-        />
-      ) : null}
-    </section>
-  )
-}
-
-/**
- * Compare Courses: the planner's catalog sidebar (tick mode) on the left and
- * the comparison on the right. Mobile switches between the two.
- */
+/** Compare mode body: step 1 Shortlist or step 2 Score and rank (from the sub bar). */
 export default function CompareView({
   compare,
-  courses,
-  terms,
+  groups,
+  term,
+  counts,
   termCode,
-  onTermChange,
-  fallYear,
-  springYear,
-  variant = 'desktop',
+  termLabel,
+  step,
+  onStepChange,
 }) {
-  const { store, update, saveFailed, recovered, dismissRecovered } = compare
-  const [mobileStep, setMobileStep] = useState('table')
+  const { update, saveFailed, recovered, dismissRecovered } = compare
 
-  const termCourses = useMemo(
-    () => courses.filter((c) => c.termCode === termCode),
-    [courses, termCode],
+  const handleDecide = useCallback(
+    (key, decision) => update((s) => decide(s, termCode, key, decision)),
+    [update, termCode],
   )
-  const groups = useMemo(() => buildCourseGroups(termCourses), [termCourses])
-  const groupByKey = useMemo(
-    () => new Map(groups.map((g) => [g.key, g])),
-    [groups],
-  )
-
-  const selectedGroups = useMemo(
-    () =>
-      (store.selected[termCode] ?? [])
-        .map((key) => groupByKey.get(key))
-        .filter(Boolean),
-    [store.selected, termCode, groupByKey],
-  )
-  const selectedKeys = useMemo(
-    () => new Set(selectedGroups.map((g) => g.key)),
-    [selectedGroups],
-  )
-
-  const toggleKey = useCallback(
-    (key) => update((s) => toggleSelected(s, termCode, key)),
+  const handleUndo = useCallback(
+    () => update((s) => undoLastDecision(s, termCode)),
     [update, termCode],
   )
 
-  const browser = (
-    <CourseBrowser
-      courses={courses}
-      mode="compare"
-      compareSelectedKeys={selectedKeys}
-      onToggleCompareKey={toggleKey}
-      fallYear={fallYear}
-      springYear={springYear}
-      terms={terms}
-      termCode={termCode}
-      onTermChange={onTermChange}
-      fullHeight={variant === 'mobile'}
-    />
-  )
-
-  const panelProps = {
-    termLabel: formatTermLabel(termCode),
-    courses,
-    selectedGroups,
-    store,
-    update,
-    saveFailed,
-    fallYear,
-    springYear,
-  }
-
-  const notice = recovered ? <RecoveredNotice onDismiss={dismissRecovered} /> : null
-
-  if (variant === 'mobile') {
-    if (mobileStep === 'add') {
-      return (
-        <div className="flex h-full min-h-0 flex-col pb-14">
-          {notice}
-          <div className="min-h-0 flex-1">{browser}</div>
-          <div className="fixed inset-x-0 bottom-[calc(3rem+env(safe-area-inset-bottom))] z-40 border-t border-gray-200 bg-white p-2">
-            <button
-              type="button"
-              onClick={() => setMobileStep('table')}
-              className="w-full rounded-md bg-yale-800 px-3 py-2 text-sm font-semibold text-white hover:bg-yale-900"
-            >
-              Done
-            </button>
-          </div>
-        </div>
-      )
-    }
-    return (
-      <div className="flex h-full min-h-0 flex-col pb-14">
-        {notice}
-        <div className="min-h-0 flex-1">
-          <ComparePanel
-            {...panelProps}
-            emptyMessage="Add courses to compare them."
-          />
-        </div>
-        <div className="fixed inset-x-0 bottom-[calc(3rem+env(safe-area-inset-bottom))] z-40 border-t border-gray-200 bg-white p-2">
-          <button
-            type="button"
-            onClick={() => setMobileStep('add')}
-            className="w-full rounded-md border border-yale-300 bg-white px-3 py-2 text-sm font-semibold text-yale-900 hover:bg-yale-50"
-          >
-            + Add courses
-          </button>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <main className="grid min-h-0 w-full flex-1 grid-cols-[22rem_minmax(0,1fr)] overflow-hidden bg-white">
-      <aside className="flex min-h-0 flex-col overflow-hidden border-r-2 border-yale-600">
-        {browser}
-      </aside>
-      <section className="flex min-h-0 flex-col overflow-hidden">
-        {notice}
-        <div className="min-h-0 flex-1">
-          <ComparePanel
-            {...panelProps}
-            emptyMessage="Tick courses on the left to compare them."
-          />
-        </div>
-      </section>
-    </main>
+    <>
+      {recovered ? <RecoveredNotice onDismiss={dismissRecovered} /> : null}
+      {saveFailed ? (
+        <p className="px-4 py-2 text-xs font-medium text-red-700 sm:px-8">
+          Couldn&apos;t save — this browser is blocking storage.
+        </p>
+      ) : null}
+      {step === 'shortlist' ? (
+        <ShortlistStep
+          groups={groups}
+          term={term}
+          counts={counts}
+          termLabel={termLabel}
+          onDecide={handleDecide}
+          onUndo={handleUndo}
+          onGoToScore={() => onStepChange('score')}
+        />
+      ) : (
+        <p className="mx-auto w-full max-w-[800px] px-4 py-12 text-center text-sm text-[#5b6576]">
+          Score and rank arrives in Step 3.
+        </p>
+      )}
+    </>
   )
 }

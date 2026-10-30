@@ -9,7 +9,14 @@ import PlansMenu from './components/PlansMenu'
 import PlanningPanel from './components/PlanningPanel'
 import { CompareStepTabs, SubBar, TermSwitch } from './components/SubBar'
 import { SAVE_BUTTON } from './lib/sectionTheme'
-import { getCatalogTerms, getSemesterCalendarYears } from './lib/academicYear'
+import {
+  formatTermLabel,
+  getCatalogTerms,
+  getSemesterCalendarYears,
+} from './lib/academicYear'
+import { buildCourseGroups } from './lib/compareGroups'
+import { decisionCounts } from './lib/compareShortlist'
+import { getTermData } from './lib/compareStorage'
 import { loadAppData } from './lib/loadData'
 import {
   courseIdSetFromArray,
@@ -110,6 +117,13 @@ function App() {
   const activeTermCode = catalogTerms.some((t) => t.id === catalogTermCode)
     ? catalogTermCode
     : (catalogTerms[0]?.id ?? null)
+
+  const compareGroups = useMemo(
+    () => buildCourseGroups(courses.filter((c) => c.termCode === activeTermCode)),
+    [courses, activeTermCode],
+  )
+  const compareTerm = getTermData(compare.store, activeTermCode)
+  const compareCounts = decisionCounts(compareGroups, compareTerm.decisions)
 
   const toggleCourse = useCallback((courseId) => {
     setSelectedIds((prev) => {
@@ -307,7 +321,12 @@ function App() {
           />
         ) : (
           <>
-            <CompareStepTabs step={compareStep} onStepChange={setCompareStep} />
+            <CompareStepTabs
+              step={compareStep}
+              onStepChange={setCompareStep}
+              leftCount={compareCounts.total - compareCounts.decided}
+              shortlistCount={compareCounts.yes + compareCounts.maybe}
+            />
             <TermSwitch {...termSwitchProps} />
           </>
         )}
@@ -317,7 +336,12 @@ function App() {
       <SubBar className="lg:hidden">
         {mobileTab === 'compare' ? (
           <>
-            <CompareStepTabs step={compareStep} onStepChange={setCompareStep} />
+            <CompareStepTabs
+              step={compareStep}
+              onStepChange={setCompareStep}
+              leftCount={compareCounts.total - compareCounts.decided}
+              shortlistCount={compareCounts.yes + compareCounts.maybe}
+            />
             <TermSwitch {...termSwitchProps} />
           </>
         ) : (
@@ -343,21 +367,6 @@ function App() {
         )}
       </SubBar>
 
-      {/* Always mounted (hidden with CSS) so search, filters and sort survive tab switches. */}
-      <div
-        className={`hidden min-h-0 flex-1 ${view === 'compare' ? 'lg:flex' : ''}`}
-      >
-        <CompareView
-          compare={compare}
-          courses={courses}
-          terms={catalogTerms}
-          termCode={activeTermCode}
-          onTermChange={setCatalogTermCode}
-          fallYear={fallYear}
-          springYear={springYear}
-        />
-      </div>
-
       <main
         className={`hidden min-h-0 w-full flex-1 grid-cols-1 bg-white lg:grid-cols-[22rem_minmax(0,1fr)] lg:overflow-hidden ${
           view === 'planner' ? 'lg:grid' : ''
@@ -381,7 +390,9 @@ function App() {
         </section>
       </main>
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white pb-[calc(3rem+env(safe-area-inset-bottom))] lg:hidden">
+      <div
+        className={`${mobileTab === 'compare' ? 'hidden' : 'flex'} min-h-0 flex-1 flex-col overflow-hidden bg-white pb-[calc(3rem+env(safe-area-inset-bottom))] lg:hidden`}
+      >
         {mobileTab === 'calendar' ? (
           <PlanningPanel {...planningPanelProps} variant="calendar" />
         ) : null}
@@ -400,18 +411,24 @@ function App() {
           />
         ) : null}
         {mobileTab === 'plans' ? <MobilePlansPanel {...plansPanelProps} /> : null}
-        {mobileTab === 'compare' ? (
-          <CompareView
-            compare={compare}
-            courses={courses}
-            terms={catalogTerms}
-            termCode={activeTermCode}
-            onTermChange={setCatalogTermCode}
-            fallYear={fallYear}
-            springYear={springYear}
-            variant="mobile"
-          />
-        ) : null}
+      </div>
+
+      {/* One Compare area for every screen size (so keyboard shortcuts never fire twice). */}
+      <div
+        className={`${mobileTab === 'compare' ? 'flex' : 'hidden'} ${
+          view === 'compare' ? 'lg:flex' : 'lg:hidden'
+        } min-h-0 flex-1 flex-col bg-[#f3f5f8] pb-[calc(3rem+env(safe-area-inset-bottom))] lg:overflow-y-auto lg:pb-0`}
+      >
+        <CompareView
+          compare={compare}
+          groups={compareGroups}
+          term={compareTerm}
+          counts={compareCounts}
+          termCode={activeTermCode}
+          termLabel={formatTermLabel(activeTermCode)}
+          step={compareStep}
+          onStepChange={setCompareStep}
+        />
       </div>
 
       <MobileBottomNav activeTab={mobileTab} onChange={setMobileTab} />

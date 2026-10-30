@@ -60,10 +60,3 @@ export function buildCourseGroups(courses) {
     }
   })
 }
-
-/** Every professor named in the catalog, sorted. */
-export function uniqueProfessors(courses) {
-  return uniqueInOrder(courses.map((c) => c.faculty?.trim())).sort((a, b) =>
-    a.localeCompare(b),
-  )
-}

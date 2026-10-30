@@ -33,18 +33,15 @@ export default function CourseRow({
   isExpanded,
   onExpandToggle,
   onTogglePlan,
-  /** `compare`: tick box instead of Add to plan; no plan/conflict pills. */
-  selectionMode = 'plan',
-  /** Compare mode: number of sections grouped into this row. */
-  sectionCount = 1,
 }) {
-  const compareMode = selectionMode === 'compare'
   const showRegistrationTag =
     Boolean(course.bidOrPermission) &&
     normalizeBidType(course.bidOrPermission) !== 'core'
 
-  const showStatusPills = !compareMode && (isSelected || (hasConflict && !isSelected))
-  const showRightRail = requirementTagCodes.length > 0 || showStatusPills
+  const showRightRail =
+    requirementTagCodes.length > 0 ||
+    isSelected ||
+    (hasConflict && !isSelected)
 
   const categoryLabel = course.category
     ? normalizeCategory(course.category)
@@ -61,97 +58,81 @@ export default function CourseRow({
 
   return (
     <li className={rowBg}>
-      <div className={compareMode ? 'flex items-start' : undefined}>
-        {compareMode ? (
-          <input
-            type="checkbox"
-            checked={isSelected}
-            onChange={onTogglePlan}
-            aria-label={`Compare ${formatCourseHeading(course)}`}
-            className="ml-3 mt-2.5 h-4 w-4 shrink-0 cursor-pointer accent-yale-800"
-          />
-        ) : null}
-        <button
-          type="button"
-          onClick={onExpandToggle}
-          aria-expanded={isExpanded}
-          className={`grid w-full min-w-0 items-start gap-x-1.5 px-3 py-2 text-left transition-colors ${
-            showRightRail
-              ? 'grid-cols-[auto_minmax(0,1fr)_auto]'
-              : 'grid-cols-[auto_minmax(0,1fr)]'
-          } ${
-            isSelected ? 'hover:bg-save-100' : 'hover:bg-save-50'
-          }`}
-        >
-          <CollapseChevron open={isExpanded} />
-          <span className="min-w-0">
-            <span
-              className={`block text-xs font-medium leading-snug ${
-                hasConflict && !isSelected ? 'text-gray-700' : 'text-gray-900'
-              }`}
-            >
-              {formatCourseHeading(course)}
-            </span>
-            {!isExpanded && compareMode && sectionCount > 1 ? (
-              <span className="mt-0.5 block truncate text-[11px] leading-snug text-gray-500">
-                {formatSessionLabel(course.session)} · {sectionCount} sections
-              </span>
-            ) : null}
-            {!isExpanded && !(compareMode && sectionCount > 1) ? (
-              <span className="mt-0.5 block truncate text-[11px] leading-snug">
-                {hasMeetingTime(course) ? (
+      <button
+        type="button"
+        onClick={onExpandToggle}
+        aria-expanded={isExpanded}
+        className={`grid w-full items-start gap-x-1.5 px-3 py-2 text-left transition-colors ${
+          showRightRail
+            ? 'grid-cols-[auto_minmax(0,1fr)_auto]'
+            : 'grid-cols-[auto_minmax(0,1fr)]'
+        } ${
+          isSelected ? 'hover:bg-save-100' : 'hover:bg-save-50'
+        }`}
+      >
+        <CollapseChevron open={isExpanded} />
+        <span className="min-w-0">
+          <span
+            className={`block text-xs font-medium leading-snug ${
+              hasConflict && !isSelected ? 'text-gray-700' : 'text-gray-900'
+            }`}
+          >
+            {formatCourseHeading(course)}
+          </span>
+          {!isExpanded ? (
+            <span className="mt-0.5 block truncate text-[11px] leading-snug">
+              {hasMeetingTime(course) ? (
+                <span className="text-gray-500">
+                  {formatSessionLabel(course.session)} ·{' '}
+                  {formatSchedule(course)}
+                </span>
+              ) : (
+                <>
                   <span className="text-gray-500">
                     {formatSessionLabel(course.session)} ·{' '}
-                    {formatSchedule(course)}
                   </span>
-                ) : (
-                  <>
-                    <span className="text-gray-500">
-                      {formatSessionLabel(course.session)} ·{' '}
-                    </span>
-                    <span className="text-amber-700">
-                      {NO_MEETING_TIME_MESSAGE}
-                    </span>
-                  </>
-                )}
+                  <span className="text-amber-700">
+                    {NO_MEETING_TIME_MESSAGE}
+                  </span>
+                </>
+              )}
+            </span>
+          ) : null}
+        </span>
+        {showRightRail ? (
+          <span className="flex max-w-[42%] flex-col items-end gap-1 self-stretch sm:max-w-[11rem]">
+            {requirementTagCodes.length > 0 ? (
+              <span className="flex flex-wrap items-center justify-end gap-1">
+                {requirementTagCodes.map((code) => (
+                  <RequirementTag
+                    key={code}
+                    tagCode={code}
+                    className="!px-1 !py-px !text-[10px]"
+                  />
+                ))}
+              </span>
+            ) : null}
+            {isSelected || (hasConflict && !isSelected) ? (
+              <span
+                className={`flex flex-wrap items-center justify-end gap-1 ${
+                  requirementTagCodes.length > 0 ? 'mt-auto' : ''
+                }`}
+              >
+                {isSelected ? (
+                  <span className="rounded bg-save-800 px-1 py-px text-[10px] font-medium leading-tight text-white">
+                    In plan
+                  </span>
+                ) : null}
+                {hasConflict && !isSelected ? (
+                  <span className="rounded bg-red-700 px-1 py-px text-[10px] font-semibold leading-tight text-white shadow-sm">
+                    Conflict
+                  </span>
+                ) : null}
               </span>
             ) : null}
           </span>
-          {showRightRail ? (
-            <span className="flex max-w-[42%] flex-col items-end gap-1 self-stretch sm:max-w-[11rem]">
-              {requirementTagCodes.length > 0 ? (
-                <span className="flex flex-wrap items-center justify-end gap-1">
-                  {requirementTagCodes.map((code) => (
-                    <RequirementTag
-                      key={code}
-                      tagCode={code}
-                      className="!px-1 !py-px !text-[10px]"
-                    />
-                  ))}
-                </span>
-              ) : null}
-              {showStatusPills ? (
-                <span
-                  className={`flex flex-wrap items-center justify-end gap-1 ${
-                    requirementTagCodes.length > 0 ? 'mt-auto' : ''
-                  }`}
-                >
-                  {isSelected ? (
-                    <span className="rounded bg-save-800 px-1 py-px text-[10px] font-medium leading-tight text-white">
-                      In plan
-                    </span>
-                  ) : null}
-                  {hasConflict && !isSelected ? (
-                    <span className="rounded bg-red-700 px-1 py-px text-[10px] font-semibold leading-tight text-white shadow-sm">
-                      Conflict
-                    </span>
-                  ) : null}
-                </span>
-              ) : null}
-            </span>
-          ) : null}
-        </button>
-      </div>
+        ) : null}
+      </button>
 
       {isExpanded ? (
         <div className="space-y-2 border-t border-yale-200/90 px-3 py-2 text-[11px] leading-snug">
@@ -201,19 +182,17 @@ export default function CourseRow({
             </a>
           ) : null}
 
-          {compareMode ? null : (
-            <button
-              type="button"
-              onClick={onTogglePlan}
-              className={`w-full rounded-md border px-2.5 py-1.5 text-xs font-semibold shadow-sm ${
-                isSelected
-                  ? 'border-red-800 bg-red-700 text-white hover:bg-red-800'
-                  : 'border-save-900 bg-save-800 text-white hover:bg-save-900'
-              }`}
-            >
-              {isSelected ? 'Remove from plan' : 'Add to plan'}
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={onTogglePlan}
+            className={`w-full rounded-md border px-2.5 py-1.5 text-xs font-semibold shadow-sm ${
+              isSelected
+                ? 'border-red-800 bg-red-700 text-white hover:bg-red-800'
+                : 'border-save-900 bg-save-800 text-white hover:bg-save-900'
+            }`}
+          >
+            {isSelected ? 'Remove from plan' : 'Add to plan'}
+          </button>
         </div>
       ) : null}
     </li>

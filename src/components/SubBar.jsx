@@ -12,20 +12,30 @@ export function SubBar({ children, className = '' }) {
 }
 
 const STEPS = [
-  { id: 'shortlist', number: 1, label: 'Shortlist' },
-  { id: 'score', number: 2, label: 'Score and rank' },
+  { id: 'shortlist', number: 1, label: 'Shortlist', short: 'Shortlist' },
+  { id: 'score', number: 2, label: 'Score and rank', short: 'Score' },
 ]
 
-/** Compare mode: "1 Shortlist › 2 Score and rank". `hints` adds grey counts per step. */
-export function CompareStepTabs({ step, onStepChange, hints = {} }) {
+/**
+ * Compare mode: "1 Shortlist › 2 Score and rank". The inactive step shows a
+ * grey count ("98 left" / "8 courses"); phones get two equal tabs instead.
+ */
+export function CompareStepTabs({ step, onStepChange, leftCount, shortlistCount }) {
+  const hints = {
+    shortlist: step === 'score' ? `${leftCount} left` : null,
+    score: step === 'shortlist' ? `${shortlistCount} courses` : null,
+  }
   return (
-    <ol className="flex flex-wrap items-stretch gap-2 self-stretch" aria-label="Compare steps">
+    <ol
+      className="-mx-4 grid w-[calc(100%+2rem)] grid-cols-2 self-stretch sm:mx-0 sm:flex sm:w-auto sm:flex-wrap sm:gap-2"
+      aria-label="Compare steps"
+    >
       {STEPS.map((s, i) => {
         const active = s.id === step
         return (
           <li key={s.id} className="flex items-stretch gap-2">
             {i > 0 ? (
-              <span aria-hidden className="flex items-center text-[#8a95a5]">
+              <span aria-hidden className="hidden items-center text-[#8a95a5] sm:flex">
                 ›
               </span>
             ) : null}
@@ -33,7 +43,7 @@ export function CompareStepTabs({ step, onStepChange, hints = {} }) {
               type="button"
               onClick={() => onStepChange(s.id)}
               aria-current={active ? 'step' : undefined}
-              className={`flex items-center gap-2 border-b-[3px] px-3 pt-4 pb-[13px] text-sm ${
+              className={`flex flex-1 items-center justify-center gap-2 border-b-[3px] px-3 pt-4 pb-[13px] text-sm sm:flex-none ${
                 active
                   ? 'border-yale-800 font-bold text-yale-800'
                   : 'border-transparent font-semibold text-[#1a1f2b] hover:text-yale-800'
@@ -46,9 +56,15 @@ export function CompareStepTabs({ step, onStepChange, hints = {} }) {
               >
                 {s.number}
               </span>
-              {s.label}
+              <span className="sm:hidden">
+                {s.short}
+                {s.id === 'score' ? (
+                  <span className="font-normal text-[#5b6576]"> · {shortlistCount}</span>
+                ) : null}
+              </span>
+              <span className="hidden sm:inline">{s.label}</span>
               {hints[s.id] ? (
-                <span className="font-normal text-[#5b6576]">{hints[s.id]}</span>
+                <span className="hidden font-normal text-[#5b6576] sm:inline">{hints[s.id]}</span>
               ) : null}
             </button>
           </li>

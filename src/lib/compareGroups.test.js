@@ -3,7 +3,6 @@ import { describe, expect, test } from 'vitest'
 import {
   buildCourseGroups,
   courseGroupKey,
-  uniqueProfessors,
 } from './compareGroups'
 import { parseCoursesCsv } from './parseCourses'
 
@@ -73,19 +72,6 @@ describe('buildCourseGroups', () => {
     ])
     expect(group.tags).toEqual(['GBS Req', 'STEM'])
     expect(group.sessions).toEqual(['fall-2', 'fall-1'])
-  })
-})
-
-describe('uniqueProfessors', () => {
-  test('drops blanks and sorts', () => {
-    expect(
-      uniqueProfessors([
-        sec({ faculty: 'B' }),
-        sec({ faculty: '' }),
-        sec({ faculty: 'A' }),
-        sec({ faculty: 'B' }),
-      ]),
-    ).toEqual(['A', 'B'])
   })
 })
 

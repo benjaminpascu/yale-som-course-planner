@@ -1,29 +1,50 @@
 /**
- * Compare Courses data in localStorage. All updaters are pure (return a new
- * store). Data for courses or professors missing from the catalog is kept.
+ * Compare Courses data in localStorage, kept separately per term. All
+ * updaters are pure (return a new store). Data for courses missing from the
+ * catalog is kept, never pruned.
+ *
+ * Store: { version: 2, terms: { [termCode]: TermData } }
+ * TermData: {
+ *   decisions: { [courseKey]: 'yes' | 'maybe' | 'no' },
+ *   history:   courseKey[]            // decision order, newest last (undo)
+ *   criteria:  { id, name, weight }[] // weights are decimals meant to sum to 1
+ *   ratings:   { [courseKey]: { [criterionId]: 1..10 } }
+ *   notes:     { [courseKey]: string }
+ * }
  */
 
 export const COMPARE_STORAGE_KEY = 'yale-som-course-planner-compare'
-const STORE_VERSION = 1
-const PROFESSOR_CRITERION = {
-  id: 'professor',
-  name: 'Professor',
-  weight: 5,
-  kind: 'professor',
+const STORE_VERSION = 2
+const DECISIONS = new Set(['yes', 'maybe', 'no'])
+
+export const DEFAULT_CRITERIA = [
+  { id: 'interesting', name: 'Interesting', weight: 0.35 },
+  { id: 'useful', name: 'Useful', weight: 0.45 },
+  { id: 'professor', name: 'Professor', weight: 0.2 },
+]
+
+export function createEmptyCompareStore() {
+  return { version: STORE_VERSION, terms: {} }
 }
 
-export function createDefaultCompareStore() {
+function createEmptyTermData() {
   return {
-    version: STORE_VERSION,
-    criteria: [
-      { id: 'interesting', name: 'Interesting', weight: 5, kind: 'manual' },
-      { id: 'useful', name: 'Useful', weight: 5, kind: 'manual' },
-      { ...PROFESSOR_CRITERION },
-    ],
-    selected: {},
-    scores: {},
+    decisions: {},
+    history: [],
+    criteria: DEFAULT_CRITERIA.map((c) => ({ ...c })),
+    ratings: {},
     notes: {},
-    professors: {},
+  }
+}
+
+export function getTermData(store, termCode) {
+  return store.terms[termCode] ?? createEmptyTermData()
+}
+
+function updateTerm(store, termCode, fn) {
+  return {
+    ...store,
+    terms: { ...store.terms, [termCode]: fn(getTermData(store, termCode)) },
   }
 }
 
@@ -31,83 +52,45 @@ function isPlainObject(value) {
   return value != null && typeof value === 'object' && !Array.isArray(value)
 }
 
-function isScore(value) {
+function isRating(value) {
   return Number.isInteger(value) && value >= 1 && value <= 10
 }
 
-function clampWeight(weight) {
-  return Math.min(10, Math.max(0, Math.round(Number(weight) || 0)))
-}
-
 function normalizeCriteria(raw) {
-  if (!Array.isArray(raw)) return createDefaultCompareStore().criteria
-  const criteria = []
-  let hasProfessor = false
-  for (const c of raw) {
-    if (!isPlainObject(c) || typeof c.id !== 'string' || typeof c.name !== 'string') continue
-    if (!c.name.trim()) continue
-    const kind = c.kind === 'professor' ? 'professor' : 'manual'
-    if (kind === 'professor') {
-      if (hasProfessor) continue
-      hasProfessor = true
-    }
-    criteria.push({ id: c.id, name: c.name.trim(), weight: clampWeight(c.weight), kind })
-  }
-  if (!hasProfessor) criteria.push({ ...PROFESSOR_CRITERION })
-  return criteria
+  if (!Array.isArray(raw)) return createEmptyTermData().criteria
+  const criteria = raw
+    .filter((c) => isPlainObject(c) && typeof c.id === 'string' && typeof c.name === 'string')
+    .filter((c) => c.name.trim())
+    .map((c) => ({
+      id: c.id,
+      name: c.name.trim(),
+      weight: Number.isFinite(c.weight) && c.weight >= 0 ? c.weight : 0,
+    }))
+  return criteria.length > 0 ? criteria : createEmptyTermData().criteria
 }
 
-function normalizeSelected(raw) {
-  if (!isPlainObject(raw)) return {}
-  return Object.fromEntries(
-    Object.entries(raw)
-      .filter(([, keys]) => Array.isArray(keys))
-      .map(([term, keys]) => [term, [...new Set(keys.filter((k) => typeof k === 'string'))]]),
+function normalizeTerm(raw) {
+  if (!isPlainObject(raw)) return createEmptyTermData()
+  const decisions = Object.fromEntries(
+    Object.entries(isPlainObject(raw.decisions) ? raw.decisions : {}).filter(([, d]) =>
+      DECISIONS.has(d),
+    ),
   )
-}
-
-function normalizeScores(raw) {
-  if (!isPlainObject(raw)) return {}
-  const scores = {}
-  for (const [key, byCriterion] of Object.entries(raw)) {
+  const history = Array.isArray(raw.history)
+    ? raw.history.filter((key) => typeof key === 'string' && key in decisions)
+    : []
+  const ratings = {}
+  for (const [key, byCriterion] of Object.entries(isPlainObject(raw.ratings) ? raw.ratings : {})) {
     if (!isPlainObject(byCriterion)) continue
-    const kept = Object.fromEntries(
-      Object.entries(byCriterion).filter(([, value]) => isScore(value)),
-    )
-    if (Object.keys(kept).length > 0) scores[key] = kept
+    const kept = Object.fromEntries(Object.entries(byCriterion).filter(([, v]) => isRating(v)))
+    if (Object.keys(kept).length > 0) ratings[key] = kept
   }
-  return scores
-}
-
-function normalizeNotes(raw) {
-  if (!isPlainObject(raw)) return {}
-  return Object.fromEntries(
-    Object.entries(raw).filter(([, note]) => typeof note === 'string' && note.trim()),
+  const notes = Object.fromEntries(
+    Object.entries(isPlainObject(raw.notes) ? raw.notes : {}).filter(
+      ([, note]) => typeof note === 'string' && note.trim(),
+    ),
   )
-}
-
-function normalizeProfessors(raw) {
-  if (!isPlainObject(raw)) return {}
-  const professors = {}
-  for (const [name, entry] of Object.entries(raw)) {
-    if (!isPlainObject(entry)) continue
-    const kept = {}
-    if (isScore(entry.rating)) kept.rating = entry.rating
-    if (typeof entry.note === 'string' && entry.note.trim()) kept.note = entry.note
-    if (Object.keys(kept).length > 0) professors[name] = kept
-  }
-  return professors
-}
-
-function normalizeStore(raw) {
-  return {
-    version: STORE_VERSION,
-    criteria: normalizeCriteria(raw.criteria),
-    selected: normalizeSelected(raw.selected),
-    scores: normalizeScores(raw.scores),
-    notes: normalizeNotes(raw.notes),
-    professors: normalizeProfessors(raw.professors),
-  }
+  return { decisions, history, criteria: normalizeCriteria(raw.criteria), ratings, notes }
 }
 
 function backUp(storage, text) {
@@ -130,9 +113,9 @@ export function loadCompareStore(storage) {
     storage = storage ?? globalThis.localStorage
     text = storage.getItem(COMPARE_STORAGE_KEY)
   } catch {
-    return { store: createDefaultCompareStore(), recovered: false }
+    return { store: createEmptyCompareStore(), recovered: false }
   }
-  if (text == null) return { store: createDefaultCompareStore(), recovered: false }
+  if (text == null) return { store: createEmptyCompareStore(), recovered: false }
 
   let raw
   try {
@@ -140,11 +123,17 @@ export function loadCompareStore(storage) {
   } catch {
     raw = undefined
   }
-  if (!isPlainObject(raw) || !(Number(raw.version) <= STORE_VERSION)) {
+  if (!isPlainObject(raw) || raw.version !== STORE_VERSION) {
     backUp(storage, text)
-    return { store: createDefaultCompareStore(), recovered: true }
+    return { store: createEmptyCompareStore(), recovered: true }
   }
-  return { store: normalizeStore(raw), recovered: false }
+  const terms = Object.fromEntries(
+    Object.entries(isPlainObject(raw.terms) ? raw.terms : {}).map(([term, data]) => [
+      term,
+      normalizeTerm(data),
+    ]),
+  )
+  return { store: { version: STORE_VERSION, terms }, recovered: false }
 }
 
 /** @returns {boolean} false when the browser refused to save */
@@ -158,105 +147,22 @@ export function persistCompareStore(store, storage) {
   }
 }
 
-export function toggleSelected(store, termCode, key) {
-  const current = store.selected[termCode] ?? []
-  const next = current.includes(key)
-    ? current.filter((k) => k !== key)
-    : [...current, key]
-  return { ...store, selected: { ...store.selected, [termCode]: next } }
+/** Mark a course 'yes' (interested), 'maybe' or 'no'; newest decision goes last for undo. */
+export function decide(store, termCode, key, decision) {
+  return updateTerm(store, termCode, (term) => ({
+    ...term,
+    decisions: { ...term.decisions, [key]: decision },
+    history: [...term.history.filter((k) => k !== key), key],
+  }))
 }
 
-export function setScore(store, key, criterionId, value) {
-  const course = { ...(store.scores[key] ?? {}) }
-  if (value == null) delete course[criterionId]
-  else course[criterionId] = value
-  const scores = { ...store.scores }
-  if (Object.keys(course).length === 0) delete scores[key]
-  else scores[key] = course
-  return { ...store, scores }
-}
-
-export function setNote(store, key, text) {
-  const notes = { ...store.notes }
-  if (text.trim()) notes[key] = text
-  else delete notes[key]
-  return { ...store, notes }
-}
-
-function updateProfessor(store, name, field, value) {
-  const entry = { ...(store.professors[name] ?? {}) }
-  if (value == null) delete entry[field]
-  else entry[field] = value
-  const professors = { ...store.professors }
-  if (Object.keys(entry).length === 0) delete professors[name]
-  else professors[name] = entry
-  return { ...store, professors }
-}
-
-export function setProfessorRating(store, name, value) {
-  return updateProfessor(store, name, 'rating', value)
-}
-
-export function setProfessorNote(store, name, text) {
-  return updateProfessor(store, name, 'note', text.trim() ? text : null)
-}
-
-function validateName(store, name, exceptId = null) {
-  const trimmed = name.trim()
-  if (!trimmed) return { error: 'empty' }
-  const lower = trimmed.toLowerCase()
-  if (store.criteria.some((c) => c.id !== exceptId && c.name.toLowerCase() === lower)) {
-    return { error: 'duplicate' }
-  }
-  return { name: trimmed }
-}
-
-function newCriterionId() {
-  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID()
-  return `criterion-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
-}
-
-/** @returns {{ store: object, error?: 'empty' | 'duplicate' }} */
-export function addCriterion(store, name) {
-  const check = validateName(store, name)
-  if (check.error) return { store, error: check.error }
-  const criterion = { id: newCriterionId(), name: check.name, weight: 5, kind: 'manual' }
-  return { store: { ...store, criteria: [...store.criteria, criterion] } }
-}
-
-/** @returns {{ store: object, error?: 'empty' | 'duplicate' }} */
-export function renameCriterion(store, id, name) {
-  const target = store.criteria.find((c) => c.id === id)
-  if (!target || target.kind === 'professor') return { store }
-  const check = validateName(store, name, id)
-  if (check.error) return { store, error: check.error }
-  return {
-    store: {
-      ...store,
-      criteria: store.criteria.map((c) => (c.id === id ? { ...c, name: check.name } : c)),
-    },
-  }
-}
-
-export function setCriterionWeight(store, id, weight) {
-  return {
-    ...store,
-    criteria: store.criteria.map((c) =>
-      c.id === id ? { ...c, weight: clampWeight(weight) } : c,
-    ),
-  }
-}
-
-export function countScoresForCriterion(store, id) {
-  return Object.values(store.scores).filter((byCriterion) => id in byCriterion).length
-}
-
-export function deleteCriterion(store, id) {
-  const target = store.criteria.find((c) => c.id === id)
-  if (!target || target.kind === 'professor') return store
-  let next = { ...store, criteria: store.criteria.filter((c) => c.id !== id) }
-  for (const key of Object.keys(store.scores)) {
-    if (id in store.scores[key]) next = setScore(next, key, id, null)
-  }
-  return next
+export function undoLastDecision(store, termCode) {
+  const term = getTermData(store, termCode)
+  if (term.history.length === 0) return store
+  const last = term.history[term.history.length - 1]
+  return updateTerm(store, termCode, (t) => {
+    const decisions = { ...t.decisions }
+    delete decisions[last]
+    return { ...t, decisions, history: t.history.slice(0, -1) }
+  })
 }
