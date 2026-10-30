@@ -10,6 +10,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "exceljs": "^4.4.0",
     "papaparse": "^5.5.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
