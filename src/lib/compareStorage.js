@@ -118,10 +118,16 @@ function backUp(storage, text) {
   }
 }
 
-/** @returns {{ store: object, recovered: boolean }} */
-export function loadCompareStore(storage = globalThis.localStorage) {
+/**
+ * Reading `window.localStorage` itself throws when the browser blocks site
+ * data, so it is resolved inside the try (never as a default parameter).
+ *
+ * @returns {{ store: object, recovered: boolean }}
+ */
+export function loadCompareStore(storage) {
   let text
   try {
+    storage = storage ?? globalThis.localStorage
     text = storage.getItem(COMPARE_STORAGE_KEY)
   } catch {
     return { store: createDefaultCompareStore(), recovered: false }
@@ -142,8 +148,9 @@ export function loadCompareStore(storage = globalThis.localStorage) {
 }
 
 /** @returns {boolean} false when the browser refused to save */
-export function persistCompareStore(store, storage = globalThis.localStorage) {
+export function persistCompareStore(store, storage) {
   try {
+    storage = storage ?? globalThis.localStorage
     storage.setItem(COMPARE_STORAGE_KEY, JSON.stringify(store))
     return true
   } catch {

@@ -1,5 +1,9 @@
-import { useEffect, useState } from 'react'
-import { parseScoreInput, scoreColor } from '../../lib/compareScoring'
+import { useEffect, useRef, useState } from 'react'
+import {
+  parseScoreInput,
+  scoreColor,
+  scoreToCommit,
+} from '../../lib/compareScoring'
 
 function toText(value) {
   return value == null ? '' : String(value)
@@ -18,6 +22,7 @@ export default function ScoreInput({
 }) {
   const [text, setText] = useState(toText(value))
   const [focused, setFocused] = useState(false)
+  const valueAtFocus = useRef(value)
 
   useEffect(() => {
     if (!focused) setText(toText(value))
@@ -28,8 +33,8 @@ export default function ScoreInput({
   function handleChange(event) {
     const next = event.target.value
     setText(next)
-    const parsed = parseScoreInput(next)
-    if (parsed !== undefined && parsed !== value) onCommit(parsed)
+    const commit = scoreToCommit(next, valueAtFocus.current)
+    if (commit !== value) onCommit(commit)
   }
 
   function moveTo(event, rowDelta) {
@@ -47,7 +52,8 @@ export default function ScoreInput({
     if (event.key === 'ArrowDown' || event.key === 'Enter') moveTo(event, 1)
     else if (event.key === 'ArrowUp') moveTo(event, -1)
     else if (event.key === 'Escape') {
-      setText(toText(value))
+      if (valueAtFocus.current !== value) onCommit(valueAtFocus.current)
+      setText(toText(valueAtFocus.current))
       event.currentTarget.blur()
     }
   }
@@ -65,6 +71,7 @@ export default function ScoreInput({
       onChange={handleChange}
       onKeyDown={handleKeyDown}
       onFocus={(event) => {
+        valueAtFocus.current = value
         setFocused(true)
         event.currentTarget.select()
       }}

@@ -384,19 +384,20 @@ function App() {
         </div>
       </header>
 
-      {view === 'compare' ? (
-        <div className="hidden min-h-0 flex-1 lg:flex">
-          <CompareView
-            compare={compare}
-            courses={courses}
-            terms={catalogTerms}
-            termCode={activeTermCode}
-            onTermChange={setCatalogTermCode}
-            fallYear={fallYear}
-            springYear={springYear}
-          />
-        </div>
-      ) : null}
+      {/* Always mounted (hidden with CSS) so search, filters and sort survive tab switches. */}
+      <div
+        className={`hidden min-h-0 flex-1 ${view === 'compare' ? 'lg:flex' : ''}`}
+      >
+        <CompareView
+          compare={compare}
+          courses={courses}
+          terms={catalogTerms}
+          termCode={activeTermCode}
+          onTermChange={setCatalogTermCode}
+          fallYear={fallYear}
+          springYear={springYear}
+        />
+      </div>
 
       <main
         className={`hidden min-h-0 w-full flex-1 grid-cols-1 bg-white lg:grid-cols-[22rem_minmax(0,1fr)] lg:overflow-hidden ${

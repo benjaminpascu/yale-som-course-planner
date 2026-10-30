@@ -181,3 +181,22 @@ describe('updaters', () => {
     expect(store.criteria.find((c) => c.id === 'professor').weight).toBe(0)
   })
 })
+
+describe('blocked localStorage (reading window.localStorage throws)', () => {
+  test('load and persist fall back instead of throwing', () => {
+    const had = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
+    Object.defineProperty(globalThis, 'localStorage', {
+      configurable: true,
+      get() {
+        throw new Error('SecurityError')
+      },
+    })
+    try {
+      expect(loadCompareStore().store.criteria).toHaveLength(3)
+      expect(persistCompareStore(createDefaultCompareStore())).toBe(false)
+    } finally {
+      if (had) Object.defineProperty(globalThis, 'localStorage', had)
+      else delete globalThis.localStorage
+    }
+  })
+})

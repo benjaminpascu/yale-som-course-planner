@@ -79,6 +79,16 @@ export function parseScoreInput(text) {
   return Number(trimmed)
 }
 
+/**
+ * Value a score cell should hold while the student types: the parsed score,
+ * or — while the text is invalid — the value from before editing began, so a
+ * half-typed "11" or "7.5" never leaves its first digit saved.
+ */
+export function scoreToCommit(text, valueAtFocus) {
+  const parsed = parseScoreInput(text)
+  return parsed === undefined ? valueAtFocus : parsed
+}
+
 /** Fill color for a score (final scores are rounded to the nearest step). */
 export function scoreColor(value) {
   if (typeof value !== 'number') return null

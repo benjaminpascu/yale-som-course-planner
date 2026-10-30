@@ -4,6 +4,7 @@ import {
   computeCourseScore,
   orderRowKeys,
   parseScoreInput,
+  scoreToCommit,
   professorValue,
   scoreColor,
   sortRows,
@@ -142,5 +143,22 @@ describe('orderRowKeys', () => {
 
   test('frozen order is kept, removed keys dropped, new keys appended', () => {
     expect(orderRowKeys(['d', 'c', 'a'], ['a', 'b', 'c'])).toEqual(['a', 'c', 'd'])
+  })
+})
+
+describe('scoreToCommit', () => {
+  test('typing "11" over an 8 never leaves 1 saved', () => {
+    expect(scoreToCommit('1', 8)).toBe(1)
+    expect(scoreToCommit('11', 8)).toBe(8)
+  })
+
+  test('"7.5" and "1 0" fall back to the value from before editing', () => {
+    expect(scoreToCommit('7.5', 4)).toBe(4)
+    expect(scoreToCommit('1 0', null)).toBeNull()
+  })
+
+  test('valid text and blank are saved as typed', () => {
+    expect(scoreToCommit('10', 3)).toBe(10)
+    expect(scoreToCommit('', 3)).toBeNull()
   })
 })
