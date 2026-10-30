@@ -50,51 +50,54 @@ function AddCriterionRow({ onAdd, onClose }) {
 }
 
 function CriteriaHeader({ criteria, needsFix, onRemove, onWeight, onFixWeights }) {
+  const total = criteria.reduce((sum, c) => sum + c.weight, 0)
   return (
-    <div className="flex items-start gap-2 py-3.5 pr-3 pl-5">
-      <span className="hidden min-w-[14rem] flex-1 pt-1 text-xs font-semibold text-[#5b6576] sm:block">
-        Course
-      </span>
-      {criteria.map((c, i) => (
-        <div
-          key={c.id}
-          className={`flex w-[72px] flex-col items-center gap-1 sm:w-24 ${i === 0 ? 'max-sm:ml-auto' : ''}`}
-        >
-          <span className="flex max-w-24 items-center gap-0.5">
-            <span className="truncate text-xs font-semibold text-[#5b6576]">{c.name}</span>
-            {criteria.length > 1 ? (
-              <button
-                type="button"
-                onClick={() => onRemove(c)}
-                aria-label={`Remove ${c.name}`}
-                className="flex h-6 w-6 flex-none items-center justify-center"
-              >
-                <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="#8a95a5" strokeWidth="3" strokeLinecap="round" className="h-2.5 w-2.5">
-                  <path d="M6 6l12 12M18 6L6 18" />
-                </svg>
-              </button>
-            ) : null}
-          </span>
-          <WeightInput
-            weight={c.weight}
-            onCommit={(w) => onWeight(c.id, w)}
-            ariaLabel={`Weight for ${c.name}`}
-          />
-        </div>
-      ))}
-      <div className="flex w-16 flex-col items-end gap-1 pt-1">
-        <span className="text-right text-xs leading-tight font-semibold text-[#5b6576]">
-          Weighted
-          <br />
-          score
+    <div className="py-3.5 pr-3 pl-5">
+      <div className="flex items-end gap-2">
+        <span className="hidden min-w-[14rem] flex-1 pb-2 text-right text-xs font-semibold text-[#5b6576] sm:block">
+          Weights
         </span>
-        {needsFix ? (
-          <button type="button" onClick={onFixWeights} className="text-right text-xs font-semibold text-[#9a4a00]">
-            Fix weights
-          </button>
-        ) : null}
+        {criteria.map((c, i) => (
+          <div
+            key={c.id}
+            className={`flex w-[72px] flex-col items-center gap-1 sm:w-24 ${i === 0 ? 'max-sm:ml-auto' : ''}`}
+          >
+            <span className="flex max-w-24 items-center gap-0.5">
+              <span className="truncate text-xs font-semibold text-[#5b6576]">{c.name}</span>
+              {criteria.length > 1 ? (
+                <button
+                  type="button"
+                  onClick={() => onRemove(c)}
+                  aria-label={`Remove ${c.name}`}
+                  className="flex h-6 w-6 flex-none items-center justify-center"
+                >
+                  <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="#8a95a5" strokeWidth="3" strokeLinecap="round" className="h-2.5 w-2.5">
+                    <path d="M6 6l12 12M18 6L6 18" />
+                  </svg>
+                </button>
+              ) : null}
+            </span>
+            <WeightInput
+              weight={c.weight}
+              onCommit={(w) => onWeight(c.id, w)}
+              ariaLabel={`Weight for ${c.name}`}
+            />
+          </div>
+        ))}
+        <span className="w-16 pb-2 text-right text-xs font-semibold whitespace-nowrap text-[#5b6576] sm:w-28">
+          <span className="sm:hidden">Score</span>
+          <span className="hidden sm:inline">Weighted score</span>
+        </span>
+        <span className="w-9" />
       </div>
-      <span className="w-9" />
+      {needsFix ? (
+        <p className="mt-2 flex flex-wrap justify-end gap-x-2 text-xs text-[#9a4a00]">
+          <span>Weights add up to {total.toFixed(2)}, not 1.00.</span>
+          <button type="button" onClick={onFixWeights} className="font-semibold underline underline-offset-2">
+            Rescale to 1.00
+          </button>
+        </p>
+      ) : null}
     </div>
   )
 }
@@ -112,7 +115,14 @@ function ScoreRow({ group, term, rowIndex, open, onToggle, onRate, onNote, onDec
 
   return (
     <div ref={rowRef} className={`border-t border-[#e6eaf0] ${open ? 'bg-[#f8fafc]' : 'bg-white'}`}>
-      <div className="flex flex-wrap items-center gap-2 py-3 pr-3 pl-5 sm:flex-nowrap">
+      {/* The whole summary line toggles the row; its own boxes, buttons and links keep their behavior. */}
+      <div
+        onClick={(event) => {
+          if (event.target.closest('input, button, a')) return
+          onToggle()
+        }}
+        className="flex cursor-pointer flex-wrap items-center gap-2 py-3 pr-3 pl-5 hover:bg-[#f8fafc] sm:flex-nowrap"
+      >
         <div className="flex basis-full flex-col gap-0.5 sm:min-w-[14rem] sm:flex-1 sm:basis-auto">
           <button
             type="button"
@@ -139,7 +149,7 @@ function ScoreRow({ group, term, rowIndex, open, onToggle, onRate, onNote, onDec
             />
           </span>
         ))}
-        <span className="w-16 text-right text-xl font-bold text-yale-800 tabular-nums">
+        <span className="w-16 text-right text-xl font-bold text-yale-800 tabular-nums sm:w-28">
           {score == null ? '–' : score.toFixed(1)}
         </span>
         <button
@@ -328,7 +338,7 @@ export default function ScoreStep({
             <button
               type="button"
               onClick={() => setAdding(true)}
-              className="h-9 px-2 text-sm font-semibold text-yale-800"
+              className="h-9 rounded-md bg-save-800 px-3.5 text-sm font-semibold text-white hover:bg-save-900"
             >
               + Add criterion
             </button>

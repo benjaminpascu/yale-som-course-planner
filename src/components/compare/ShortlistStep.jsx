@@ -9,6 +9,7 @@ const BUTTONS = [
     decision: 'no',
     label: 'Not interested',
     short: 'Not',
+    keycap: '←',
     className: 'border-[#c4321f] bg-[#fdeceb] text-[#8f1d14]',
     icon: 'M6 6l12 12M18 6L6 18',
   },
@@ -16,6 +17,7 @@ const BUTTONS = [
     decision: 'maybe',
     label: 'Maybe',
     short: 'Maybe',
+    keycap: '↓',
     className: 'border-[#c58a00] bg-[#fff4d6] text-[#6b4700]',
     icon: 'M5 12h14',
   },
@@ -23,6 +25,7 @@ const BUTTONS = [
     decision: 'yes',
     label: 'Interested',
     short: 'Interested',
+    keycap: '→',
     className: 'border-[#1e7a3c] bg-[#e5f3e8] text-[#145c2c]',
     icon: 'M5 12.5l4.5 4.5L19 7.5',
   },
@@ -70,7 +73,7 @@ function CourseCard({ card, onSwipe }) {
         transform: dragX ? `translateX(${dragX}px) rotate(${dragX / 40}deg)` : undefined,
         transition: dragX ? 'none' : 'transform 150ms ease-out',
       }}
-      className="flex flex-col gap-5 rounded-xl border border-[#dde3ea] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.04)] sm:px-9 sm:py-8"
+      className="flex flex-col gap-5 rounded-xl border border-[#dde3ea] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.04)] sm:h-[min(600px,calc(100dvh-280px))] sm:min-h-[420px] sm:px-9 sm:py-8"
     >
       <div className="flex flex-wrap gap-1.5">
         {card.session ? (
@@ -117,9 +120,12 @@ function CourseCard({ card, onSwipe }) {
 
       {card.meta ? <p className="text-sm text-[#5b6576]">{card.meta}</p> : null}
       <div className="border-t border-[#e6eaf0]" />
-      {card.description ? (
-        <p className="max-w-[68ch] text-base leading-[1.65]">{card.description}</p>
-      ) : null}
+      {/* Fixed card height on desktop: the description scrolls so the buttons never move. */}
+      <div className="sm:min-h-0 sm:flex-1 sm:overflow-y-auto">
+        {card.description ? (
+          <p className="max-w-[68ch] text-base leading-[1.65]">{card.description}</p>
+        ) : null}
+      </div>
       {card.syllabusUrl ? (
         <a
           href={card.syllabusUrl}
@@ -152,6 +158,12 @@ function DecisionButtons({ onDecide }) {
           </svg>
           <span className="sm:hidden">{b.short}</span>
           <span className="hidden sm:inline">{b.label}</span>
+          <kbd
+            aria-label={`Shortcut: ${b.keycap}`}
+            className="hidden h-6 min-w-6 items-center justify-center rounded border border-current/40 px-1 font-sans text-xs font-semibold opacity-80 lg:inline-flex"
+          >
+            {b.keycap}
+          </kbd>
         </button>
       ))}
     </div>
