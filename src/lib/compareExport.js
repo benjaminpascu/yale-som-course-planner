@@ -101,9 +101,8 @@ function fillCell(cell, value) {
   }
 }
 
-/** Build the two-sheet workbook with ExcelJS (loaded on demand) and download it. */
-export async function downloadCompareWorkbook({ groups, store, termLabel }) {
-  const ExcelJS = (await import('exceljs')).default
+/** Two-sheet workbook (Ranking, Professors). `ExcelJS` is passed in so it stays lazy. */
+export async function buildCompareWorkbook(ExcelJS, { groups, store }) {
   const workbook = new ExcelJS.Workbook()
 
   const ranking = buildRankingSheet({ groups, store })
@@ -134,6 +133,13 @@ export async function downloadCompareWorkbook({ groups, store, termLabel }) {
   }
   professorSheet.columns = [{ width: 28 }, { width: 8 }, { width: 50 }]
 
+  return workbook
+}
+
+/** Load ExcelJS on demand, build the workbook, and download it. */
+export async function downloadCompareWorkbook({ groups, store, termLabel }) {
+  const ExcelJS = (await import('exceljs')).default
+  const workbook = await buildCompareWorkbook(ExcelJS, { groups, store })
   const buffer = await workbook.xlsx.writeBuffer()
   const blob = new Blob([buffer], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

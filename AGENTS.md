@@ -33,6 +33,7 @@ The user is a non-technical student. Explain clearly; ask explicitly when a prod
 | **Fall 2026 data + inline tags** | ✅ Catalog + dynamic tags from CSV `tags` column |
 | **Spring 2027 data + term selector** | ✅ Live (Oct 2026) |
 | **Live** | ✅ Vercel; share link privately; fix issues as feedback comes in |
+| **Compare Courses** | ✅ Built Oct 2026 on branch `compare-courses`, awaiting approval |
 | **Wider promo** | When you choose (not a separate dev milestone) |
 
 Full detail: **`docs/PROJECT_STATUS.md`**.
@@ -63,6 +64,7 @@ cd "/Users/benjaminpascu/Documents/Vibe Coding/Cursor/Course planner"
 npm install
 npm run dev              # http://localhost:5173 (or next free port)
 npm run build
+npm test                 # Vitest: compare grouping, scoring, storage, export
 ```
 
 No database or environment variables. Course data is the CSVs in `docs/data-samples/`, bundled at build time; to update courses, edit a CSV and push to `main`.
@@ -85,6 +87,8 @@ No database or environment variables. Course data is the CSVs in `docs/data-samp
 | Parse courses + `hasMeetingTime` + inline tags | `src/lib/parseCourses.js` |
 | Category typo aliases only (new CSV values pass through) | `src/lib/categoryDisplay.js` |
 | CSV column validation | `src/lib/csvColumns.js` |
+| Compare Courses logic (grouping, scoring, storage, Excel) | `src/lib/compareGroups.js`, `compareScoring.js`, `compareStorage.js`, `compareExport.js` |
+| Compare Courses UI | `src/components/compare/` (`CompareView`, `CompareTable`, `SetupPanel`, …) |
 
 ## Tech stack
 

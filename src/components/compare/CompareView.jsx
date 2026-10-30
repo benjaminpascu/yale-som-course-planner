@@ -1,4 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
+import { formatTermLabel } from '../../lib/academicYear'
+import { downloadCompareWorkbook } from '../../lib/compareExport'
 import { buildCourseGroups } from '../../lib/compareGroups'
 import { toggleSelected } from '../../lib/compareStorage'
 import CourseBrowser from '../CourseBrowser'
@@ -28,7 +30,37 @@ function RecoveredNotice({ onDismiss }) {
   )
 }
 
+function ExportButton({ groups, store, termLabel }) {
+  const [busy, setBusy] = useState(false)
+  const [failed, setFailed] = useState(false)
+
+  async function handleExport() {
+    setBusy(true)
+    setFailed(false)
+    try {
+      await downloadCompareWorkbook({ groups, store, termLabel })
+    } catch (err) {
+      console.error('Excel export failed', err)
+      setFailed(true)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleExport}
+      disabled={busy || groups.length === 0}
+      className={`${HEADER_BUTTON} ${failed ? '!border-red-400 !text-red-700' : ''}`}
+    >
+      {busy ? 'Exporting…' : failed ? 'Export failed — retry' : 'Export'}
+    </button>
+  )
+}
+
 function ComparePanel({
+  termLabel,
   courses,
   selectedGroups,
   emptyMessage,
@@ -52,6 +84,7 @@ function ComparePanel({
           <button type="button" onClick={() => setSetupOpen(true)} className={HEADER_BUTTON}>
             Set up
           </button>
+          <ExportButton groups={selectedGroups} store={store} termLabel={termLabel} />
         </div>
       </SectionHeader>
       <div className="min-h-0 flex-1 overflow-auto">
@@ -157,6 +190,7 @@ export default function CompareView({
   )
 
   const panelProps = {
+    termLabel: formatTermLabel(termCode),
     courses,
     selectedGroups,
     store,

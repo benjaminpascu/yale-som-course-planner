@@ -109,6 +109,19 @@ Desktop (`lg+`): unchanged — catalog sidebar + planning stack; **Plans** in he
 
 ---
 
+### Compare Courses ✅ (built Oct 2026, awaiting approval)
+
+Design: `docs/superpowers/specs/2026-10-29-compare-courses-design.md` · Plan: `docs/superpowers/plans/2026-10-29-compare-courses.md`
+
+- **Planner · Compare courses** page tabs in the desktop header; **Compare** as a fourth mobile tab. Plans menu hidden in Compare.
+- Left: same catalog with tick boxes (one row per course; sections grouped by number + title, EMBA separate). Right: ranked table.
+- Students create their own criteria and weights; 1–10 scores colored red → green; professor ratings shared across terms (highest-rated professor counts for multi-professor courses); note per course; sortable columns; rows don't re-sort while typing.
+- **Export** to Excel (ExcelJS, loaded only on click): Ranking + Professors sheets.
+- Saved in `localStorage` key `yale-som-course-planner-compare`; scores/notes follow a course across terms; selection is per term; unreadable data is backed up, never overwritten.
+- Tests: `npm test` (Vitest) covers grouping, scoring, storage, export.
+
+---
+
 ## Open product decisions (defer unless blocking)
 
 - Calendar library: FullCalendar vs custom grid — **resolved** (custom grid at M4)
@@ -128,7 +141,8 @@ npm run dev
 
 - Header: academic year (from CSV `TermCode`), course/tag counts, link to [Yale SOM Course List](https://som.yale.edu/elective-core-courses)
 - **Desktop:** catalog sidebar (left) + stack (right): calendar → requirements → your plan. **Plans** via header menu.
-- **Mobile:** bottom tabs — Calendar / Courses / Plans (see mobile section above).
+- **Mobile:** bottom tabs — Calendar / Courses / Plans / Compare (see mobile section above).
+- **Compare courses** (header tab): tick courses on the left, score them on the right, **Set up** for criteria/weights/professors, **Export** for Excel.
 - Click a catalog row to add/remove from plan; selected rows show light blue “In plan” styling
 - Rows that would overlap your plan show a red **Conflict** badge (still clickable)
 - **Calendar:** session tabs when your plan mixes terms (e.g. Fall 1 + Fall 2); full-term courses show on both mini-term tabs; overlapping courses render side by side
@@ -153,3 +167,4 @@ After CSV changes: check locally with `npm run dev`, then push to `main` (Vercel
 | July 2026 | Fall 2026 CSV; inline `tags` column; removed separate tags CSV/table; dynamic requirement UI |
 | Oct 2026 | Spring 2027 CSV; combined catalog; term selector; term-aware conflicts; section tag harmonizing |
 | Oct 2026 | Removed Supabase (paused project broke live); app reads bundled CSVs only |
+| Oct 2026 | Compare Courses (custom criteria, weights, 1–10 scores, professor ratings, notes, Excel export); Vitest added |

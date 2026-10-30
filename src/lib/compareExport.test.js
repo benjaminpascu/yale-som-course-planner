@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import {
+  buildCompareWorkbook,
   buildProfessorsSheet,
   buildRankingSheet,
   exportFileName,
@@ -118,6 +119,33 @@ describe('buildProfessorsSheet', () => {
       ['A', 4, 'great'],
       ['C', null, 'tbd'],
     ])
+  })
+})
+
+describe('buildCompareWorkbook', () => {
+  test('two sheets, weights row, colored scores, note kept as text', async () => {
+    const ExcelJS = (await import('exceljs')).default
+    const workbook = await buildCompareWorkbook(ExcelJS, {
+      groups: [gC, gA, gB],
+      store: rankingStore(),
+    })
+    const reread = new ExcelJS.Workbook()
+    await reread.xlsx.load(await workbook.xlsx.writeBuffer())
+
+    const ranking = reread.getWorksheet('Ranking')
+    expect(ranking.getRow(1).getCell(1).value).toBe('Rank')
+    expect(ranking.getRow(2).getCell(1).value).toBe('Weight')
+    const top = ranking.getRow(3)
+    expect(top.getCell(2).value).toBe('MGT 611')
+    expect(top.getCell(11).value).toBe(9)
+    expect(top.getCell(11).fill?.fgColor?.argb).toMatch(/^FF[0-9A-F]{6}$/)
+    const noteCell = ranking.getRow(4).getCell(12)
+    expect(noteCell.value).toBe(ODD_NOTE)
+    expect(noteCell.formula).toBeUndefined()
+
+    const professors = reread.getWorksheet('Professors')
+    expect(professors.getRow(1).values.slice(1)).toEqual(['Professor', 'Rating', 'Note'])
+    expect(professors.getRow(2).getCell(1).value).toBe('Prof, B')
   })
 })
 
