@@ -141,7 +141,7 @@ function CourseCard({ card, onSwipe }) {
           and the buttons stay put; only a long description scrolls inside the card. */}
       <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
         {card.description ? (
-          <p className="text-sm leading-normal">{card.description}</p>
+          <p className="text-base leading-normal">{card.description}</p>
         ) : null}
       </div>
     </article>
