@@ -5,6 +5,10 @@ import CourseBrowser from '../CourseBrowser'
 import SectionHeader from '../SectionHeader'
 import CompareTable from './CompareTable'
 import CourseDetailModal from './CourseDetailModal'
+import SetupPanel from './SetupPanel'
+
+const HEADER_BUTTON =
+  'shrink-0 rounded border border-yale-300 bg-white px-2.5 py-1 text-xs font-medium text-yale-900 hover:bg-yale-50 disabled:cursor-not-allowed disabled:opacity-50'
 
 function RecoveredNotice({ onDismiss }) {
   return (
@@ -25,6 +29,7 @@ function RecoveredNotice({ onDismiss }) {
 }
 
 function ComparePanel({
+  courses,
   selectedGroups,
   emptyMessage,
   store,
@@ -34,10 +39,21 @@ function ComparePanel({
   springYear,
 }) {
   const [detailGroup, setDetailGroup] = useState(null)
+  const [setupOpen, setSetupOpen] = useState(false)
+  const comparedProfessors = useMemo(
+    () => [...new Set(selectedGroups.flatMap((g) => g.professors))],
+    [selectedGroups],
+  )
 
   return (
     <section className="flex h-full min-h-0 flex-col bg-white">
-      <SectionHeader tone="calendar" title="Compare courses" />
+      <SectionHeader tone="calendar" title="Compare courses">
+        <div className="flex gap-2">
+          <button type="button" onClick={() => setSetupOpen(true)} className={HEADER_BUTTON}>
+            Set up
+          </button>
+        </div>
+      </SectionHeader>
       <div className="min-h-0 flex-1 overflow-auto">
         {selectedGroups.length === 0 ? (
           <p className="px-4 py-8 text-center text-sm text-gray-500">
@@ -61,6 +77,14 @@ function ComparePanel({
             : 'Saved in this browser only.'}
         </p>
       </div>
+      <SetupPanel
+        open={setupOpen}
+        onClose={() => setSetupOpen(false)}
+        store={store}
+        update={update}
+        allCourses={courses}
+        comparedProfessors={comparedProfessors}
+      />
       {detailGroup ? (
         <CourseDetailModal
           group={detailGroup}
@@ -133,6 +157,7 @@ export default function CompareView({
   )
 
   const panelProps = {
+    courses,
     selectedGroups,
     store,
     update,
