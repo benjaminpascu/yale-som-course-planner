@@ -26,7 +26,7 @@ The tool **complements** the official site — it does not replace it as the aut
 
 - Registration or bidding (the official system handles this).
 - Grade tracking or transcript.
-- Public professor reviews (consider for v2). Private, browser-only professor ratings exist in Compare Courses (§7.7).
+- Public professor reviews (consider for v2). Compare Courses (§7.7) lets students rate the professor privately as one of their criteria.
 - Mobile app (responsive web is enough).
 - Authentication / accounts (use localStorage for saved plans).
 - Multi-semester / full MBA degree tracking (designed-for but not built in v1).
@@ -189,7 +189,7 @@ Several panels use hover (desktop) or tap (mobile) to show extra detail: **calen
 When adding a new hover detail popup elsewhere, copy this pattern — do not reintroduce `group-hover:block` + `absolute` inside scrollable or layered layout.
 
 ### 7.7 Compare Courses
-Separate view (header tab / mobile tab) for ranking courses by the student's own weighted criteria. Students tick courses in the catalog, score them 1–10 per criterion, rate professors (shared across terms), add notes, sort columns, and export to Excel. Browser-only (`localStorage`); no link to plans or calendar. Full design: `docs/superpowers/specs/2026-10-29-compare-courses-design.md`.
+Separate mode (header tab / mobile tab) with two steps. **Shortlist:** one course at a time, marked Not interested / Maybe / Interested (keys and swipe supported). **Score and rank:** rate shortlisted courses 1–10 per student-defined criterion with decimal weights that add to 1; weighted scores feed a ranking; notes; Excel export. Saved per term in the browser (`localStorage`); no link to plans or calendar. Visual spec: `docs/design/compare/`.
 
 ## 8. Tech stack
 

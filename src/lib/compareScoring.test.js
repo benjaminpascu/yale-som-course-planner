@@ -1,148 +1,103 @@
 import { describe, expect, test } from 'vitest'
 import {
-  SCORE_COLORS,
-  computeCourseScore,
-  orderRowKeys,
+  normalizeWeights,
   parseScoreInput,
+  parseWeightInput,
+  rankCourses,
+  ratingTone,
   scoreToCommit,
-  professorValue,
-  scoreColor,
-  sortRows,
-  weightShares,
+  weightedScore,
+  weightsNeedFix,
 } from './compareScoring'
 
 const C = [
-  { id: 'i', name: 'Interesting', weight: 5, kind: 'manual' },
-  { id: 'u', name: 'Useful', weight: 5, kind: 'manual' },
-  { id: 'p', name: 'Professor', weight: 5, kind: 'professor' },
+  { id: 'i', name: 'Interesting', weight: 0.35 },
+  { id: 'u', name: 'Useful', weight: 0.45 },
+  { id: 'p', name: 'Professor', weight: 0.2 },
 ]
 
-describe('computeCourseScore', () => {
-  test('spec example: unrated professor is skipped', () => {
-    expect(computeCourseScore({ professors: ['X'] }, C, { i: 8, u: 6 }, {})).toEqual({
-      score: 7,
-      complete: false,
-    })
+describe('weightedScore', () => {
+  test('sum(weight × rating) ÷ sum(weight) over all rated criteria', () => {
+    // MGT 802 in the mockup: 9, 9, 7 → 8.6
+    expect(weightedScore({ i: 9, u: 9, p: 7 }, C)).toBeCloseTo(8.6, 5)
   })
 
-  test('professor criterion uses highest rating among professors', () => {
-    expect(professorValue(['A', 'B', 'C'], { A: { rating: 4 }, B: { rating: 9 } })).toBe(9)
-    expect(
-      computeCourseScore(
-        { professors: ['A', 'B'] },
-        C,
-        { i: 6, u: 6 },
-        { A: { rating: 4 }, B: { rating: 9 } },
-      ),
-    ).toEqual({ score: 7, complete: true })
+  test('only criteria the course has a rating for count', () => {
+    // MGT 541 in the mockup: 5, 7, unrated → (0.35×5 + 0.45×7) ÷ 0.8 = 6.125
+    expect(weightedScore({ i: 5, u: 7 }, C)).toBeCloseTo(6.125, 5)
   })
 
-  test('unrated professors give no professor value', () => {
-    expect(professorValue(['A'], { A: { note: 'hi' } })).toBeNull()
-    expect(professorValue([], {})).toBeNull()
+  test('no ratings gives no score', () => {
+    expect(weightedScore(undefined, C)).toBeNull()
+    expect(weightedScore({}, C)).toBeNull()
   })
 
-  test('weight 0 criterion is ignored', () => {
-    const zeroP = C.map((c) => (c.id === 'p' ? { ...c, weight: 0 } : c))
-    expect(computeCourseScore({ professors: [] }, zeroP, { i: 8, u: 6 }, {})).toEqual({
-      score: 7,
-      complete: true,
-    })
-  })
-
-  test('all weights 0 gives no score', () => {
-    const zero = C.map((c) => ({ ...c, weight: 0 }))
-    expect(computeCourseScore({ professors: [] }, zero, { i: 8 }, {}).score).toBeNull()
-  })
-
-  test('no values gives no score', () => {
-    expect(computeCourseScore({ professors: [] }, C, undefined, {}).score).toBeNull()
-  })
-
-  test('score is rounded to one decimal', () => {
-    const w = [
-      { id: 'i', name: 'I', weight: 1, kind: 'manual' },
-      { id: 'u', name: 'U', weight: 2, kind: 'manual' },
-    ]
-    expect(computeCourseScore({ professors: [] }, w, { i: 10, u: 7 }, {}).score).toBe(8)
-    expect(computeCourseScore({ professors: [] }, w, { i: 9, u: 7 }, {}).score).toBe(7.7)
+  test('ratings only on zero-weight criteria give no score', () => {
+    expect(weightedScore({ i: 8 }, [{ id: 'i', name: 'I', weight: 0 }])).toBeNull()
   })
 })
 
-describe('weightShares', () => {
-  test('weights 2/3/5 give shares 20/30/50', () => {
-    expect(
-      weightShares([
-        { ...C[0], weight: 2 },
-        { ...C[1], weight: 3 },
-        { ...C[2], weight: 5 },
-      ]),
-    ).toEqual({ i: 20, u: 30, p: 50 })
+describe('ratingTone', () => {
+  test('the five bands from the design', () => {
+    expect(ratingTone(1)).toMatchObject({ bg: '#f6d4cf', fg: '#7a1810' })
+    expect(ratingTone(2)).toMatchObject({ bg: '#f6d4cf', fg: '#7a1810' })
+    expect(ratingTone(4)).toMatchObject({ bg: '#fbe0c8', fg: '#7a3d0a' })
+    expect(ratingTone(6)).toMatchObject({ bg: '#fcefc0', fg: '#634800' })
+    expect(ratingTone(8)).toMatchObject({ bg: '#d8eecd', fg: '#1f5a1c' })
+    expect(ratingTone(10)).toMatchObject({ bg: '#a9d99c', fg: '#0f420f' })
   })
 
-  test('three equal weights give 33 each; all zero gives 0', () => {
-    expect(weightShares(C)).toEqual({ i: 33, u: 33, p: 33 })
-    expect(weightShares(C.map((c) => ({ ...c, weight: 0 })))).toEqual({ i: 0, u: 0, p: 0 })
+  test('weighted scores use the band of the rounded score; empty is white', () => {
+    expect(ratingTone(8.6)).toEqual(ratingTone(9))
+    expect(ratingTone(6.1)).toEqual(ratingTone(6))
+    expect(ratingTone(null).bg).toBe('#ffffff')
   })
 })
 
-describe('parseScoreInput', () => {
-  test('accepts integers 1 to 10', () => {
-    expect(parseScoreInput('10')).toBe(10)
-    expect(parseScoreInput('1')).toBe(1)
-    expect(parseScoreInput(' 7 ')).toBe(7)
+describe('weights', () => {
+  test('default weights add up to 1, so no fix is needed', () => {
+    expect(weightsNeedFix(C)).toBe(false)
   })
 
-  test('blank clears', () => {
-    expect(parseScoreInput('')).toBeNull()
-    expect(parseScoreInput(' ')).toBeNull()
+  test('typed weights that do not add to 1 need fixing', () => {
+    expect(weightsNeedFix([{ ...C[0], weight: 0.5 }, C[1], C[2]])).toBe(true)
   })
 
-  test('rejects anything else', () => {
-    for (const bad of ['0', '11', '7.5', '-3', 'abc', '1 0', '05']) {
-      expect(parseScoreInput(bad), bad).toBeUndefined()
+  test('normalizeWeights rescales so they add to 1, keeping proportions', () => {
+    const fixed = normalizeWeights([
+      { id: 'a', name: 'A', weight: 1 },
+      { id: 'b', name: 'B', weight: 3 },
+    ])
+    expect(fixed.map((c) => c.weight)).toEqual([0.25, 0.75])
+  })
+
+  test('all-zero weights become equal', () => {
+    const fixed = normalizeWeights([
+      { id: 'a', name: 'A', weight: 0 },
+      { id: 'b', name: 'B', weight: 0 },
+    ])
+    expect(fixed.map((c) => c.weight)).toEqual([0.5, 0.5])
+  })
+
+  test('parseWeightInput accepts decimals from 0 to 1', () => {
+    expect(parseWeightInput('0.35')).toBe(0.35)
+    expect(parseWeightInput('.5')).toBe(0.5)
+    expect(parseWeightInput('1')).toBe(1)
+    expect(parseWeightInput('0')).toBe(0)
+    for (const bad of ['', ' ', '1.2', '-0.1', 'abc', '0.3.1']) {
+      expect(parseWeightInput(bad), bad).toBeUndefined()
     }
   })
 })
 
-describe('scoreColor', () => {
-  test('maps 1..10 onto the palette, rounding final scores', () => {
-    expect(SCORE_COLORS).toHaveLength(10)
-    expect(scoreColor(1)).toBe(SCORE_COLORS[0])
-    expect(scoreColor(10)).toBe(SCORE_COLORS[9])
-    expect(scoreColor(7.4)).toBe(SCORE_COLORS[6])
-    expect(scoreColor(null)).toBeNull()
-  })
-})
-
-describe('sortRows', () => {
-  const rows = [
-    { k: 'a', v: null },
-    { k: 'b', v: 3 },
-    { k: 'c', v: 8 },
-  ]
-  const get = (r) => r.v
-
-  test('empty values last in both directions', () => {
-    expect(sortRows(rows, 'v', 'desc', get).map((r) => r.k)).toEqual(['c', 'b', 'a'])
-    expect(sortRows(rows, 'v', 'asc', get).map((r) => r.k)).toEqual(['b', 'c', 'a'])
-  })
-
-  test('strings sort with localeCompare and do not mutate input', () => {
-    const named = [{ k: 'MGT 611' }, { k: 'MGT 525' }, { k: '' }]
-    const sorted = sortRows(named, 'k', 'asc', (r) => r.k)
-    expect(sorted.map((r) => r.k)).toEqual(['MGT 525', 'MGT 611', ''])
-    expect(named[0].k).toBe('MGT 611')
-  })
-})
-
-describe('orderRowKeys', () => {
-  test('no frozen order returns the sorted order', () => {
-    expect(orderRowKeys(['c', 'a', 'b'], null)).toEqual(['c', 'a', 'b'])
-  })
-
-  test('frozen order is kept, removed keys dropped, new keys appended', () => {
-    expect(orderRowKeys(['d', 'c', 'a'], ['a', 'b', 'c'])).toEqual(['a', 'c', 'd'])
+describe('parseScoreInput', () => {
+  test('accepts integers 1 to 10; blank clears; anything else is invalid', () => {
+    expect(parseScoreInput('10')).toBe(10)
+    expect(parseScoreInput(' 7 ')).toBe(7)
+    expect(parseScoreInput('')).toBeNull()
+    for (const bad of ['0', '11', '7.5', '-3', 'abc', '1 0', '05']) {
+      expect(parseScoreInput(bad), bad).toBeUndefined()
+    }
   })
 })
 
@@ -156,9 +111,23 @@ describe('scoreToCommit', () => {
     expect(scoreToCommit('7.5', 4)).toBe(4)
     expect(scoreToCommit('1 0', null)).toBeNull()
   })
+})
 
-  test('valid text and blank are saved as typed', () => {
-    expect(scoreToCommit('10', 3)).toBe(10)
-    expect(scoreToCommit('', 3)).toBeNull()
+describe('rankCourses', () => {
+  const groups = [{ key: 'a' }, { key: 'b' }, { key: 'c' }]
+
+  test('scored courses highest first; unscored are counted, not ranked', () => {
+    const ratings = { a: { i: 5 }, b: { i: 9 } }
+    const { ranked, unscored } = rankCourses(groups, ratings, C)
+    expect(ranked.map((r) => [r.group.key, r.score])).toEqual([
+      ['b', 9],
+      ['a', 5],
+    ])
+    expect(unscored).toBe(1)
+  })
+
+  test('ties keep shortlist order', () => {
+    const { ranked } = rankCourses(groups, { a: { i: 7 }, c: { i: 7 } }, C)
+    expect(ranked.map((r) => r.group.key)).toEqual(['a', 'c'])
   })
 })

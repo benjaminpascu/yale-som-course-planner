@@ -1,34 +1,29 @@
 import { useEffect, useRef, useState } from 'react'
-import {
-  parseScoreInput,
-  scoreColor,
-  scoreToCommit,
-} from '../../lib/compareScoring'
+import { parseScoreInput, ratingTone, scoreToCommit } from '../../lib/compareScoring'
 
 function toText(value) {
   return value == null ? '' : String(value)
 }
 
 /**
- * One 1–10 score cell. Valid input saves immediately; invalid input shows red
- * and reverts on blur. Arrow Up/Down/Enter move within the same table column.
+ * One 1–10 rating box (64×36), tinted by value. Valid input saves at once;
+ * invalid input shows red and never replaces the earlier rating. Escape undoes
+ * the edit; Arrow Up/Down and Enter move within the same column.
  */
-export default function ScoreInput({
-  value,
-  onCommit,
-  ariaLabel,
-  rowIndex = null,
-  colIndex = null,
-}) {
+export default function RatingInput({ value, onCommit, ariaLabel, rowIndex, colIndex }) {
   const [text, setText] = useState(toText(value))
   const [focused, setFocused] = useState(false)
   const valueAtFocus = useRef(value)
 
+  // While not being edited, track the saved value: it's what an invalid edit falls back to.
   useEffect(() => {
-    if (!focused) setText(toText(value))
+    if (focused) return
+    valueAtFocus.current = value
+    setText(toText(value))
   }, [value, focused])
 
   const invalid = parseScoreInput(text) === undefined
+  const tone = ratingTone(value)
 
   function handleChange(event) {
     const next = event.target.value
@@ -38,11 +33,9 @@ export default function ScoreInput({
   }
 
   function moveTo(event, rowDelta) {
-    if (rowIndex == null) return
-    const table = event.currentTarget.closest('table')
-    const target = table?.querySelector(
-      `input[data-row="${rowIndex + rowDelta}"][data-col="${colIndex}"]`,
-    )
+    const target = event.currentTarget
+      .closest('[data-rating-grid]')
+      ?.querySelector(`input[data-row="${rowIndex + rowDelta}"][data-col="${colIndex}"]`)
     if (!target) return
     event.preventDefault()
     target.focus()
@@ -63,15 +56,15 @@ export default function ScoreInput({
       type="text"
       inputMode="numeric"
       autoComplete="off"
+      placeholder="–"
       value={text}
       aria-label={ariaLabel}
       aria-invalid={invalid || undefined}
-      data-row={rowIndex ?? undefined}
-      data-col={colIndex ?? undefined}
+      data-row={rowIndex}
+      data-col={colIndex}
       onChange={handleChange}
       onKeyDown={handleKeyDown}
       onFocus={(event) => {
-        valueAtFocus.current = value
         setFocused(true)
         event.currentTarget.select()
       }}
@@ -79,11 +72,13 @@ export default function ScoreInput({
         setFocused(false)
         setText(toText(value))
       }}
-      style={{ backgroundColor: invalid ? undefined : (scoreColor(value) ?? undefined) }}
-      className={`h-8 w-11 rounded border text-center text-sm font-semibold tabular-nums text-gray-900 focus:outline-none focus:ring-2 focus:ring-yale-800 ${
+      style={
         invalid
-          ? 'border-red-400 bg-red-50 text-red-700'
-          : 'border-gray-200 bg-white'
+          ? undefined
+          : { backgroundColor: tone.bg, color: tone.fg, borderColor: tone.bd }
+      }
+      className={`h-9 w-16 rounded-md border text-center text-sm font-bold tabular-nums placeholder:font-normal placeholder:text-[#8a95a5] focus:outline-none focus:ring-2 focus:ring-yale-800 ${
+        invalid ? 'border-red-400 bg-red-50 text-red-700' : ''
       }`}
     />
   )

@@ -1,5 +1,16 @@
 import { useCallback } from 'react'
-import { decide, undoLastDecision } from '../../lib/compareStorage'
+import {
+  addCriterion,
+  countRatingsForCriterion,
+  decide,
+  fixWeights,
+  removeCriterion,
+  setCriterionWeight,
+  setNote,
+  setRating,
+  undoLastDecision,
+} from '../../lib/compareStorage'
+import ScoreStep from './ScoreStep'
 import ShortlistStep from './ShortlistStep'
 
 function RecoveredNotice({ onDismiss }) {
@@ -30,7 +41,7 @@ export default function CompareView({
   step,
   onStepChange,
 }) {
-  const { update, saveFailed, recovered, dismissRecovered } = compare
+  const { store, update, saveFailed, recovered, dismissRecovered } = compare
 
   const handleDecide = useCallback(
     (key, decision) => update((s) => decide(s, termCode, key, decision)),
@@ -40,6 +51,23 @@ export default function CompareView({
     () => update((s) => undoLastDecision(s, termCode)),
     [update, termCode],
   )
+
+  function handleAddCriterion(name) {
+    let error
+    update((s) => {
+      const result = addCriterion(s, termCode, name)
+      error = result.error
+      return result.store
+    })
+    return error
+  }
+
+  function handleRemoveCriterion(criterion) {
+    const n = countRatingsForCriterion(store, termCode, criterion.id)
+    const ratings = n === 1 ? '1 rating' : `${n} ratings`
+    if (n > 0 && !window.confirm(`Remove '${criterion.name}'? This deletes ${ratings}.`)) return
+    update((s) => removeCriterion(s, termCode, criterion.id))
+  }
 
   return (
     <>
@@ -60,9 +88,19 @@ export default function CompareView({
           onGoToScore={() => onStepChange('score')}
         />
       ) : (
-        <p className="mx-auto w-full max-w-[800px] px-4 py-12 text-center text-sm text-[#5b6576]">
-          Score and rank arrives in Step 3.
-        </p>
+        <ScoreStep
+          groups={groups}
+          term={term}
+          termLabel={termLabel}
+          onRate={(key, id, value) => update((s) => setRating(s, termCode, key, id, value))}
+          onNote={(key, text) => update((s) => setNote(s, termCode, key, text))}
+          onDecide={handleDecide}
+          onAddCriterion={handleAddCriterion}
+          onRemoveCriterion={handleRemoveCriterion}
+          onWeight={(id, weight) => update((s) => setCriterionWeight(s, termCode, id, weight))}
+          onFixWeights={() => update((s) => fixWeights(s, termCode))}
+          onGoToShortlist={() => onStepChange('shortlist')}
+        />
       )}
     </>
   )

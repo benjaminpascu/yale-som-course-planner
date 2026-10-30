@@ -1,3 +1,5 @@
+import { normalizeWeights } from './compareScoring'
+
 /**
  * Compare Courses data in localStorage, kept separately per term. All
  * updaters are pure (return a new store). Data for courses missing from the
@@ -189,4 +191,89 @@ export function ensureShuffledOrder(store, termCode, keys, random) {
     order.splice(Math.floor(random() * (order.length + 1)), 0, key)
   }
   return updateTerm(store, termCode, (t) => ({ ...t, order }))
+}
+
+export function setRating(store, termCode, key, criterionId, value) {
+  return updateTerm(store, termCode, (term) => {
+    const course = { ...(term.ratings[key] ?? {}) }
+    if (value == null) delete course[criterionId]
+    else course[criterionId] = value
+    const ratings = { ...term.ratings }
+    if (Object.keys(course).length === 0) delete ratings[key]
+    else ratings[key] = course
+    return { ...term, ratings }
+  })
+}
+
+export function setNote(store, termCode, key, text) {
+  return updateTerm(store, termCode, (term) => {
+    const notes = { ...term.notes }
+    if (text.trim()) notes[key] = text
+    else delete notes[key]
+    return { ...term, notes }
+  })
+}
+
+function newCriterionId() {
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID()
+  return `criterion-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+}
+
+/**
+ * New criterion gets 1/(n+1); the others shrink by n/(n+1), so the total stays 1.
+ *
+ * @returns {{ store: object, error?: 'empty' | 'duplicate' }}
+ */
+export function addCriterion(store, termCode, name) {
+  const trimmed = name.trim()
+  if (!trimmed) return { store, error: 'empty' }
+  const { criteria } = getTermData(store, termCode)
+  if (criteria.some((c) => c.name.toLowerCase() === trimmed.toLowerCase())) {
+    return { store, error: 'duplicate' }
+  }
+  const n = criteria.length
+  const next = [
+    ...criteria.map((c) => ({ ...c, weight: (c.weight * n) / (n + 1) })),
+    { id: newCriterionId(), name: trimmed, weight: 1 / (n + 1) },
+  ]
+  return { store: updateTerm(store, termCode, (term) => ({ ...term, criteria: next })) }
+}
+
+export function countRatingsForCriterion(store, termCode, criterionId) {
+  return Object.values(getTermData(store, termCode).ratings).filter((r) => criterionId in r)
+    .length
+}
+
+/** Removes a criterion and its ratings, rescaling the rest. At least one always stays. */
+export function removeCriterion(store, termCode, criterionId) {
+  const term = getTermData(store, termCode)
+  if (term.criteria.length <= 1 || !term.criteria.some((c) => c.id === criterionId)) {
+    return store
+  }
+  const ratings = {}
+  for (const [key, byCriterion] of Object.entries(term.ratings)) {
+    const kept = { ...byCriterion }
+    delete kept[criterionId]
+    if (Object.keys(kept).length > 0) ratings[key] = kept
+  }
+  return updateTerm(store, termCode, (t) => ({
+    ...t,
+    criteria: normalizeWeights(t.criteria.filter((c) => c.id !== criterionId)),
+    ratings,
+  }))
+}
+
+/** Stores a typed weight as-is; "Fix weights" rescales if the total isn't 1. */
+export function setCriterionWeight(store, termCode, criterionId, weight) {
+  return updateTerm(store, termCode, (term) => ({
+    ...term,
+    criteria: term.criteria.map((c) => (c.id === criterionId ? { ...c, weight } : c)),
+  }))
+}
+
+export function fixWeights(store, termCode) {
+  return updateTerm(store, termCode, (term) => ({
+    ...term,
+    criteria: normalizeWeights(term.criteria),
+  }))
 }

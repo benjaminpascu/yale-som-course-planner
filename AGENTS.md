@@ -64,7 +64,7 @@ cd "/Users/benjaminpascu/Documents/Vibe Coding/Cursor/Course planner"
 npm install
 npm run dev              # http://localhost:5173 (or next free port)
 npm run build
-npm test                 # Vitest: compare grouping, scoring, storage, export
+npm test                 # Vitest: compare grouping, shortlist, scoring, storage, export
 ```
 
 No database or environment variables. Course data is the CSVs in `docs/data-samples/`, bundled at build time; to update courses, edit a CSV and push to `main`.
@@ -87,8 +87,9 @@ No database or environment variables. Course data is the CSVs in `docs/data-samp
 | Parse courses + `hasMeetingTime` + inline tags | `src/lib/parseCourses.js` |
 | Category typo aliases only (new CSV values pass through) | `src/lib/categoryDisplay.js` |
 | CSV column validation | `src/lib/csvColumns.js` |
-| Compare Courses logic (grouping, scoring, storage, Excel) | `src/lib/compareGroups.js`, `compareScoring.js`, `compareStorage.js`, `compareExport.js` |
-| Compare Courses UI | `src/components/compare/` (`CompareView`, `CompareTable`, `SetupPanel`, …) |
+| Compare Courses logic (grouping, shortlist, scoring, storage, Excel) | `src/lib/compareGroups.js`, `compareShortlist.js`, `compareScoring.js`, `compareStorage.js`, `compareExport.js` |
+| Compare Courses UI | `src/components/compare/` (`CompareView`, `ShortlistStep`, `ScoreStep`, `RatingInput`, `WeightInput`) — visual spec in `docs/design/compare/` |
+| Header (nav bar + mode sub bar) | `src/components/NavBar.jsx`, `src/components/SubBar.jsx` |
 
 ## Tech stack
 

@@ -2,6 +2,13 @@ import { describe, expect, test } from 'vitest'
 import {
   COMPARE_STORAGE_KEY,
   DEFAULT_CRITERIA,
+  addCriterion,
+  countRatingsForCriterion,
+  fixWeights,
+  removeCriterion,
+  setCriterionWeight,
+  setNote,
+  setRating,
   createEmptyCompareStore,
   decide,
   ensureShuffledOrder,
@@ -185,5 +192,64 @@ describe('ensureShuffledOrder', () => {
       getTermData(store, SPRING).order,
     )
     expect(getTermData(store, FALL).order).toEqual([])
+  })
+})
+
+describe('ratings and notes', () => {
+  test('setRating stores per term; null removes; empty course entry removed', () => {
+    let store = setRating(createEmptyCompareStore(), FALL, 'a', 'useful', 7)
+    expect(getTermData(store, FALL).ratings).toEqual({ a: { useful: 7 } })
+    expect(getTermData(store, SPRING).ratings).toEqual({})
+    store = setRating(store, FALL, 'a', 'useful', null)
+    expect(getTermData(store, FALL).ratings).toEqual({})
+  })
+
+  test('setNote keeps text verbatim; blank removes', () => {
+    let store = setNote(createEmptyCompareStore(), FALL, 'a', ' ask second-years\nre quizzes ')
+    expect(getTermData(store, FALL).notes.a).toBe(' ask second-years\nre quizzes ')
+    store = setNote(store, FALL, 'a', '  ')
+    expect(getTermData(store, FALL).notes.a).toBeUndefined()
+  })
+})
+
+const weights = (store) => getTermData(store, FALL).criteria.map((c) => Number(c.weight.toFixed(4)))
+
+describe('criteria', () => {
+  test('adding a criterion gives it 1/(n+1) and scales the others so the total stays 1', () => {
+    const { store, error } = addCriterion(createEmptyCompareStore(), FALL, ' Workload ')
+    expect(error).toBeUndefined()
+    const criteria = getTermData(store, FALL).criteria
+    expect(criteria.at(-1).name).toBe('Workload')
+    expect(weights(store)).toEqual([0.2625, 0.3375, 0.15, 0.25])
+  })
+
+  test('adding rejects empty and duplicate names', () => {
+    const store = createEmptyCompareStore()
+    expect(addCriterion(store, FALL, '  ').error).toBe('empty')
+    expect(addCriterion(store, FALL, 'useful').error).toBe('duplicate')
+    expect(addCriterion(store, FALL, 'useful').store).toBe(store)
+  })
+
+  test('removing a criterion rescales the rest and deletes its ratings', () => {
+    let store = setRating(createEmptyCompareStore(), FALL, 'a', 'useful', 7)
+    store = setRating(store, FALL, 'a', 'interesting', 9)
+    expect(countRatingsForCriterion(store, FALL, 'useful')).toBe(1)
+    store = removeCriterion(store, FALL, 'useful')
+    expect(getTermData(store, FALL).criteria.map((c) => c.id)).toEqual(['interesting', 'professor'])
+    expect(weights(store)).toEqual([0.6364, 0.3636])
+    expect(getTermData(store, FALL).ratings).toEqual({ a: { interesting: 9 } })
+  })
+
+  test('the last criterion cannot be removed', () => {
+    let store = removeCriterion(createEmptyCompareStore(), FALL, 'useful')
+    store = removeCriterion(store, FALL, 'professor')
+    expect(removeCriterion(store, FALL, 'interesting')).toBe(store)
+  })
+
+  test('typed weights are kept as typed until "Fix weights" rescales them', () => {
+    let store = setCriterionWeight(createEmptyCompareStore(), FALL, 'interesting', 0.55)
+    expect(weights(store)).toEqual([0.55, 0.45, 0.2])
+    store = fixWeights(store, FALL)
+    expect(weights(store)).toEqual([0.4583, 0.375, 0.1667])
   })
 })
