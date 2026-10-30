@@ -4,6 +4,7 @@ import {
   DEFAULT_CRITERIA,
   createEmptyCompareStore,
   decide,
+  ensureShuffledOrder,
   getTermData,
   loadCompareStore,
   persistCompareStore,
@@ -142,5 +143,47 @@ describe('decide and undo', () => {
     const before = createEmptyCompareStore()
     decide(before, FALL, 'a', 'yes')
     expect(before).toEqual(createEmptyCompareStore())
+  })
+})
+
+describe('ensureShuffledOrder', () => {
+  // Deterministic "random": always picks the last remaining slot, so the
+  // shuffle reverses the list and new keys are inserted at the front.
+  const lastSlot = () => 0.999
+
+  test('creates a shuffled order once for all courses in the term', () => {
+    const store = ensureShuffledOrder(createEmptyCompareStore(), FALL, ['a', 'b', 'c'], lastSlot)
+    const order = getTermData(store, FALL).order
+    expect([...order].sort()).toEqual(['a', 'b', 'c'])
+  })
+
+  test('returns the same store when every course already has a place', () => {
+    const store = ensureShuffledOrder(createEmptyCompareStore(), FALL, ['a', 'b', 'c'], Math.random)
+    expect(ensureShuffledOrder(store, FALL, ['c', 'a', 'b'], Math.random)).toBe(store)
+  })
+
+  test('new courses are added without reshuffling existing ones', () => {
+    let store = ensureShuffledOrder(createEmptyCompareStore(), FALL, ['a', 'b', 'c'], Math.random)
+    const before = getTermData(store, FALL).order
+    store = ensureShuffledOrder(store, FALL, ['a', 'b', 'c', 'd'], Math.random)
+    const after = getTermData(store, FALL).order
+    expect(after).toHaveLength(4)
+    expect(after.filter((k) => k !== 'd')).toEqual(before)
+  })
+
+  test('courses that left the catalog keep their place (data is never pruned)', () => {
+    let store = ensureShuffledOrder(createEmptyCompareStore(), FALL, ['a', 'b'], Math.random)
+    store = ensureShuffledOrder(store, FALL, ['a'], Math.random)
+    expect([...getTermData(store, FALL).order].sort()).toEqual(['a', 'b'])
+  })
+
+  test('order is saved per term and survives a reload', () => {
+    const storage = fake()
+    const store = ensureShuffledOrder(createEmptyCompareStore(), SPRING, ['x', 'y'], lastSlot)
+    persistCompareStore(store, storage)
+    expect(getTermData(loadCompareStore(storage).store, SPRING).order).toEqual(
+      getTermData(store, SPRING).order,
+    )
+    expect(getTermData(store, FALL).order).toEqual([])
   })
 })

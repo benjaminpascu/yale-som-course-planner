@@ -7,6 +7,7 @@
  * TermData: {
  *   decisions: { [courseKey]: 'yes' | 'maybe' | 'no' },
  *   history:   courseKey[]            // decision order, newest last (undo)
+ *   order:     courseKey[]            // Shortlist order, shuffled once per term
  *   criteria:  { id, name, weight }[] // weights are decimals meant to sum to 1
  *   ratings:   { [courseKey]: { [criterionId]: 1..10 } }
  *   notes:     { [courseKey]: string }
@@ -31,6 +32,7 @@ function createEmptyTermData() {
   return {
     decisions: {},
     history: [],
+    order: [],
     criteria: DEFAULT_CRITERIA.map((c) => ({ ...c })),
     ratings: {},
     notes: {},
@@ -90,7 +92,10 @@ function normalizeTerm(raw) {
       ([, note]) => typeof note === 'string' && note.trim(),
     ),
   )
-  return { decisions, history, criteria: normalizeCriteria(raw.criteria), ratings, notes }
+  const order = Array.isArray(raw.order)
+    ? [...new Set(raw.order.filter((key) => typeof key === 'string'))]
+    : []
+  return { decisions, history, order, criteria: normalizeCriteria(raw.criteria), ratings, notes }
 }
 
 function backUp(storage, text) {
@@ -165,4 +170,23 @@ export function undoLastDecision(store, termCode) {
     delete decisions[last]
     return { ...t, decisions, history: t.history.slice(0, -1) }
   })
+}
+
+/**
+ * Give every course in the term a place in the Shortlist order. The first
+ * time, the whole list is shuffled; later, only new courses are slotted in at
+ * random places, so reloads and Undo never reshuffle what's already there.
+ *
+ * @param {() => number} random  Math.random, injectable for tests
+ */
+export function ensureShuffledOrder(store, termCode, keys, random) {
+  const term = getTermData(store, termCode)
+  const placed = new Set(term.order)
+  const missing = keys.filter((key) => !placed.has(key))
+  if (missing.length === 0) return store
+  const order = [...term.order]
+  for (const key of missing) {
+    order.splice(Math.floor(random() * (order.length + 1)), 0, key)
+  }
+  return updateTerm(store, termCode, (t) => ({ ...t, order }))
 }

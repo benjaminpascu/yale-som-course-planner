@@ -15,8 +15,8 @@ import {
   getSemesterCalendarYears,
 } from './lib/academicYear'
 import { buildCourseGroups } from './lib/compareGroups'
-import { decisionCounts } from './lib/compareShortlist'
-import { getTermData } from './lib/compareStorage'
+import { decisionCounts, orderGroups } from './lib/compareShortlist'
+import { ensureShuffledOrder, getTermData } from './lib/compareStorage'
 import { loadAppData } from './lib/loadData'
 import {
   courseIdSetFromArray,
@@ -118,11 +118,25 @@ function App() {
     ? catalogTermCode
     : (catalogTerms[0]?.id ?? null)
 
-  const compareGroups = useMemo(
+  const compareCatalog = useMemo(
     () => buildCourseGroups(courses.filter((c) => c.termCode === activeTermCode)),
     [courses, activeTermCode],
   )
   const compareTerm = getTermData(compare.store, activeTermCode)
+  const compareGroups = useMemo(
+    () => orderGroups(compareCatalog, compareTerm.order),
+    [compareCatalog, compareTerm.order],
+  )
+  const compareOpen = view === 'compare' || mobileTab === 'compare'
+  const { update: updateCompare } = compare
+
+  // Shuffle the Shortlist once per term, the first time Compare is opened for it.
+  useEffect(() => {
+    if (!compareOpen || !activeTermCode || compareCatalog.length === 0) return
+    updateCompare((s) =>
+      ensureShuffledOrder(s, activeTermCode, compareCatalog.map((g) => g.key), Math.random),
+    )
+  }, [compareOpen, activeTermCode, compareCatalog, updateCompare])
   const compareCounts = decisionCounts(compareGroups, compareTerm.decisions)
 
   const toggleCourse = useCallback((courseId) => {

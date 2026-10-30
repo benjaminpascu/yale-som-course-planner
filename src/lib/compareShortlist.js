@@ -2,7 +2,16 @@ import { normalizeCategory } from './categoryDisplay'
 import { WEEKDAYS, formatCourseUnits, normalizeBidType } from './courseDisplay'
 import { formatSessionLabel } from './sessionDisplay'
 
-/** Courses still to decide, in catalog order. */
+/** Groups in the saved Shortlist order; any without a place follow in catalog order. */
+export function orderGroups(groups, order) {
+  const rank = new Map(order.map((key, i) => [key, i]))
+  return groups
+    .map((g, i) => ({ g, i, r: rank.get(g.key) ?? Infinity }))
+    .sort((a, b) => a.r - b.r || a.i - b.i)
+    .map(({ g }) => g)
+}
+
+/** Courses still to decide, in the order given. */
 export function shortlistQueue(groups, decisions) {
   return groups.filter((g) => !decisions[g.key])
 }

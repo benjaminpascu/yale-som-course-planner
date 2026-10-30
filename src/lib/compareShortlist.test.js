@@ -1,11 +1,22 @@
 import { describe, expect, test } from 'vitest'
-import { decisionCounts, shortlistCard, shortlistQueue } from './compareShortlist'
+import {
+  decisionCounts,
+  orderGroups,
+  shortlistCard,
+  shortlistQueue,
+} from './compareShortlist'
 
 const groups = [{ key: 'a' }, { key: 'b' }, { key: 'c' }, { key: 'd' }]
 
 describe('shortlistQueue', () => {
   test('skips decided courses and keeps catalog order', () => {
     expect(shortlistQueue(groups, { b: 'yes', c: 'no' }).map((g) => g.key)).toEqual(['a', 'd'])
+  })
+})
+
+describe('orderGroups', () => {
+  test('follows the saved order; courses without a place go last in catalog order', () => {
+    expect(orderGroups(groups, ['c', 'a']).map((g) => g.key)).toEqual(['c', 'a', 'b', 'd'])
   })
 })
 
