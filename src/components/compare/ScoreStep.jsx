@@ -49,55 +49,80 @@ function AddCriterionRow({ onAdd, onClose }) {
   )
 }
 
+/**
+ * Header and rows share one column grid on desktop (`--score-cols`, set on the
+ * table), so every label sits exactly over its column. Phones stack instead:
+ * course name on its own line, boxes right-aligned underneath.
+ */
+const GRID_ROW =
+  'flex flex-wrap items-center gap-2 pr-3 pl-5 sm:grid sm:[grid-template-columns:var(--score-cols)]'
+const LABEL = 'text-xs font-semibold text-[#5b6576]'
+
+function columnCell(index, extra = '') {
+  return `flex w-[72px] justify-center sm:w-auto ${index === 0 ? 'max-sm:ml-auto' : ''} ${extra}`
+}
+
+function scoreColumns(criteriaCount) {
+  return `minmax(14rem, 1fr) repeat(${criteriaCount}, 7rem) 6.5rem 2.25rem`
+}
+
 function CriteriaHeader({ criteria, needsFix, onRemove, onWeight, onFixWeights }) {
   const total = criteria.reduce((sum, c) => sum + c.weight, 0)
   return (
-    <div className="py-3.5 pr-3 pl-5">
-      <div className="flex items-end gap-2">
-        <span className="hidden min-w-[14rem] flex-1 pb-2 text-right text-xs font-semibold text-[#5b6576] sm:block">
-          Weights
-        </span>
+    <div className="border-b border-[#e6eaf0] pb-3">
+      <div className={`${GRID_ROW} pt-2`}>
+        <span className={`hidden sm:block ${LABEL}`}>Course</span>
         {criteria.map((c, i) => (
-          <div
-            key={c.id}
-            className={`flex w-[72px] flex-col items-center gap-1 sm:w-24 ${i === 0 ? 'max-sm:ml-auto' : ''}`}
-          >
-            <span className="flex max-w-24 items-center gap-0.5">
-              <span className="truncate text-xs font-semibold text-[#5b6576]">{c.name}</span>
-              {criteria.length > 1 ? (
-                <button
-                  type="button"
-                  onClick={() => onRemove(c)}
-                  aria-label={`Remove ${c.name}`}
-                  className="flex h-6 w-6 flex-none items-center justify-center"
-                >
-                  <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="#8a95a5" strokeWidth="3" strokeLinecap="round" className="h-2.5 w-2.5">
-                    <path d="M6 6l12 12M18 6L6 18" />
-                  </svg>
-                </button>
-              ) : null}
+          <span key={c.id} className={columnCell(i, 'h-6 items-center')}>
+            {/* Same-width spacer before the name keeps it centered over its column, × right beside it. */}
+            {criteria.length > 1 ? <span aria-hidden className="hidden w-3.5 flex-none sm:block" /> : null}
+            <span title={c.name} className={`min-w-0 truncate ${LABEL}`}>
+              {c.name}
             </span>
+            {criteria.length > 1 ? (
+              <button
+                type="button"
+                onClick={() => onRemove(c)}
+                aria-label={`Remove ${c.name}`}
+                className="hidden h-6 w-3.5 flex-none items-center justify-center sm:flex"
+              >
+                <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="#8a95a5" strokeWidth="3" strokeLinecap="round" className="h-2.5 w-2.5">
+                  <path d="M6 6l12 12M18 6L6 18" />
+                </svg>
+              </button>
+            ) : null}
+          </span>
+        ))}
+        <span className={`w-16 text-right sm:w-auto ${LABEL}`}>
+          <span className="sm:hidden">Score</span>
+          <span className="hidden sm:inline">Weighted score</span>
+        </span>
+        <span className="hidden w-9 sm:block" />
+      </div>
+
+      <div className={`${GRID_ROW} pt-1`}>
+        <span className={`hidden sm:block ${LABEL}`}>Weight</span>
+        {criteria.map((c, i) => (
+          <span key={c.id} className={columnCell(i)}>
             <WeightInput
               weight={c.weight}
               onCommit={(w) => onWeight(c.id, w)}
               ariaLabel={`Weight for ${c.name}`}
             />
-          </div>
+          </span>
         ))}
-        <span className="w-16 pb-2 text-right text-xs font-semibold whitespace-nowrap text-[#5b6576] sm:w-28">
-          <span className="sm:hidden">Score</span>
-          <span className="hidden sm:inline">Weighted score</span>
-        </span>
-        <span className="w-9" />
+        {needsFix ? (
+          <span className="flex w-16 flex-col items-end text-xs leading-tight font-semibold text-[#9a4a00] sm:w-auto">
+            <span className="tabular-nums">Total {total.toFixed(2)}</span>
+            <button type="button" onClick={onFixWeights} className="underline underline-offset-2">
+              Rescale<span className="hidden sm:inline"> to 1</span>
+            </button>
+          </span>
+        ) : (
+          <span className="w-16 text-right text-xs text-[#5b6576] tabular-nums sm:w-auto">Total 1.00</span>
+        )}
+        <span className="hidden w-9 sm:block" />
       </div>
-      {needsFix ? (
-        <p className="mt-2 flex flex-wrap justify-end gap-x-2 text-xs text-[#9a4a00]">
-          <span>Weights add up to {total.toFixed(2)}, not 1.00.</span>
-          <button type="button" onClick={onFixWeights} className="font-semibold underline underline-offset-2">
-            Rescale to 1.00
-          </button>
-        </p>
-      ) : null}
     </div>
   )
 }
@@ -121,9 +146,9 @@ function ScoreRow({ group, term, rowIndex, open, onToggle, onRate, onNote, onDec
           if (event.target.closest('input, button, a')) return
           onToggle()
         }}
-        className="flex cursor-pointer flex-wrap items-center gap-2 py-3 pr-3 pl-5 hover:bg-[#f8fafc] sm:flex-nowrap"
+        className={`${GRID_ROW} cursor-pointer py-3 hover:bg-[#f8fafc]`}
       >
-        <div className="flex basis-full flex-col gap-0.5 sm:min-w-[14rem] sm:flex-1 sm:basis-auto">
+        <div className="flex min-w-0 basis-full flex-col gap-0.5 sm:basis-auto">
           <button
             type="button"
             onClick={onToggle}
@@ -136,10 +161,7 @@ function ScoreRow({ group, term, rowIndex, open, onToggle, onRate, onNote, onDec
           {note && !open ? <span className="text-xs text-[#1a1f2b] italic">{note}</span> : null}
         </div>
         {criteria.map((c, colIndex) => (
-          <span
-            key={c.id}
-            className={`flex w-[72px] justify-center sm:w-24 ${colIndex === 0 ? 'max-sm:ml-auto' : ''}`}
-          >
+          <span key={c.id} className={columnCell(colIndex)}>
             <RatingInput
               value={course[c.id] ?? null}
               onCommit={(v) => onRate(group.key, c.id, v)}
@@ -149,7 +171,7 @@ function ScoreRow({ group, term, rowIndex, open, onToggle, onRate, onNote, onDec
             />
           </span>
         ))}
-        <span className="w-16 text-right text-xl font-bold text-yale-800 tabular-nums sm:w-28">
+        <span className="w-16 text-right text-xl font-bold text-yale-800 tabular-nums sm:w-auto">
           {score == null ? '–' : score.toFixed(1)}
         </span>
         <button
@@ -157,7 +179,7 @@ function ScoreRow({ group, term, rowIndex, open, onToggle, onRate, onNote, onDec
           onClick={onToggle}
           aria-expanded={open}
           aria-label="Description and note"
-          className="flex h-9 w-9 items-center justify-center"
+          className="hidden h-9 w-9 items-center justify-center sm:flex"
         >
           <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="#5b6576" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={`h-[18px] w-[18px] ${open ? 'rotate-180' : ''}`}>
             <path d="M6 9l6 6 6-6" />
@@ -332,13 +354,17 @@ export default function ScoreStep({
   return (
     <div className="mx-auto flex w-full max-w-[1376px] flex-wrap items-start gap-6 px-3 pt-6 pb-14 sm:px-8">
       <main className="min-w-0 flex-[999_1_640px] overflow-x-auto rounded-lg border border-[#dde3ea] bg-white">
-        <div className="sm:min-w-[700px]" data-rating-grid>
-          <div className="flex items-center justify-between gap-3 pt-3 pr-3 pb-1 pl-5">
+        <div
+          className="sm:min-w-[700px]"
+          style={{ '--score-cols': scoreColumns(term.criteria.length) }}
+          data-rating-grid
+        >
+          <div className="flex items-center justify-between gap-3 pt-4 pr-3 pb-2 pl-5">
             <h2 className="text-base font-bold">Your shortlist</h2>
             <button
               type="button"
               onClick={() => setAdding(true)}
-              className="h-9 rounded-md bg-save-800 px-3.5 text-sm font-semibold text-white hover:bg-save-900"
+              className="h-8 rounded-md bg-save-800 px-3 text-sm font-semibold text-white hover:bg-save-900"
             >
               + Add criterion
             </button>
