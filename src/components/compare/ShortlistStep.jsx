@@ -171,38 +171,41 @@ function DecisionButtons({ onDecide }) {
   )
 }
 
+/** Desktop-only progress column to the right of the card (phones skip it). */
 function Progress({ counts }) {
   const pct = counts.total ? Math.round((counts.decided / counts.total) * 100) : 0
-  const tiles = [
-    { n: counts.yes, label: 'Interested', className: 'text-[#145c2c]' },
-    { n: counts.maybe, label: 'Maybe', className: 'text-[#6b4700]' },
-    { n: counts.no, label: 'Not interested', className: 'text-[#8f1d14]' },
+  const rows = [
+    { n: counts.yes, label: 'Interested', dot: 'bg-[#1e7a3c]', text: 'text-[#145c2c]' },
+    { n: counts.maybe, label: 'Maybe', dot: 'bg-[#c58a00]', text: 'text-[#6b4700]' },
+    { n: counts.no, label: 'Not interested', dot: 'bg-[#c4321f]', text: 'text-[#8f1d14]' },
   ]
   return (
-    <section aria-label="Progress" className="flex shrink-0 flex-col gap-3 border-t border-[#dde3ea] pt-4">
-      <div className="flex items-center gap-3 text-sm text-[#5b6576]">
-        <span className="whitespace-nowrap tabular-nums">
-          {counts.decided} of {counts.total} decided
-        </span>
-        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#dde3ea]">
-          <div className="h-1.5 bg-yale-800" style={{ width: `${pct}%` }} />
-        </div>
+    <aside aria-label="Progress" className="hidden w-44 shrink-0 flex-col gap-3 self-start pt-1 lg:flex">
+      <p className="text-sm text-[#5b6576] tabular-nums">
+        <span className="font-semibold text-[#1a1f2b]">{counts.decided}</span> of {counts.total} decided
+      </p>
+      <div className="h-1.5 overflow-hidden rounded-full bg-[#dde3ea]">
+        <div className="h-1.5 bg-yale-800" style={{ width: `${pct}%` }} />
       </div>
-      <div className="grid grid-cols-3 gap-2">
-        {tiles.map((t) => (
-          <div key={t.label} className="rounded-lg border border-[#dde3ea] bg-white px-3 py-2.5">
-            <div className={`text-xl font-bold tabular-nums ${t.className}`}>{t.n}</div>
-            <div className="text-xs text-[#5b6576]">{t.label}</div>
-          </div>
+      <ul className="flex flex-col gap-1.5 text-sm">
+        {rows.map((r) => (
+          <li key={r.label} className="flex items-center justify-between gap-2">
+            <span className="flex items-center gap-2 text-[#5b6576]">
+              <span aria-hidden className={`h-2 w-2 rounded-full ${r.dot}`} />
+              {r.label}
+            </span>
+            <span className={`font-semibold tabular-nums ${r.text}`}>{r.n}</span>
+          </li>
         ))}
-      </div>
-    </section>
+      </ul>
+    </aside>
   )
 }
 
 /**
  * Compare step 1: one course at a time — Not interested / Maybe / Interested.
- * Arrow keys (← ↓ →) and, on phones, swiping the card left/right decide too.
+ * Arrow keys (← ↓ →) and, on phones, swiping the card left/right decide too;
+ * Cmd/Ctrl+Z undoes the last decision.
  */
 export default function ShortlistStep({ groups, term, counts, termLabel, onDecide, onUndo, onGoToScore }) {
   const rootRef = useRef(null)
@@ -213,63 +216,75 @@ export default function ShortlistStep({ groups, term, counts, termLabel, onDecid
     ? `${lastGroup.courseNumber} marked ${DECISION_LABELS[term.decisions[lastKey]]}`
     : ''
 
+  const canUndo = Boolean(lastGroup)
+
   useEffect(() => {
     function handleKey(event) {
+      if (isTyping(event.target) || !rootRef.current?.offsetParent) return
+      const undo =
+        (event.metaKey || event.ctrlKey) && !event.shiftKey && !event.altKey && event.key.toLowerCase() === 'z'
+      if (undo) {
+        if (!canUndo) return
+        event.preventDefault()
+        onUndo()
+        return
+      }
       const decision = KEY_DECISIONS[event.key]
       if (!decision || !current) return
       if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
-      if (isTyping(event.target) || !rootRef.current?.offsetParent) return
       event.preventDefault()
       onDecide(current.key, decision)
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [current, onDecide])
+  }, [current, canUndo, onDecide, onUndo])
 
   return (
     <div
       ref={rootRef}
-      className="mx-auto flex w-full max-w-[880px] flex-col gap-4 px-3 py-4 sm:px-8 sm:pt-8 sm:pb-14 lg:min-h-0 lg:flex-1 lg:pt-6 lg:pb-6"
+      className="mx-auto flex w-full max-w-[1100px] gap-6 px-3 py-4 sm:px-8 sm:pt-8 sm:pb-14 lg:min-h-0 lg:flex-1 lg:pt-6 lg:pb-6"
     >
-      {current ? (
-        <>
-          <CourseCard
-            key={current.key}
-            card={shortlistCard(current)}
-            onSwipe={(decision) => onDecide(current.key, decision)}
-          />
-          <div className="sticky bottom-[calc(3rem+env(safe-area-inset-bottom))] z-10 -mx-3 flex shrink-0 flex-col gap-1 border-t border-[#dde3ea] bg-white px-4 pt-3 pb-2 sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0">
-            <DecisionButtons onDecide={(d) => onDecide(current.key, d)} />
-            <div className="flex min-h-9 items-center justify-between gap-2 text-sm text-[#5b6576]">
-              <span>{lastLine}</span>
-              {lastGroup ? (
-                <button type="button" onClick={onUndo} className="h-9 px-1 font-semibold text-yale-800">
-                  Undo
-                </button>
-              ) : null}
+      <div className="mx-auto flex w-full max-w-[880px] min-w-0 flex-col gap-4 lg:min-h-0">
+        {current ? (
+          <>
+            <CourseCard
+              key={current.key}
+              card={shortlistCard(current)}
+              onSwipe={(decision) => onDecide(current.key, decision)}
+            />
+            <div className="sticky bottom-[calc(3rem+env(safe-area-inset-bottom))] z-10 -mx-3 flex shrink-0 flex-col gap-1 border-t border-[#dde3ea] bg-white px-4 pt-3 pb-2 sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0">
+              <DecisionButtons onDecide={(d) => onDecide(current.key, d)} />
+              <div className="flex min-h-9 items-center justify-between gap-2 text-sm text-[#5b6576]">
+                <span>{lastLine}</span>
+                {lastGroup ? (
+                  <button type="button" onClick={onUndo} className="h-9 px-1 font-semibold text-yale-800">
+                    Undo
+                  </button>
+                ) : null}
+              </div>
             </div>
-          </div>
-        </>
-      ) : (
-        <div className="flex flex-col items-center gap-4 rounded-xl border border-[#dde3ea] bg-white px-9 py-12 text-center">
-          <h2 className="text-xl font-bold">Every {termLabel} course decided</h2>
-          <p className="text-sm text-[#5b6576]">
-            {counts.yes} interested · {counts.maybe} maybe
-          </p>
-          <button
-            type="button"
-            onClick={onGoToScore}
-            className="flex h-12 items-center rounded-lg bg-yale-800 px-5 text-sm font-semibold text-white hover:bg-yale-900"
-          >
-            Score and rank them
-          </button>
-          {lastGroup ? (
-            <button type="button" onClick={onUndo} className="h-9 text-sm font-semibold text-yale-800">
-              Undo last
+          </>
+        ) : (
+          <div className="flex flex-col items-center gap-4 rounded-xl border border-[#dde3ea] bg-white px-9 py-12 text-center">
+            <h2 className="text-xl font-bold">Every {termLabel} course decided</h2>
+            <p className="text-sm text-[#5b6576]">
+              {counts.yes} interested · {counts.maybe} maybe
+            </p>
+            <button
+              type="button"
+              onClick={onGoToScore}
+              className="flex h-12 items-center rounded-lg bg-yale-800 px-5 text-sm font-semibold text-white hover:bg-yale-900"
+            >
+              Score and rank them
             </button>
-          ) : null}
-        </div>
-      )}
+            {lastGroup ? (
+              <button type="button" onClick={onUndo} className="h-9 text-sm font-semibold text-yale-800">
+                Undo last
+              </button>
+            ) : null}
+          </div>
+        )}
+      </div>
       <Progress counts={counts} />
     </div>
   )
