@@ -100,7 +100,7 @@ export default function CourseRow({
           ) : null}
         </span>
         {showRightRail ? (
-          <span className="flex max-w-[42%] flex-col items-end gap-1 self-stretch sm:max-w-[11rem]">
+          <span className="flex max-w-[9rem] flex-col items-end gap-1 self-stretch sm:max-w-[11rem]">
             {requirementTagCodes.length > 0 ? (
               <span className="flex flex-wrap items-center justify-end gap-1">
                 {requirementTagCodes.map((code) => (
