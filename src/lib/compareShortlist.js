@@ -16,6 +16,24 @@ export function shortlistQueue(groups, decisions) {
   return groups.filter((g) => !decisions[g.key])
 }
 
+const squash = (text) => text.toLowerCase().replace(/\s+/g, '')
+
+/**
+ * Courses with one decision, in course-number order, for reviewing and changing
+ * past decisions. `query` matches number, title or professor (case and spaces ignored).
+ */
+export function reviewList(groups, decisions, decision, query) {
+  const q = squash(query)
+  return groups
+    .filter((g) => decisions[g.key] === decision)
+    .filter(
+      (g) =>
+        !q ||
+        squash(`${g.courseNumber} ${g.title} ${g.professors.join(' ')}`).includes(q),
+    )
+    .sort((a, b) => a.courseNumber.localeCompare(b.courseNumber, undefined, { numeric: true }))
+}
+
 /** Interested / maybe / not counts for this term's courses only. */
 export function decisionCounts(groups, decisions) {
   const counts = { yes: 0, maybe: 0, no: 0, decided: 0, total: groups.length }

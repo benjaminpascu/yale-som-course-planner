@@ -114,7 +114,7 @@ Desktop (`lg+`): unchanged — catalog sidebar + planning stack; **Plans** in he
 Visual spec: `docs/design/compare/` (screenshots + `.dc.html` mockups).
 
 - **Header:** global navy bar (title, Planner | Compare, contact pill) + white sub bar per mode (Planner: plans menu; Compare: step tabs + term switch). Phones switch modes in the bottom nav.
-- **Step 1 Shortlist:** one course at a time (sections grouped by number + title, EMBA separate), in a random order shuffled once per term and saved. Not interested / Maybe / Interested via buttons, ← ↓ → keys, or swipe on phones; Undo; progress + counts.
+- **Step 1 Shortlist:** one course at a time (sections grouped by number + title, EMBA separate), in a random order shuffled once per term and saved. Not interested / Maybe / Interested via buttons, ← ↓ → keys, or swipe on phones; Undo (also Cmd/Ctrl+Z); progress column on desktop whose counts open a Review panel to search past decisions and move courses between Interested / Maybe / Not interested ("Review" link on phones).
 - **Step 2 Score and rank:** Interested and Maybe courses rated 1–10 per criterion (default Interesting 0.35, Useful 0.45, Professor 0.20; weights are decimals that add to 1, "Fix weights" rescales). Weighted score over rated criteria; the Professor rating is shared by every course (and term) with the same professor or teaching team; expandable rows (description, syllabus, growing note box, move/remove); Ranking card; Excel export (ExcelJS, loaded on click) with Shortlist + Criteria sheets.
 - Saved per term in `localStorage` key `yale-som-course-planner-compare` (version 2); unreadable data is backed up, never overwritten.
 - Tests: `npm test` (Vitest) — grouping, shortlist, scoring, storage, export.

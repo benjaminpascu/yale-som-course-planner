@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { shortlistCard, shortlistQueue } from '../../lib/compareShortlist'
+import ReviewPanel from './ReviewPanel'
 
 const DECISION_LABELS = { yes: 'Interested', maybe: 'Maybe', no: 'Not interested' }
 const SWIPE_DISTANCE = 80
@@ -73,30 +74,24 @@ function CourseCard({ card, onSwipe }) {
         transform: dragX ? `translateX(${dragX}px) rotate(${dragX / 40}deg)` : undefined,
         transition: dragX ? 'none' : 'transform 150ms ease-out',
       }}
-      className="flex flex-col gap-5 rounded-xl border border-[#dde3ea] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.04)] sm:px-9 sm:py-8 lg:min-h-[300px] lg:flex-1"
+      className="flex flex-col gap-4 rounded-xl border border-[#dde3ea] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.04)] sm:px-9 sm:py-6 lg:min-h-[300px] lg:flex-1"
     >
-      <div className="flex flex-wrap items-center gap-1.5">
-        {card.session ? (
-          <span className="rounded border border-[#c5ced9] px-2 py-0.5 text-xs font-medium">
-            {card.session}
-          </span>
-        ) : null}
-        {card.tags.map((tag) => (
-          <span key={tag} className="rounded bg-[#e3ebf5] px-2 py-0.5 text-xs font-semibold text-yale-800">
-            {tag}
-          </span>
-        ))}
-        {card.category ? <span className="ml-1 text-xs text-[#5b6576]">{card.category}</span> : null}
-      </div>
-
-      <div className="flex flex-wrap items-start justify-between gap-x-8 gap-y-4">
-        <div className="min-w-0 flex-[999_1_320px]">
-          <h2 className="text-xl leading-tight font-bold tracking-[-0.01em] lg:text-[28px]">
-            {card.heading} <span className="whitespace-nowrap">{card.units}</span>
-          </h2>
-          <p className="mt-1.5 text-base text-[#5b6576]">{card.professors}</p>
+      {/* Top row: session, tags and category on the left; meeting days and time on the right. */}
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+        <div className="flex flex-wrap items-center gap-1.5">
+          {card.session ? (
+            <span className="rounded border border-[#c5ced9] px-2 py-0.5 text-xs font-medium">
+              {card.session}
+            </span>
+          ) : null}
+          {card.tags.map((tag) => (
+            <span key={tag} className="rounded bg-[#e3ebf5] px-2 py-0.5 text-xs font-semibold text-yale-800">
+              {tag}
+            </span>
+          ))}
+          {card.category ? <span className="ml-1 text-xs text-[#5b6576]">{card.category}</span> : null}
         </div>
-        <div className="flex flex-none flex-col items-start gap-1 sm:items-end">
+        <div className="flex items-center gap-3">
           <span className="sr-only">{card.daysLabel}</span>
           <div aria-hidden className="flex gap-2.5 text-sm tracking-[0.02em]">
             {card.days.map((d, i) =>
@@ -119,27 +114,36 @@ function CourseCard({ card, onSwipe }) {
         </div>
       </div>
 
+      <div>
+        <h2 className="text-xl leading-tight font-bold tracking-[-0.01em] lg:text-[28px]">
+          {card.heading} <span className="whitespace-nowrap">{card.units}</span>
+        </h2>
+        <div className="mt-1 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+          <p className="text-base text-[#5b6576]">{card.professors}</p>
+          {card.syllabusUrl ? (
+            <a
+              href={card.syllabusUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex shrink-0 items-center gap-1.5 text-sm font-semibold text-yale-800 underline underline-offset-2 hover:text-yale-950"
+            >
+              Syllabus
+              <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" className="h-3 w-3">
+                <path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6" />
+              </svg>
+            </a>
+          ) : null}
+        </div>
+      </div>
+
       <div className="border-t border-[#e6eaf0]" />
       {/* Desktop: the card fills the space left on screen, so the page itself never scrolls
           and the buttons stay put; only a long description scrolls inside the card. */}
       <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
         {card.description ? (
-          <p className="max-w-[72ch] text-base leading-[1.65]">{card.description}</p>
+          <p className="text-sm leading-normal">{card.description}</p>
         ) : null}
       </div>
-      {card.syllabusUrl ? (
-        <a
-          href={card.syllabusUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-1.5 self-start text-sm font-semibold text-yale-800 underline underline-offset-2 hover:text-yale-950"
-        >
-          Syllabus
-          <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" className="h-3 w-3">
-            <path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6" />
-          </svg>
-        </a>
-      ) : null}
     </article>
   )
 }
@@ -171,13 +175,13 @@ function DecisionButtons({ onDecide }) {
   )
 }
 
-/** Desktop-only progress column to the right of the card (phones skip it). */
-function Progress({ counts }) {
+/** Desktop-only progress column to the right of the card (phones skip it). Rows open the review panel. */
+function Progress({ counts, onReview }) {
   const pct = counts.total ? Math.round((counts.decided / counts.total) * 100) : 0
   const rows = [
-    { n: counts.yes, label: 'Interested', dot: 'bg-[#1e7a3c]', text: 'text-[#145c2c]' },
-    { n: counts.maybe, label: 'Maybe', dot: 'bg-[#c58a00]', text: 'text-[#6b4700]' },
-    { n: counts.no, label: 'Not interested', dot: 'bg-[#c4321f]', text: 'text-[#8f1d14]' },
+    { decision: 'yes', n: counts.yes, label: 'Interested', dot: 'bg-[#1e7a3c]', text: 'text-[#145c2c]' },
+    { decision: 'maybe', n: counts.maybe, label: 'Maybe', dot: 'bg-[#c58a00]', text: 'text-[#6b4700]' },
+    { decision: 'no', n: counts.no, label: 'Not interested', dot: 'bg-[#c4321f]', text: 'text-[#8f1d14]' },
   ]
   return (
     <aside aria-label="Progress" className="hidden w-44 shrink-0 flex-col gap-3 self-start pt-1 lg:flex">
@@ -187,14 +191,21 @@ function Progress({ counts }) {
       <div className="h-1.5 overflow-hidden rounded-full bg-[#dde3ea]">
         <div className="h-1.5 bg-yale-800" style={{ width: `${pct}%` }} />
       </div>
-      <ul className="flex flex-col gap-1.5 text-sm">
+      <ul className="-mx-2 flex flex-col text-sm">
         {rows.map((r) => (
-          <li key={r.label} className="flex items-center justify-between gap-2">
-            <span className="flex items-center gap-2 text-[#5b6576]">
-              <span aria-hidden className={`h-2 w-2 rounded-full ${r.dot}`} />
-              {r.label}
-            </span>
-            <span className={`font-semibold tabular-nums ${r.text}`}>{r.n}</span>
+          <li key={r.label}>
+            <button
+              type="button"
+              onClick={() => onReview(r.decision)}
+              title={`Review ${r.label.toLowerCase()} courses`}
+              className="flex w-full items-center justify-between gap-2 rounded-md px-2 py-1 hover:bg-white"
+            >
+              <span className="flex items-center gap-2 text-[#5b6576]">
+                <span aria-hidden className={`h-2 w-2 rounded-full ${r.dot}`} />
+                {r.label}
+              </span>
+              <span className={`font-semibold tabular-nums ${r.text}`}>{r.n}</span>
+            </button>
           </li>
         ))}
       </ul>
@@ -209,6 +220,7 @@ function Progress({ counts }) {
  */
 export default function ShortlistStep({ groups, term, counts, termLabel, onDecide, onUndo, onGoToScore }) {
   const rootRef = useRef(null)
+  const [reviewing, setReviewing] = useState(null)
   const current = shortlistQueue(groups, term.decisions)[0] ?? null
   const lastKey = term.history[term.history.length - 1]
   const lastGroup = lastKey ? groups.find((g) => g.key === lastKey) : null
@@ -220,7 +232,7 @@ export default function ShortlistStep({ groups, term, counts, termLabel, onDecid
 
   useEffect(() => {
     function handleKey(event) {
-      if (isTyping(event.target) || !rootRef.current?.offsetParent) return
+      if (reviewing || isTyping(event.target) || !rootRef.current?.offsetParent) return
       const undo =
         (event.metaKey || event.ctrlKey) && !event.shiftKey && !event.altKey && event.key.toLowerCase() === 'z'
       if (undo) {
@@ -237,7 +249,7 @@ export default function ShortlistStep({ groups, term, counts, termLabel, onDecid
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [current, canUndo, onDecide, onUndo])
+  }, [current, canUndo, reviewing, onDecide, onUndo])
 
   return (
     <div
@@ -255,12 +267,23 @@ export default function ShortlistStep({ groups, term, counts, termLabel, onDecid
             <div className="sticky bottom-[calc(3rem+env(safe-area-inset-bottom))] z-10 -mx-3 flex shrink-0 flex-col gap-1 border-t border-[#dde3ea] bg-white px-4 pt-3 pb-2 sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0">
               <DecisionButtons onDecide={(d) => onDecide(current.key, d)} />
               <div className="flex min-h-9 items-center justify-between gap-2 text-sm text-[#5b6576]">
-                <span>{lastLine}</span>
-                {lastGroup ? (
-                  <button type="button" onClick={onUndo} className="h-9 px-1 font-semibold text-yale-800">
-                    Undo
-                  </button>
-                ) : null}
+                <span className="min-w-0 truncate">{lastLine}</span>
+                <span className="flex shrink-0 items-center gap-3">
+                  {counts.decided > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => setReviewing('no')}
+                      className="h-9 px-1 font-semibold text-yale-800 lg:hidden"
+                    >
+                      Review
+                    </button>
+                  ) : null}
+                  {lastGroup ? (
+                    <button type="button" onClick={onUndo} className="h-9 px-1 font-semibold text-yale-800">
+                      Undo
+                    </button>
+                  ) : null}
+                </span>
               </div>
             </div>
           </>
@@ -277,15 +300,30 @@ export default function ShortlistStep({ groups, term, counts, termLabel, onDecid
             >
               Score and rank them
             </button>
-            {lastGroup ? (
-              <button type="button" onClick={onUndo} className="h-9 text-sm font-semibold text-yale-800">
-                Undo last
+            <span className="flex items-center gap-4">
+              <button type="button" onClick={() => setReviewing('no')} className="h-9 text-sm font-semibold text-yale-800">
+                Review decisions
               </button>
-            ) : null}
+              {lastGroup ? (
+                <button type="button" onClick={onUndo} className="h-9 text-sm font-semibold text-yale-800">
+                  Undo last
+                </button>
+              ) : null}
+            </span>
           </div>
         )}
       </div>
-      <Progress counts={counts} />
+      <Progress counts={counts} onReview={setReviewing} />
+      {reviewing ? (
+        <ReviewPanel
+          initialDecision={reviewing}
+          groups={groups}
+          term={term}
+          counts={counts}
+          onDecide={onDecide}
+          onClose={() => setReviewing(null)}
+        />
+      ) : null}
     </div>
   )
 }

@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest'
 import {
   decisionCounts,
   orderGroups,
+  reviewList,
   shortlistCard,
   shortlistQueue,
 } from './compareShortlist'
@@ -17,6 +18,27 @@ describe('shortlistQueue', () => {
 describe('orderGroups', () => {
   test('follows the saved order; courses without a place go last in catalog order', () => {
     expect(orderGroups(groups, ['c', 'a']).map((g) => g.key)).toEqual(['c', 'a', 'b', 'd'])
+  })
+})
+
+describe('reviewList', () => {
+  const courses = [
+    { key: 'a', courseNumber: 'MGT 525', title: 'Valuation', professors: ['Majd, Saman'] },
+    { key: 'b', courseNumber: 'MGT 611', title: 'Policy Modeling', professors: ['Monachou, Faidra'] },
+    { key: 'c', courseNumber: 'MGT 805', title: 'Fixed Income', professors: ['Majd, Saman'] },
+    { key: 'd', courseNumber: 'MGT 900', title: 'Derivatives', professors: [] },
+  ]
+  const decisions = { a: 'no', b: 'no', c: 'yes' }
+
+  test('lists courses with that decision, in course-number order', () => {
+    expect(reviewList(courses, decisions, 'no', '').map((g) => g.key)).toEqual(['a', 'b'])
+    expect(reviewList(courses, decisions, 'maybe', '')).toEqual([])
+  })
+
+  test('search matches number, title or professor, ignoring case and spaces', () => {
+    expect(reviewList(courses, decisions, 'no', 'policy').map((g) => g.key)).toEqual(['b'])
+    expect(reviewList(courses, decisions, 'no', ' mgt525 ').map((g) => g.key)).toEqual(['a'])
+    expect(reviewList(courses, decisions, 'no', 'majd').map((g) => g.key)).toEqual(['a'])
   })
 })
 
