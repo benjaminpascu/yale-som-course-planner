@@ -33,7 +33,7 @@ The user is a non-technical student. Explain clearly; ask explicitly when a prod
 | **Fall 2026 data + inline tags** | ✅ Catalog + dynamic tags from CSV `tags` column |
 | **Spring 2027 data + term selector** | ✅ Live (Oct 2026) |
 | **Live** | ✅ Vercel; share link privately; fix issues as feedback comes in |
-| **Compare Courses** | ✅ Built Oct 2026 on branch `compare-courses`, awaiting approval |
+| **Compare Courses + two-bar header** | ✅ Live (Nov 2026) |
 | **Wider promo** | When you choose (not a separate dev milestone) |
 
 Full detail: **`docs/PROJECT_STATUS.md`**.

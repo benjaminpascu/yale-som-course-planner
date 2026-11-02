@@ -34,7 +34,7 @@
 - Removed separate `course_tags.csv` / app join on tags table
 - Requirement tracker + filters discover tag names from data (no hardcoded tag list)
 
-### Spring 2027 catalog + term selector (built Oct 2026, awaiting approval)
+### Spring 2027 catalog + term selector ✅ (Oct 2026, live)
 
 - Second file: `docs/data-samples/courses_master_spring2027.csv` (217 rows, 216 visible, TermCode `202701`); same columns as fall
 - App + import script load both files into one list (416 visible courses)
@@ -109,7 +109,7 @@ Desktop (`lg+`): unchanged — catalog sidebar + planning stack; **Plans** in he
 
 ---
 
-### Compare Courses ✅ (built Oct 2026 on branch `compare-courses`, awaiting approval)
+### Compare Courses ✅ (live Nov 2026)
 
 Visual spec: `docs/design/compare/` (screenshots + `.dc.html` mockups).
 
@@ -167,3 +167,4 @@ After CSV changes: check locally with `npm run dev`, then push to `main` (Vercel
 | Oct 2026 | Spring 2027 CSV; combined catalog; term selector; term-aware conflicts; section tag harmonizing |
 | Oct 2026 | Removed Supabase (paused project broke live); app reads bundled CSVs only |
 | Oct 2026 | Two-bar header; Compare Courses (Shortlist + Score and rank, per-term saving, Excel export); Vitest added |
+| Nov 2026 | Compare Courses live: review panel for past decisions, shared professor ratings, final review fixes; merged to `main` |
