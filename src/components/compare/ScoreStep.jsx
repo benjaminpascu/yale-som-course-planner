@@ -9,6 +9,7 @@ import {
   weightedScore,
   weightsNeedFix,
 } from '../../lib/compareScoring'
+import { formatCourseHeading, formatCourseUnits } from '../../lib/courseDisplay'
 import { formatSessionLabel } from '../../lib/sessionDisplay'
 import RatingInput from './RatingInput'
 import WeightInput from './WeightInput'
@@ -161,7 +162,7 @@ function NoteBox({ courseNumber, value, onChange }) {
       }}
       placeholder="Add a note"
       aria-label={`Note for ${courseNumber}`}
-      className="min-h-16 max-w-[520px] flex-[1_1_280px] resize-y rounded-md border border-[#c5ced9] bg-white px-2.5 py-2 text-sm leading-relaxed"
+      className="min-h-16 w-full resize-y rounded-md border border-[#c5ced9] bg-white px-2.5 py-2 text-sm leading-relaxed"
     />
   )
 }
@@ -195,7 +196,7 @@ function ScoreRow({ group, term, professors, rowIndex, open, onToggle, onRate, o
             aria-expanded={open}
             className="text-left text-sm leading-snug font-bold text-[#1a1f2b] hover:text-yale-800"
           >
-            {group.courseNumber} — {group.title}
+            {formatCourseHeading(group)}
           </button>
           {sub ? <span className="text-xs text-[#5b6576]">{sub}</span> : null}
           {note && !open ? <span className="text-xs text-[#1a1f2b] italic">{note}</span> : null}
@@ -230,7 +231,7 @@ function ScoreRow({ group, term, professors, rowIndex, open, onToggle, onRate, o
 
       {open ? (
         <div className="flex flex-col gap-3 px-5 pb-4">
-          <p className="max-w-[76ch] text-sm leading-relaxed">
+          <p className="text-sm leading-relaxed">
             {first.description}{' '}
             {first.syllabusUrl ? (
               <a
@@ -243,17 +244,22 @@ function ScoreRow({ group, term, professors, rowIndex, open, onToggle, onRate, o
               </a>
             ) : null}
           </p>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <NoteBox courseNumber={group.courseNumber} value={note} onChange={(text) => onNote(group.key, text)} />
-            <span className="ml-auto flex items-center gap-1 text-sm text-[#5b6576]">
-              <button type="button" onClick={() => onDecide(group.key, isYes ? 'maybe' : 'yes')} className="h-8 px-2 hover:text-yale-800">
-                {isYes ? 'Move to Maybe' : 'Move to Interested'}
-              </button>
-              <span aria-hidden>·</span>
-              <button type="button" onClick={() => onDecide(group.key, 'no')} className="h-8 px-2 hover:text-yale-800">
-                Remove
-              </button>
-            </span>
+          <NoteBox courseNumber={group.courseNumber} value={note} onChange={(text) => onNote(group.key, text)} />
+          <div className="flex flex-wrap justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => onDecide(group.key, isYes ? 'maybe' : 'yes')}
+              className="h-8 rounded-md border border-[#c5ced9] bg-white px-3 text-sm font-medium text-[#1a1f2b] hover:bg-yale-50"
+            >
+              {isYes ? 'Move to Maybe' : 'Move to Interested'}
+            </button>
+            <button
+              type="button"
+              onClick={() => onDecide(group.key, 'no')}
+              className="h-8 rounded-md border border-[#c5ced9] bg-white px-3 text-sm font-medium text-[#1a1f2b] hover:border-[#c4321f] hover:bg-[#fdeceb] hover:text-[#8f1d14]"
+            >
+              Remove
+            </button>
           </div>
         </div>
       ) : null}
@@ -308,7 +314,9 @@ function RankingCard({ shortlist, term, professors, termLabel, onOpen }) {
               >
                 <span className="w-5 font-semibold text-[#5b6576] tabular-nums">{i + 1}</span>
                 <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="leading-snug font-semibold">{group.title}</span>
+                  <span className="leading-snug font-semibold">
+                    {group.title} ({formatCourseUnits(group.units)})
+                  </span>
                   <span className="text-xs text-[#5b6576]">{group.courseNumber}</span>
                 </span>
                 <span
