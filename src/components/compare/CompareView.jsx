@@ -43,7 +43,7 @@ export default function CompareView({
   step,
   onStepChange,
 }) {
-  const { store, update, saveFailed, recovered, dismissRecovered } = compare
+  const { store, update, saveFailed, recovered, dismissRecovered, outdated } = compare
 
   const handleDecide = useCallback(
     (key, decision) => update((s) => decide(s, termCode, key, decision)),
@@ -87,6 +87,18 @@ export default function CompareView({
   return (
     <>
       {recovered ? <RecoveredNotice onDismiss={dismissRecovered} /> : null}
+      {outdated ? (
+        <div className="flex items-center justify-between gap-3 border-b border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-900 sm:px-8">
+          <span>A newer version of Compare is open in another tab. Reload to keep your changes in sync.</span>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="shrink-0 rounded border border-amber-300 bg-white px-2 py-0.5 font-medium hover:bg-amber-100"
+          >
+            Reload
+          </button>
+        </div>
+      ) : null}
       {saveFailed ? (
         <p className="px-4 py-2 text-xs font-medium text-red-700 sm:px-8">
           Couldn&apos;t save — this browser is blocking storage.

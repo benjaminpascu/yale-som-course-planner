@@ -56,6 +56,7 @@ Use only: `days_clean`, `start_24h`, `end_24h` → app fields `meetingDays`, `st
 - **`hasMeetingTime(course)`** in `src/lib/parseCourses.js` — true when all three are present.
 - Courses with **no** weekly time: list normally, show amber **“No time defined — won't show on calendar”**, and **exclude** from calendar rendering and time-conflict checks (see PRD §6.1, §7.2).
 - **`tags`** on each course: parse the CSV `tags` column by splitting on `;`. Do not hardcode tag names; discover unique tags from loaded courses.
+- **Compare Courses data is filed per course under course number + program (EMBA or not)**, plus the title only when one number covers several courses (e.g. the MGT 416 trips). Fixing a title typo keeps students' Compare data; changing a course number, the EMBA category, or the title of a multi-course number starts that course fresh for them. Professor ratings are filed by professor name, so fix spelling duplicates (e.g. "Pinker, Edi" / "Pinker, Edieal") in the CSV.
 
 ## Commands
 

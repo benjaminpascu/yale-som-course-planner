@@ -222,7 +222,7 @@ export default function ShortlistStep({ groups, term, counts, termLabel, onDecid
   const rootRef = useRef(null)
   const [reviewing, setReviewing] = useState(null)
   const current = shortlistQueue(groups, term.decisions)[0] ?? null
-  const lastKey = term.history[term.history.length - 1]
+  const lastKey = term.history[term.history.length - 1]?.key
   const lastGroup = lastKey ? groups.find((g) => g.key === lastKey) : null
   const lastLine = lastGroup
     ? `${lastGroup.courseNumber} marked ${DECISION_LABELS[term.decisions[lastKey]]}`
@@ -232,7 +232,9 @@ export default function ShortlistStep({ groups, term, counts, termLabel, onDecid
 
   useEffect(() => {
     function handleKey(event) {
-      if (reviewing || isTyping(event.target) || !rootRef.current?.offsetParent) return
+      // Shortcuts pause while typing or while any pop-up (Contact, Review…) is open.
+      if (isTyping(event.target) || !rootRef.current?.offsetParent) return
+      if (document.querySelector('[role="dialog"]')) return
       const undo =
         (event.metaKey || event.ctrlKey) && !event.shiftKey && !event.altKey && event.key.toLowerCase() === 'z'
       if (undo) {
@@ -249,7 +251,7 @@ export default function ShortlistStep({ groups, term, counts, termLabel, onDecid
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [current, canUndo, reviewing, onDecide, onUndo])
+  }, [current, canUndo, onDecide, onUndo])
 
   return (
     <div

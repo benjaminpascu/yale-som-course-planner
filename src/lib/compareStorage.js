@@ -12,7 +12,7 @@ import { PROFESSOR_CRITERION_ID, normalizeWeights } from './compareScoring'
  * }
  * TermData: {
  *   decisions: { [courseKey]: 'yes' | 'maybe' | 'no' },
- *   history:   courseKey[]            // decision order, newest last (undo)
+ *   history:   { key, previous }[]    // decisions in order, newest last; Undo restores `previous`
  *   order:     courseKey[]            // Shortlist order, shuffled once per term
  *   criteria:  { id, name, weight }[] // weights are decimals meant to sum to 1
  *   ratings:   { [courseKey]: { [criterionId]: 1..10 } }
@@ -84,9 +84,9 @@ function normalizeTerm(raw) {
       DECISIONS.has(d),
     ),
   )
-  const history = Array.isArray(raw.history)
-    ? raw.history.filter((key) => typeof key === 'string' && key in decisions)
-    : []
+  const history = (Array.isArray(raw.history) ? raw.history : [])
+    .filter((entry) => isPlainObject(entry) && typeof entry.key === 'string' && entry.key in decisions)
+    .map((entry) => ({ key: entry.key, previous: DECISIONS.has(entry.previous) ? entry.previous : null }))
   const ratings = {}
   for (const [key, byCriterion] of Object.entries(isPlainObject(raw.ratings) ? raw.ratings : {})) {
     if (!isPlainObject(byCriterion)) continue
@@ -116,7 +116,11 @@ function backUp(storage, text) {
  * Reading `window.localStorage` itself throws when the browser blocks site
  * data, so it is resolved inside the try (never as a default parameter).
  *
- * @returns {{ store: object, recovered: boolean }}
+ * Data saved by a newer version of the app (e.g. another tab opened after a
+ * deploy) is left untouched and reported as `newerVersion`, so this older
+ * page can stop saving instead of overwriting it.
+ *
+ * @returns {{ store: object, recovered: boolean, newerVersion?: boolean }}
  */
 export function loadCompareStore(storage) {
   let text
@@ -133,6 +137,9 @@ export function loadCompareStore(storage) {
     raw = JSON.parse(text)
   } catch {
     raw = undefined
+  }
+  if (isPlainObject(raw) && Number(raw.version) > STORE_VERSION) {
+    return { store: createEmptyCompareStore(), recovered: false, newerVersion: true }
   }
   if (!isPlainObject(raw) || raw.version !== STORE_VERSION) {
     backUp(storage, text)
@@ -163,22 +170,23 @@ export function persistCompareStore(store, storage) {
   }
 }
 
-/** Mark a course 'yes' (interested), 'maybe' or 'no'; newest decision goes last for undo. */
+/** Mark a course 'yes' (interested), 'maybe' or 'no'; history remembers what it was, for Undo. */
 export function decide(store, termCode, key, decision) {
   return updateTerm(store, termCode, (term) => ({
     ...term,
     decisions: { ...term.decisions, [key]: decision },
-    history: [...term.history.filter((k) => k !== key), key],
+    history: [...term.history, { key, previous: term.decisions[key] ?? null }],
   }))
 }
 
 export function undoLastDecision(store, termCode) {
   const term = getTermData(store, termCode)
   if (term.history.length === 0) return store
-  const last = term.history[term.history.length - 1]
+  const { key, previous } = term.history[term.history.length - 1]
   return updateTerm(store, termCode, (t) => {
     const decisions = { ...t.decisions }
-    delete decisions[last]
+    if (previous) decisions[key] = previous
+    else delete decisions[key]
     return { ...t, decisions, history: t.history.slice(0, -1) }
   })
 }

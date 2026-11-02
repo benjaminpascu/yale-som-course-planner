@@ -57,7 +57,18 @@ describe('loadCompareStore', () => {
     expect(storage.data[backupKey]).toBe('{not json')
   })
 
-  test('a store from another version is backed up rather than misread', () => {
+  test('data saved by a newer version is left untouched and marked read-only', () => {
+    const raw = JSON.stringify({ version: 3, terms: { x: {} } })
+    const storage = fake({ [COMPARE_STORAGE_KEY]: raw })
+    const { store, recovered, newerVersion } = loadCompareStore(storage)
+    expect(newerVersion).toBe(true)
+    expect(recovered).toBe(false)
+    expect(store).toEqual(createEmptyCompareStore())
+    expect(Object.keys(storage.data)).toEqual([COMPARE_STORAGE_KEY])
+    expect(storage.data[COMPARE_STORAGE_KEY]).toBe(raw)
+  })
+
+  test('an older-version store is backed up rather than misread', () => {
     const raw = JSON.stringify({ version: 1, criteria: [] })
     const storage = fake({ [COMPARE_STORAGE_KEY]: raw })
     expect(loadCompareStore(storage).recovered).toBe(true)
@@ -70,14 +81,22 @@ describe('loadCompareStore', () => {
       terms: {
         [FALL]: {
           decisions: { a: 'yes', b: 'nope', c: 'no' },
-          history: ['a', 'b', 'c', 'zzz'],
+          history: [
+            { key: 'a', previous: null },
+            { key: 'b', previous: null },
+            { key: 'c', previous: 'bogus' },
+            { key: 'zzz', previous: null },
+          ],
         },
       },
     }
     const { store } = loadCompareStore(fake({ [COMPARE_STORAGE_KEY]: JSON.stringify(raw) }))
     const term = getTermData(store, FALL)
     expect(term.decisions).toEqual({ a: 'yes', c: 'no' })
-    expect(term.history).toEqual(['a', 'c'])
+    expect(term.history).toEqual([
+      { key: 'a', previous: null },
+      { key: 'c', previous: null },
+    ])
     expect(term.criteria).toEqual(DEFAULT_CRITERIA)
   })
 
@@ -132,14 +151,18 @@ describe('decide and undo', () => {
     store = decide(store, FALL, 'b', 'maybe')
     store = undoLastDecision(store, FALL)
     expect(getTermData(store, FALL).decisions).toEqual({ a: 'yes' })
-    expect(getTermData(store, FALL).history).toEqual(['a'])
+    expect(getTermData(store, FALL).history).toEqual([{ key: 'a', previous: null }])
   })
 
-  test('re-deciding a course moves it to the end of history', () => {
+  test('undo after changing a decision restores the previous one', () => {
     let store = decide(createEmptyCompareStore(), FALL, 'a', 'yes')
     store = decide(store, FALL, 'b', 'no')
     store = decide(store, FALL, 'a', 'maybe')
-    expect(getTermData(store, FALL).history).toEqual(['b', 'a'])
+    store = undoLastDecision(store, FALL)
+    expect(getTermData(store, FALL).decisions).toEqual({ a: 'yes', b: 'no' })
+    store = undoLastDecision(store, FALL)
+    store = undoLastDecision(store, FALL)
+    expect(getTermData(store, FALL).decisions).toEqual({})
   })
 
   test('undo with nothing to undo returns the same store', () => {

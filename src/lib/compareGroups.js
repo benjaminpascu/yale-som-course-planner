@@ -1,18 +1,20 @@
 /**
- * Compare Courses groups catalog sections into "courses": same course number,
- * same title (trimmed, case-insensitive), and same program (EMBA vs full-time).
- * The key leaves out the term so scores follow a course across Fall and Spring.
+ * Compare Courses groups one term's catalog sections into "courses": same
+ * course number, same program (EMBA vs full-time) and — only where one number
+ * covers several different courses, like the MGT 416 trips — same title.
+ *
+ * The group key is where Compare files a course's decisions, ratings and note,
+ * so it leaves the title out whenever it can: fixing a title typo in the CSV
+ * then keeps that course's data. (Editing the course number or the EMBA
+ * category still starts that course fresh.)
  */
 
 function isEmbaSection(course) {
   return (course.category ?? '').trim() === 'EMBA'
 }
 
-/** @param {{ courseNumber: string, title: string, category?: string }} course */
-export function courseGroupKey(course) {
-  const title = (course.title ?? '').trim().toLowerCase()
-  return `${course.courseNumber}|${title}|${isEmbaSection(course) ? 'emba' : 'ft'}`
-}
+const programKey = (course) => `${course.courseNumber}|${isEmbaSection(course) ? 'emba' : 'ft'}`
+const titleKey = (course) => (course.title ?? '').trim().toLowerCase()
 
 function uniqueInOrder(values) {
   return [...new Set(values.filter((value) => value !== '' && value != null))]
@@ -34,9 +36,22 @@ function mostCommon(values) {
  * @param {object[]} courses
  */
 export function buildCourseGroups(courses) {
+  const titlesByProgram = new Map()
+  for (const course of courses) {
+    const program = programKey(course)
+    if (!titlesByProgram.has(program)) titlesByProgram.set(program, new Set())
+    titlesByProgram.get(program).add(titleKey(course))
+  }
+  const keyOf = (course) => {
+    const program = programKey(course)
+    if (titlesByProgram.get(program).size === 1) return program
+    const [number, flag] = program.split('|')
+    return `${number}|${titleKey(course)}|${flag}`
+  }
+
   const byKey = new Map()
   for (const course of courses) {
-    const key = courseGroupKey(course)
+    const key = keyOf(course)
     if (!byKey.has(key)) byKey.set(key, [])
     byKey.get(key).push(course)
   }

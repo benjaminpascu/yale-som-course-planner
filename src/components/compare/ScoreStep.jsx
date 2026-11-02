@@ -81,8 +81,8 @@ function CriteriaHeader({ criteria, needsFix, onRemove, onWeight, onFixWeights }
       <div className={`${GRID_ROW} pt-2`}>
         <span className={`hidden sm:block ${LABEL}`}>Course</span>
         {criteria.map((c, i) => (
-          <span key={c.id} className={columnCell(i, 'h-6 items-center')}>
-            {/* Same-width spacer before the name keeps it centered over its column, × right beside it. */}
+          <span key={c.id} className={columnCell(i, 'flex-col items-center sm:h-6 sm:flex-row')}>
+            {/* Desktop: a same-width spacer keeps the name centered with × beside it. Phones: × sits under the name. */}
             {criteria.length > 1 ? <span aria-hidden className="hidden w-3.5 flex-none sm:block" /> : null}
             <span
               title={
@@ -90,7 +90,7 @@ function CriteriaHeader({ criteria, needsFix, onRemove, onWeight, onFixWeights }
                   ? `${c.name} — shared across courses with the same professor`
                   : c.name
               }
-              className={`min-w-0 truncate ${LABEL}`}
+              className={`min-w-0 text-center leading-tight break-words sm:truncate ${LABEL}`}
             >
               {c.name}
             </span>
@@ -99,7 +99,7 @@ function CriteriaHeader({ criteria, needsFix, onRemove, onWeight, onFixWeights }
                 type="button"
                 onClick={() => onRemove(c)}
                 aria-label={`Remove ${c.name}`}
-                className="hidden h-6 w-3.5 flex-none items-center justify-center sm:flex"
+                className="flex h-5 w-6 flex-none items-center justify-center sm:h-6 sm:w-3.5"
               >
                 <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="#8a95a5" strokeWidth="3" strokeLinecap="round" className="h-2.5 w-2.5">
                   <path d="M6 6l12 12M18 6L6 18" />

@@ -1,9 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, test } from 'vitest'
-import {
-  buildCourseGroups,
-  courseGroupKey,
-} from './compareGroups'
+import { buildCourseGroups } from './compareGroups'
 import { parseCoursesCsv } from './parseCourses'
 
 function sec(overrides = {}) {
@@ -20,17 +17,38 @@ function sec(overrides = {}) {
   }
 }
 
-describe('courseGroupKey', () => {
-  test('title match is trimmed and case-insensitive', () => {
-    expect(courseGroupKey(sec({ title: ' Valuation ' }))).toBe(
-      courseGroupKey(sec({ title: 'valuation' })),
-    )
+describe('course keys (where Compare files a course\'s decisions, ratings and notes)', () => {
+  test('a course with one title is keyed by number and program, so fixing the title keeps its data', () => {
+    const [before] = buildCourseGroups([sec({ title: 'Valuaton' })])
+    const [after] = buildCourseGroups([sec({ title: 'Valuation' })])
+    expect(before.key).toBe('MGT 525|ft')
+    expect(after.key).toBe(before.key)
   })
 
-  test('key excludes term', () => {
-    expect(courseGroupKey(sec({ termCode: '202609' }))).toBe(
-      courseGroupKey(sec({ termCode: '202701' })),
-    )
+  test('the title is added only when one number covers several courses', () => {
+    const keys = buildCourseGroups([
+      sec({ courseNumber: 'MGT 416', title: 'IE: Japan' }),
+      sec({ courseNumber: 'MGT 416', title: 'IE: Kenya' }),
+      sec({ courseNumber: 'MGT 525', title: 'Valuation' }),
+    ]).map((g) => g.key)
+    expect(keys).toEqual(['MGT 416|ie: japan|ft', 'MGT 416|ie: kenya|ft', 'MGT 525|ft'])
+  })
+
+  test('title match is trimmed and case-insensitive', () => {
+    const groups = buildCourseGroups([
+      sec({ courseNumber: 'MGT 416', title: ' IE: Japan ' }),
+      sec({ courseNumber: 'MGT 416', title: 'ie: japan' }),
+      sec({ courseNumber: 'MGT 416', title: 'IE: Kenya' }),
+    ])
+    expect(groups.map((g) => g.sections.length)).toEqual([2, 1])
+  })
+
+  test('EMBA sections get their own key', () => {
+    const keys = buildCourseGroups([
+      sec({ courseNumber: 'MGT 408', category: 'Core' }),
+      sec({ courseNumber: 'MGT 408', category: 'EMBA' }),
+    ]).map((g) => g.key)
+    expect(keys).toEqual(['MGT 408|ft', 'MGT 408|emba'])
   })
 })
 
