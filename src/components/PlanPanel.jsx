@@ -23,6 +23,7 @@ function formatPlanHeaderSummary(courseCount, totalUnits) {
 }
 
 export default function PlanPanel({
+  className = '',
   selectedCourses,
   activePlanName,
   isDirty,
@@ -32,7 +33,7 @@ export default function PlanPanel({
   collapsible = true,
   expanded,
   onToggle,
-  planEmptyHint = 'Open Plans in the header to pick or create a plan, then add courses from the catalog.',
+  planEmptyHint = 'Pick or save a plan in the Plan menu',
   catalogSelectHint = 'the catalog on the left',
   onSavePlan,
   onRemoveCourse,
@@ -69,7 +70,7 @@ export default function PlanPanel({
 
   return (
     <section
-      className={`flex flex-col border-b ${planTone.section} ${
+      className={`flex flex-col border-b ${className} ${planTone.section} ${
         expanded && collapsible
           ? 'min-h-0 flex-1 overflow-hidden'
           : 'shrink-0'

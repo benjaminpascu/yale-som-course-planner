@@ -12,6 +12,7 @@ import {
   undoLastDecision,
 } from '../../lib/compareStorage'
 import { PROFESSOR_CRITERION_ID, professorKey } from '../../lib/compareScoring'
+import { HintBackdrop } from '../HintBubble'
 import ScoreStep from './ScoreStep'
 import ShortlistStep from './ShortlistStep'
 
@@ -32,6 +33,35 @@ function RecoveredNotice({ onDismiss }) {
   )
 }
 
+/** First-time box over the Shortlist, page dimmed behind it; nothing underneath moves. A dialog, so Shortlist shortcuts pause. */
+function CompareIntro({ onStart }) {
+  return (
+    <>
+    <HintBackdrop onClick={onStart} />
+    <div
+      role="dialog"
+      aria-label="About Compare"
+      className="absolute inset-x-0 top-10 z-50 mx-auto w-[min(22rem,calc(100%-2rem))] rounded-lg border border-[#dde3ea] bg-white p-5 text-sm leading-relaxed text-[#1a1f2b] shadow-xl"
+    >
+      <p>
+        <b>1 Shortlist</b> — sort courses fast
+      </p>
+      <p>
+        <b>2 Score</b> — rate and rank the keepers
+      </p>
+      <button
+        type="button"
+        onClick={onStart}
+        autoFocus
+        className="mt-3 h-9 rounded-md bg-yale-800 px-5 font-semibold text-white hover:bg-yale-900"
+      >
+        Start
+      </button>
+    </div>
+    </>
+  )
+}
+
 /** Compare mode body: step 1 Shortlist or step 2 Score and rank (from the sub bar). */
 export default function CompareView({
   compare,
@@ -42,6 +72,8 @@ export default function CompareView({
   termLabel,
   step,
   onStepChange,
+  showIntro,
+  onIntroDone,
 }) {
   const { store, update, saveFailed, recovered, dismissRecovered, outdated } = compare
 
@@ -104,6 +136,7 @@ export default function CompareView({
           Couldn&apos;t save — this browser is blocking storage.
         </p>
       ) : null}
+      {showIntro && step === 'shortlist' ? <CompareIntro onStart={onIntroDone} /> : null}
       {step === 'shortlist' ? (
         <ShortlistStep
           groups={groups}

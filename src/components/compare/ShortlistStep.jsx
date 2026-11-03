@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { shortlistCard, shortlistQueue } from '../../lib/compareShortlist'
+import NoDescription from '../NoDescription'
 import ReviewPanel from './ReviewPanel'
 
 const DECISION_LABELS = { yes: 'Interested', maybe: 'Maybe', no: 'Not interested' }
@@ -142,7 +143,9 @@ function CourseCard({ card, onSwipe }) {
       <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
         {card.description ? (
           <p className="text-base leading-normal">{card.description}</p>
-        ) : null}
+        ) : (
+          <NoDescription className="text-base" />
+        )}
       </div>
     </article>
   )

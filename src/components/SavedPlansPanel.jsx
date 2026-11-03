@@ -160,11 +160,11 @@ export default function SavedPlansPanel({
             <p className={compact ? 'text-xs text-yale-700' : 'text-sm text-yale-700'}>
               {hasSelection
                 ? compact
-                  ? 'Name your plan and tap Save to keep your current courses.'
-                  : 'Name your plan and click Save to plan to keep your current course selection.'
+                  ? 'Name it, then tap Save'
+                  : 'Name it, then click Save to plan'
                 : compact
-                  ? 'Add courses from the Courses tab, then save them to a new plan — or tap Add for an empty plan.'
-                  : 'Add courses from the catalog, then name a plan and click Save to plan — or click Add to start with an empty plan.'}
+                  ? 'Add courses from the Courses tab, then save them here'
+                  : 'Add courses from the list, then save them here'}
             </p>
           ) : (
             <ul className={planListGap}>

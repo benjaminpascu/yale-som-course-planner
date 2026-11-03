@@ -23,9 +23,6 @@ import RequirementTag from './RequirementTag'
 import RequirementTargetsModal from './RequirementTargetsModal'
 import SectionHeader from './SectionHeader'
 
-const REQUIREMENTS_SUBTITLE =
-  'Units per requirement tag for your selected plan. Tap or hover a requirement for details.'
-
 const EMPTY_HINT =
   'No requirement tags in this catalog yet.'
 
@@ -297,7 +294,6 @@ export default function TagUnitTracker({
         <SectionHeader
           tone="requirements"
           title="Requirements"
-          subtitle={REQUIREMENTS_SUBTITLE}
         >
           <AddRequirementsButton onClick={() => setModalOpen(true)} />
         </SectionHeader>

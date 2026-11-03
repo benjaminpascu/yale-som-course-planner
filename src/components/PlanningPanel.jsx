@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import HintBubble from './HintBubble'
 import PlanPanel from './PlanPanel'
 import TagUnitTracker from './TagUnitTracker'
 import WeeklyCalendar from './WeeklyCalendar'
@@ -20,13 +21,21 @@ export default function PlanningPanel({
   onSavePlan,
   onRemoveCourse,
   onClearPlan,
+  tip = null,
+  onDismissTip,
 }) {
   const [expandedPane, setExpandedPane] = useState('calendar')
   const calendarOnly = variant === 'calendar'
 
+  // Opening "Your plan" is what that tip asks for.
+  useEffect(() => {
+    if (tip === 'your-plan' && expandedPane === 'plan') onDismissTip?.()
+  }, [tip, expandedPane, onDismissTip])
+
   return (
-    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
+    <div className="relative flex h-full min-h-0 w-full flex-col overflow-hidden">
       <WeeklyCalendar
+        className={tip === 'calendar-details' ? 'relative z-[45]' : ''}
         selectedCourses={selectedCourses}
         hasSelection={hasSelection}
         fallYear={fallYear}
@@ -38,7 +47,25 @@ export default function PlanningPanel({
           setExpandedPane((pane) => (pane === 'calendar' ? 'plan' : 'calendar'))
         }
       />
-      <div className="shrink-0">
+      {/* Tips float over the page; the area they point at is lifted above the dimmed layer. */}
+      <div
+        className={`shrink-0 ${tip === 'requirements' || tip === 'set-targets' ? 'relative z-[45]' : ''}`}
+      >
+        {tip === 'requirements' ? (
+          <HintBubble arrow="down" className="absolute bottom-full left-6 mb-3" onDismiss={onDismissTip}>
+            Units per requirement. {calendarOnly ? 'Tap' : 'Hover'} one for details
+          </HintBubble>
+        ) : null}
+        {tip === 'set-targets' ? (
+          <HintBubble
+            arrow="down"
+            arrowStyle={{ right: '2.5rem' }}
+            className="absolute right-4 bottom-full mb-3"
+            onDismiss={onDismissTip}
+          >
+            Set unit targets for each requirement
+          </HintBubble>
+        ) : null}
         <TagUnitTracker
           selectedCourses={selectedCourses}
           courses={courses}
@@ -48,6 +75,7 @@ export default function PlanningPanel({
       </div>
       {!calendarOnly ? (
         <PlanPanel
+          className={tip === 'your-plan' ? 'relative z-[45]' : ''}
           selectedCourses={selectedCourses}
           activePlanName={activePlanName}
           isDirty={isDirty}
@@ -61,6 +89,16 @@ export default function PlanningPanel({
           onRemoveCourse={onRemoveCourse}
           onClearPlan={onClearPlan}
         />
+      ) : null}
+      {tip === 'calendar-details' ? (
+        <HintBubble className="absolute top-28 right-6" onDismiss={onDismissTip}>
+          See your selected courses&apos; timetable. {calendarOnly ? 'Tap' : 'Hover'} for details
+        </HintBubble>
+      ) : null}
+      {tip === 'your-plan' ? (
+        <HintBubble arrow="down" className="absolute bottom-12 left-6" onDismiss={onDismissTip}>
+          Click to see all your courses
+        </HintBubble>
       ) : null}
     </div>
   )

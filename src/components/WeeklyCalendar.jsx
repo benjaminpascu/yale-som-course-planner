@@ -262,6 +262,7 @@ export default function WeeklyCalendar({
   fillViewport = false,
   expanded = true,
   onToggle = () => {},
+  className = '',
 }) {
   const timedCourses = useMemo(
     () => selectedCourses.filter(hasMeetingTime),
@@ -369,7 +370,7 @@ export default function WeeklyCalendar({
       : ''
   }, [viewOptions, calendarView, fallYear, springYear, selectedCourses])
 
-  const sectionLayoutClass = `flex flex-col border-b ${calendarTone.section} lg:min-h-0 ${
+  const sectionLayoutClass = `flex flex-col border-b ${className} ${calendarTone.section} lg:min-h-0 ${
     fillViewport && hasSelection
       ? 'min-h-0 flex-1 overflow-hidden'
       : hasSelection && expanded
@@ -446,14 +447,10 @@ export default function WeeklyCalendar({
           subtitle={
             fillViewport
               ? 'Add courses in the Courses tab to build your schedule.'
-              : 'Select courses below to plan your weekly schedule.'
+              : '← Add courses from the list'
           }
         />
-        <div className="flex flex-1 flex-col justify-center px-4 py-10">
-          <p className="text-center text-xs text-gray-400">
-            Courses with meeting times will show on this calendar.
-          </p>
-        </div>
+        <div className="flex-1 py-10" />
       </section>
     )
   }

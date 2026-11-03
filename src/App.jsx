@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import CourseBrowser from './components/CourseBrowser'
 import CompareView from './components/compare/CompareView'
+import HintBubble, { HintBackdrop } from './components/HintBubble'
 import { useCompareStore } from './components/compare/useCompareStore'
 import MobileBottomNav from './components/MobileBottomNav'
 import MobilePlansPanel from './components/MobilePlansPanel'
@@ -18,6 +19,12 @@ import { buildCourseGroups } from './lib/compareGroups'
 import { decisionCounts, orderGroups } from './lib/compareShortlist'
 import { ensureShuffledOrder, getTermData } from './lib/compareStorage'
 import { loadAppData } from './lib/loadData'
+import {
+  COMPARE_INTRO,
+  loadSeenHints,
+  nextPlannerHint,
+  persistSeenHints,
+} from './lib/onboardingHints'
 import {
   courseIdSetFromArray,
   deletePlanFromStore,
@@ -45,6 +52,23 @@ function App() {
   const compare = useCompareStore()
   const [catalogTermCode, setCatalogTermCode] = useState(null)
   const planHydratedRef = useRef(false)
+  const [seenHints, setSeenHints] = useState(() => loadSeenHints())
+
+  const markHintSeen = useCallback((id) => {
+    setSeenHints((prev) => {
+      if (prev.has(id)) return prev
+      const next = new Set(prev)
+      next.add(id)
+      persistSeenHints(next)
+      return next
+    })
+  }, [])
+
+  const resetHints = useCallback(() => {
+    const next = new Set()
+    persistSeenHints(next)
+    setSeenHints(next)
+  }, [])
 
   const validCourseIds = useMemo(
     () => new Set(courses.map((c) => c.courseId)),
@@ -138,6 +162,41 @@ function App() {
     )
   }, [compareOpen, activeTermCode, compareCatalog, updateCompare])
   const compareCounts = decisionCounts(compareGroups, compareTerm.decisions)
+
+  // One tip at a time; computer and phone layouts each get their own next tip.
+  const hintState = {
+    seen: seenHints,
+    selectedCount: selectedIds.size,
+    hasPlan: planStore.activePlanId != null,
+  }
+  const desktopHint = nextPlannerHint({ ...hintState, phone: false })
+  const phoneHint = nextPlannerHint({ ...hintState, phone: true })
+  // The tip actually on screen: each waits until the spot it points at is showing.
+  const desktopTip = view === 'planner' ? desktopHint : null
+  const phoneTip = (() => {
+    if (phoneHint === 'phone-courses') return ['catalog', 'compare'].includes(mobileTab) ? null : phoneHint
+    if (phoneHint === 'add-course' || phoneHint === 'clash') return mobileTab === 'catalog' ? phoneHint : null
+    if (['calendar-details', 'requirements', 'set-targets'].includes(phoneHint)) {
+      return mobileTab === 'calendar' ? phoneHint : null
+    }
+    if (phoneHint === 'save-plan') return ['plans', 'compare'].includes(mobileTab) ? null : phoneHint
+    return null
+  })()
+  // Lifts the area a tip points at above the dark layer; no size or position change.
+  const SPOTLIGHT = 'relative z-[45]'
+
+  // Adding a course means the "add a course" tip did its job.
+  const prevSelectedCountRef = useRef(selectedIds.size)
+  useEffect(() => {
+    if (selectedIds.size > prevSelectedCountRef.current) markHintSeen('add-course')
+    prevSelectedCountRef.current = selectedIds.size
+  }, [selectedIds, markHintSeen])
+
+  // Phone tips that point at a tab go away once that tab is opened.
+  useEffect(() => {
+    if (mobileTab === 'catalog' && phoneHint === 'phone-courses') markHintSeen('phone-courses')
+    if (mobileTab === 'plans' && phoneHint === 'save-plan') markHintSeen('save-plan')
+  }, [mobileTab, phoneHint, markHintSeen])
 
   const toggleCourse = useCallback((courseId) => {
     setSelectedIds((prev) => {
@@ -322,24 +381,36 @@ function App() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-gray-50 lg:h-dvh lg:overflow-hidden">
-      <NavBar mode={view} onModeChange={setView} />
+      <NavBar mode={view} onModeChange={setView} onShowTips={resetHints} />
 
       {/* Sub bar: plan (Planner) or steps (Compare) on the left, term switch on the right. */}
       <SubBar className="hidden lg:block">
         {view === 'planner' ? (
-          <PlansMenu
-            plans={planStore.plans}
-            courses={courses}
-            activePlanId={planStore.activePlanId}
-            activePlanName={activePlan?.name ?? null}
-            hasSelection={selectedIds.size > 0}
-            isDirty={isDirty}
-            onAddPlan={handleAddPlan}
-            onSelectPlan={handleSelectPlan}
-            onSavePlan={handleSavePlan}
-            onRenamePlan={handleRenamePlan}
-            onDeletePlan={handleDeletePlan}
-          />
+          // Wrapper only anchors the save tip beside the Plan button; it adds no space.
+          <div className={desktopTip === 'save-plan' ? SPOTLIGHT : 'relative'}>
+            <PlansMenu
+              plans={planStore.plans}
+              courses={courses}
+              activePlanId={planStore.activePlanId}
+              activePlanName={activePlan?.name ?? null}
+              hasSelection={selectedIds.size > 0}
+              isDirty={isDirty}
+              onAddPlan={handleAddPlan}
+              onSelectPlan={handleSelectPlan}
+              onSavePlan={handleSavePlan}
+              onRenamePlan={handleRenamePlan}
+              onDeletePlan={handleDeletePlan}
+            />
+            {desktopTip === 'save-plan' ? (
+              <HintBubble
+                arrow="left"
+                className="absolute top-1/2 left-full ml-4 -translate-y-1/2"
+                onDismiss={() => markHintSeen('save-plan')}
+              >
+                Save this plan here
+              </HintBubble>
+            ) : null}
+          </div>
         ) : (
           <CompareStepTabs {...compareStepTabsProps} />
         )}
@@ -371,11 +442,15 @@ function App() {
       </SubBar>
 
       <main
-        className={`hidden min-h-0 w-full flex-1 grid-cols-1 bg-white lg:grid-cols-[22rem_minmax(0,1fr)] lg:overflow-hidden ${
+        className={`relative hidden min-h-0 w-full flex-1 grid-cols-1 bg-white lg:grid-cols-[22rem_minmax(0,1fr)] lg:overflow-hidden ${
           view === 'planner' ? 'lg:grid' : ''
         }`}
       >
-        <aside className="flex min-h-0 flex-col overflow-hidden border-r-2 border-yale-600">
+        <aside
+          className={`flex min-h-0 flex-col overflow-hidden border-r-2 border-yale-600 ${
+            desktopTip === 'add-course' || desktopTip === 'clash' ? SPOTLIGHT : ''
+          }`}
+        >
           <CourseBrowser
             courses={courses}
             selectedIds={selectedIds}
@@ -387,15 +462,47 @@ function App() {
           />
         </aside>
         <section className="flex min-h-0 flex-col overflow-hidden">
-          <PlanningPanel {...planningPanelProps} />
+          <PlanningPanel
+            {...planningPanelProps}
+            tip={
+              ['calendar-details', 'requirements', 'set-targets', 'your-plan'].includes(desktopTip)
+                ? desktopTip
+                : null
+            }
+            onDismissTip={() => markHintSeen(desktopTip)}
+          />
         </section>
+        {desktopTip === 'add-course' || desktopTip === 'clash' ? (
+          <HintBubble
+            arrow="left"
+            className="absolute top-24 left-[23rem]"
+            onDismiss={() => markHintSeen(desktopTip)}
+          >
+            {desktopTip === 'add-course' ? (
+              <>
+                Click a course, then <b>Add to plan</b>
+              </>
+            ) : (
+              <>
+                <b>Conflict</b> = clashes with your plan
+              </>
+            )}
+          </HintBubble>
+        ) : null}
       </main>
 
       <div
-        className={`${mobileTab === 'compare' ? 'hidden' : 'flex'} min-h-0 flex-1 flex-col overflow-hidden bg-white pb-[calc(3rem+env(safe-area-inset-bottom))] lg:hidden`}
+        className={`${mobileTab === 'compare' ? 'hidden' : 'flex'} min-h-0 flex-1 flex-col overflow-hidden bg-white pb-[calc(3rem+env(safe-area-inset-bottom))] lg:hidden ${
+          phoneTip === 'add-course' || phoneTip === 'clash' ? SPOTLIGHT : ''
+        }`}
       >
         {mobileTab === 'calendar' ? (
-          <PlanningPanel {...planningPanelProps} variant="calendar" />
+          <PlanningPanel
+            {...planningPanelProps}
+            variant="calendar"
+            tip={phoneTip}
+            onDismissTip={() => markHintSeen(phoneTip)}
+          />
         ) : null}
         {mobileTab === 'catalog' ? (
           <CourseBrowser
@@ -416,7 +523,7 @@ function App() {
       <div
         className={`${mobileTab === 'compare' ? 'flex' : 'hidden'} ${
           view === 'compare' ? 'lg:flex' : 'lg:hidden'
-        } min-h-0 flex-1 flex-col bg-[#f3f5f8] pb-[calc(3rem+env(safe-area-inset-bottom))] lg:overflow-y-auto lg:pb-0`}
+        } relative min-h-0 flex-1 flex-col bg-[#f3f5f8] pb-[calc(3rem+env(safe-area-inset-bottom))] lg:overflow-y-auto lg:pb-0`}
       >
         <CompareView
           compare={compare}
@@ -427,8 +534,52 @@ function App() {
           termLabel={formatTermLabel(activeTermCode)}
           step={compareStep}
           onStepChange={setCompareStep}
+          showIntro={!seenHints.has(COMPARE_INTRO)}
+          onIntroDone={() => markHintSeen(COMPARE_INTRO)}
         />
       </div>
+
+      {/* Phone tips float just above the bottom nav, pointing at the tab to tap. */}
+      {desktopTip ? (
+        <HintBackdrop className="hidden lg:block" onClick={() => markHintSeen(desktopTip)} />
+      ) : null}
+      {phoneTip ? <HintBackdrop className="lg:hidden" onClick={() => markHintSeen(phoneTip)} /> : null}
+      {phoneTip === 'phone-courses' ? (
+        <HintBubble
+          arrow="down"
+          arrowStyle={{ left: 'calc(2rem - 6px)' }}
+          className="fixed bottom-[calc(3.75rem+env(safe-area-inset-bottom))] left-[calc(37.5vw-2rem)] lg:hidden"
+          onDismiss={() => markHintSeen('phone-courses')}
+        >
+          Tap <b>Courses</b> to add courses
+        </HintBubble>
+      ) : null}
+      {phoneTip === 'add-course' || phoneTip === 'clash' ? (
+        <HintBubble
+          className="fixed bottom-[calc(3.75rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 lg:hidden"
+          onDismiss={() => markHintSeen(phoneTip)}
+        >
+          {phoneTip === 'add-course' ? (
+            <>
+              Tap a course, then <b>Add to plan</b>
+            </>
+          ) : (
+            <>
+              <b>Conflict</b> = clashes with your plan
+            </>
+          )}
+        </HintBubble>
+      ) : null}
+      {phoneTip === 'save-plan' ? (
+        <HintBubble
+          arrow="down"
+          arrowStyle={{ right: 'calc(2rem - 6px)' }}
+          className="fixed right-[calc(37.5vw-2rem)] bottom-[calc(3.75rem+env(safe-area-inset-bottom))] lg:hidden"
+          onDismiss={() => markHintSeen('save-plan')}
+        >
+          Tap <b>Plans</b> to save this plan
+        </HintBubble>
+      ) : null}
 
       <MobileBottomNav activeTab={mobileTab} onChange={setMobileTab} />
     </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import CollapseChevron from '../CollapseChevron'
+import NoDescription from '../NoDescription'
 import { normalizeCategory } from '../../lib/categoryDisplay'
 import { formatCourseHeading } from '../../lib/courseDisplay'
 import { reviewList } from '../../lib/compareShortlist'
@@ -50,7 +51,6 @@ function DecisionSwitch({ group, decision, onDecide }) {
 function ReviewItem({ group, decision, onDecide }) {
   const [open, setOpen] = useState(false)
   const first = group.sections[0]
-  const hasDescription = Boolean(first.description)
   const sub = [group.professors.join(' / '), normalizeCategory(first.category)]
     .filter(Boolean)
     .join(' · ')
@@ -66,23 +66,25 @@ function ReviewItem({ group, decision, onDecide }) {
   return (
     <li className="border-t border-[#eef1f5] py-3">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">
-        {hasDescription ? (
-          <button
-            type="button"
-            onClick={() => setOpen((o) => !o)}
-            aria-expanded={open}
-            title={open ? 'Hide description' : 'Show description'}
-            className="group flex min-w-0 flex-1 items-start gap-1 rounded text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-yale-800"
-          >
-            <CollapseChevron open={open} />
-            <span className="min-w-0">{heading}</span>
-          </button>
-        ) : (
-          <div className="min-w-0 flex-1 pl-6">{heading}</div>
-        )}
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          title={open ? 'Hide description' : 'Show description'}
+          className="group flex min-w-0 flex-1 items-start gap-1 rounded text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-yale-800"
+        >
+          <CollapseChevron open={open} />
+          <span className="min-w-0">{heading}</span>
+        </button>
         <DecisionSwitch group={group} decision={decision} onDecide={onDecide} />
       </div>
-      {open ? <p className="mt-2 pl-6 text-sm leading-normal text-[#1a1f2b]">{first.description}</p> : null}
+      {open ? (
+        first.description ? (
+          <p className="mt-2 pl-6 text-sm leading-normal text-[#1a1f2b]">{first.description}</p>
+        ) : (
+          <NoDescription className="mt-2 pl-6 text-sm" />
+        )
+      ) : null}
     </li>
   )
 }

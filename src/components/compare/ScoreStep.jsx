@@ -232,7 +232,11 @@ function ScoreRow({ group, term, professors, rowIndex, open, onToggle, onRate, o
       {open ? (
         <div className="flex flex-col gap-3 px-5 pb-4">
           <p className="text-sm leading-relaxed">
-            {first.description}{' '}
+            {first.description ? (
+              <>{first.description} </>
+            ) : (
+              <span className="text-gray-500 italic">No description provided. </span>
+            )}
             {first.syllabusUrl ? (
               <a
                 href={first.syllabusUrl}

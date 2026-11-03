@@ -13,6 +13,7 @@ import {
 import { formatSessionLabel } from '../lib/sessionDisplay'
 import CollapseChevron from './CollapseChevron'
 import RegistrationTag from './RegistrationTag'
+import NoDescription from './NoDescription'
 import RequirementTag from './RequirementTag'
 
 function FactItem({ label, value, valueClassName = '' }) {
@@ -169,7 +170,9 @@ export default function CourseRow({
             <p className="border-t border-gray-200/60 pt-2 text-gray-600">
               {course.description}
             </p>
-          ) : null}
+          ) : (
+            <NoDescription className="border-t border-gray-200/60 pt-2" />
+          )}
 
           {course.syllabusUrl ? (
             <a

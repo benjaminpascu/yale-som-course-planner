@@ -30,3 +30,27 @@
     font-size: 16px;
   }
 }
+
+/* Mac hides scrollbars until you scroll, so scrollable areas look fixed. On computers
+   with a mouse or trackpad, always draw a slim scrollbar so it's clear there's more. */
+@media (hover: hover) and (pointer: fine) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #c5ced9;
+    border: 2px solid transparent;
+    border-radius: 9999px;
+    background-clip: padding-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #8fa3bc;
+  }
+}
