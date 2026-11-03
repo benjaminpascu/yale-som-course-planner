@@ -196,7 +196,7 @@ function Progress({ counts, onReview, tip, onDismissTip }) {
     >
       {tip === 'cmp-review' ? (
         <HintBubble arrow="right" className="absolute top-16 right-full mr-4" onDismiss={onDismissTip}>
-          Click Interested, Maybe or Not interested to see or move those courses
+          Click “Interested”, “Maybe” or “Not interested” to see or move those courses
         </HintBubble>
       ) : null}
       <p className="text-sm text-[#5b6576] tabular-nums">
@@ -232,10 +232,10 @@ function Progress({ counts, onReview, tip, onDismissTip }) {
  * Arrow keys (← ↓ →) and, on phones, swiping the card left/right decide too;
  * Cmd/Ctrl+Z undoes the last decision.
  */
-// Phones: tip above the sticky button bar, arrow down. sm+: the bar is in the page, so tip below, arrow up.
-const BELOW_BAR_TIP = 'absolute right-3 bottom-full sm:right-0 mb-3 sm:top-full sm:bottom-auto sm:mt-3 sm:mb-0'
-const BELOW_BAR_ARROW =
-  'right-6 -bottom-[7px] border-r-[1.5px] border-b-[1.5px] sm:-top-[7px] sm:bottom-auto sm:border-r-0 sm:border-b-0 sm:border-t-[1.5px] sm:border-l-[1.5px]'
+// Tips about the button bar sit just above it (right side, arrow down), so they stay on screen
+// at every size; below the bar can fall off the bottom of the screen.
+const ABOVE_BAR_TIP = 'absolute right-3 bottom-full mb-3 sm:right-0'
+const ABOVE_BAR_ARROW = 'right-6 -bottom-[7px] border-r-[1.5px] border-b-[1.5px]'
 const UNDO_KEYS =
   typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform) ? 'Cmd+Z' : 'Ctrl+Z'
 
@@ -316,19 +316,19 @@ export default function ShortlistStep({
                   onDismiss={onDismissTip}
                 >
                   <span className="lg:hidden">Or swipe the card left or right to choose</span>
-                  <span className="hidden lg:inline">Or press ← ↓ → to choose Not interested, Maybe or Interested</span>
+                  <span className="hidden lg:inline">Or press ← ↓ → to choose “Not interested”, “Maybe” or “Interested”</span>
                 </HintBubble>
               ) : null}
               {tip === 'cmp-undo' ? (
-                <HintBubble arrowClassName={BELOW_BAR_ARROW} className={BELOW_BAR_TIP} onDismiss={onDismissTip}>
+                <HintBubble arrowClassName={ABOVE_BAR_ARROW} className={ABOVE_BAR_TIP} onDismiss={onDismissTip}>
                   <span className="lg:hidden">Changed your mind? Tap Undo</span>
                   <span className="hidden lg:inline">Changed your mind? Undo, or {UNDO_KEYS}</span>
                 </HintBubble>
               ) : null}
               {tip === 'cmp-review' ? (
                 <HintBubble
-                  arrowClassName={BELOW_BAR_ARROW}
-                  className={`${BELOW_BAR_TIP} lg:hidden`}
+                  arrowClassName={ABOVE_BAR_ARROW}
+                  className={`${ABOVE_BAR_TIP} lg:hidden`}
                   onDismiss={onDismissTip}
                 >
                   Tap <b>Review</b> to see or move courses

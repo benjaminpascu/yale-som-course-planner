@@ -1,5 +1,3 @@
-import { useEffect, useRef } from 'react'
-
 // Rotated square; the two outer sides carry the note's border so the arrow looks cut from it.
 const ARROWS = {
   left: 'top-1/2 -left-[7px] -translate-y-1/2 border-b-[1.5px] border-l-[1.5px]',
@@ -17,8 +15,9 @@ export function HintBackdrop({ onClick, className = '' }) {
  * Yellow first-visit tip note with "Got it" (yellow so it never blends into navy course
  * blocks or white panels). It floats over the page (the caller passes absolute/fixed
  * positioning), so nothing underneath moves. `arrowClassName` replaces the preset arrow
- * placement when it must change by screen size. Scrolls itself into view if off-screen,
- * keeping clear of the phone's bottom tab bar (scroll-my-24).
+ * placement when it must change by screen size; `maxWidthClass` narrows a tip that sits
+ * inside a box it must not poke out of. Tips never move or scroll the page: each
+ * must fit inside the screen where it's placed (long text wraps at 24rem).
  */
 export default function HintBubble({
   children,
@@ -26,19 +25,14 @@ export default function HintBubble({
   arrow,
   arrowStyle,
   arrowClassName,
+  maxWidthClass = 'max-w-[min(24rem,calc(100vw-2rem))]',
   className = '',
 }) {
-  const ref = useRef(null)
-  useEffect(() => {
-    ref.current?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' })
-  }, [])
-
   return (
     <div
-      ref={ref}
       role="note"
       onClick={(event) => event.stopPropagation()}
-      className={`z-50 flex w-max scroll-my-24 max-w-[calc(100vw-2rem)] items-center gap-3 rounded-lg border-[1.5px] border-[#c58a00] bg-[#fff4d6] px-3 py-2 text-sm text-[#4a3200] shadow-lg ${className}`}
+      className={`z-50 flex w-max ${maxWidthClass} items-center gap-3 rounded-lg border-[1.5px] border-[#c58a00] bg-[#fff4d6] px-3 py-2 text-sm text-[#4a3200] shadow-lg ${className}`}
     >
       {arrow || arrowClassName ? (
         <span

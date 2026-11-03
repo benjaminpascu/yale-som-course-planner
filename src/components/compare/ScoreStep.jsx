@@ -67,6 +67,8 @@ function AddCriterionRow({ onAdd, onClose }) {
 const GRID_ROW =
   'flex flex-wrap items-center gap-2 pr-3 pl-5 sm:grid sm:[grid-template-columns:var(--score-cols)]'
 const LABEL = 'text-xs font-semibold text-[#5b6576]'
+// Tips inside the table stay narrower than it on phones: poking out would make it scroll sideways.
+const TABLE_TIP_MAX_W = 'max-w-[min(24rem,calc(100vw-5rem))]'
 
 function columnCell(index, extra = '') {
   return `flex w-[72px] justify-center sm:w-auto ${index === 0 ? 'max-sm:ml-auto' : ''} ${extra}`
@@ -226,6 +228,7 @@ function ScoreRow({
               arrow="down"
               arrowStyle={{ left: '1.5rem' }}
               className="absolute bottom-full left-0 mb-3"
+              maxWidthClass={TABLE_TIP_MAX_W}
               onDismiss={onDismissTip}
             >
               <span className="sm:hidden">Tap a course for its description and notes</span>
@@ -253,6 +256,7 @@ function ScoreRow({
               <HintBubble
                 arrowClassName="-bottom-[7px] left-6 border-r-[1.5px] border-b-[1.5px] sm:left-[calc(50%-6px)]"
                 className="absolute bottom-full left-0 mb-3 sm:left-1/2 sm:-translate-x-1/2"
+                maxWidthClass={TABLE_TIP_MAX_W}
                 onDismiss={onDismissTip}
               >
                 Rate each course 1–10 on each criterion (10 = best)
@@ -365,14 +369,27 @@ function RankingCard({ shortlist, term, professors, termLabel, onOpen, tip, onDi
       }`}
     >
       {tip === 'cmp-ranking' ? (
-        // Phones/narrow: the card is last on the page, so the tip goes above it; computers: below.
-        <HintBubble
-          arrowClassName="left-6 -bottom-[7px] border-r-[1.5px] border-b-[1.5px] lg:-top-[7px] lg:bottom-auto lg:border-r-0 lg:border-b-0 lg:border-t-[1.5px] lg:border-l-[1.5px]"
-          className="absolute bottom-full left-4 mb-3 lg:top-full lg:bottom-auto lg:mt-3 lg:mb-0"
-          onDismiss={onDismissTip}
-        >
-          Your ranking updates as you rate. Export to Excel here
-        </HintBubble>
+        <>
+          {/* Computers: under the card, lined up with its right edge so it never passes the page edge. */}
+          <div className="hidden lg:block">
+            <HintBubble
+              arrowClassName="-top-[7px] right-6 border-t-[1.5px] border-l-[1.5px]"
+              className="absolute top-full right-0 mt-3"
+              onDismiss={onDismissTip}
+            >
+              Your ranking updates as you rate. Export to Excel here
+            </HintBubble>
+          </div>
+          {/* Narrower screens: the card sits further down, so the tip floats above the bottom bar. */}
+          <div className="lg:hidden">
+            <HintBubble
+              className="fixed bottom-[calc(3.75rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2"
+              onDismiss={onDismissTip}
+            >
+              Scroll down for your ranking and Excel export
+            </HintBubble>
+          </div>
+        </>
       ) : null}
       <h2 className="px-5 pt-3.5 pb-2.5 text-base font-bold">Ranking</h2>
       <ol>

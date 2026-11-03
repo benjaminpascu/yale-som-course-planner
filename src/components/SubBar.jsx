@@ -19,17 +19,18 @@ const STEPS = [
 ]
 
 // First Compare tips: which step tab each points at, and what it says.
-const STEP_2_TEXT = 'Step 2: rate your Interested and Maybe courses on your criteria to get a ranking'
+const STEP_2_TEXT =
+  'Step 2: rate your “Interested” and “Maybe” courses on your criteria to get a ranked order of which courses to take'
 const STEP_TAB_TIPS = {
   'cmp-here-shortlist': {
     step: 'shortlist',
-    text: 'Step 1: sort each course into Interested, Maybe or Not interested',
+    text: 'Step 1: sort each course into “Interested”, “Maybe” or “Not interested”',
   },
   'cmp-next-score': { step: 'score', text: STEP_2_TEXT },
   'cmp-here-score': { step: 'score', text: STEP_2_TEXT },
   'cmp-back-shortlist': {
     step: 'shortlist',
-    text: 'Step 1: sort more courses into Interested, Maybe or Not interested',
+    text: 'Step 1: sort more courses into “Interested”, “Maybe” or “Not interested”',
   },
 }
 

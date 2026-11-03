@@ -45,7 +45,7 @@ function CompareIntro({ onStart }) {
       className="absolute inset-x-0 top-10 z-50 mx-auto w-[min(22rem,calc(100%-2rem))] rounded-lg border-[1.5px] border-[#c58a00] bg-[#fff4d6] p-5 text-sm leading-relaxed text-[#4a3200] shadow-xl"
     >
       <p className="font-semibold">Can&apos;t choose between electives? Narrow them down in 2 steps.</p>
-      <p>This doesn&apos;t change your plan.</p>
+      <p>Compare is separate from Planner, so nothing here changes your plan there.</p>
       <button
         type="button"
         onClick={onStart}
