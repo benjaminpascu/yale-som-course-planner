@@ -28,3 +28,7 @@ dist-ssr
 
 # Claude app (local preview config)
 .claude/
+.superpowers/
+
+# Raw Yale exports for npm run update-courses (see docs/updating-course-data.md)
+course-import/*.csv

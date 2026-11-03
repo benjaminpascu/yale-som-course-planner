@@ -45,6 +45,8 @@ Full detail: **`docs/PROJECT_STATUS.md`**.
 | Product spec | `docs/PRD.md` |
 | **Courses (one file per term)** | `docs/data-samples/courses_master_fall2026.csv`, `docs/data-samples/courses_master_spring2027.csv` (identical columns) |
 | Tags | Inline `tags` column on those CSVs (semicolon-separated names; not a separate file). Sections of one course share tags at load time (`harmonizeSectionTags`). |
+| **Updating courses from the SOM site** | `docs/updating-course-data.md` — drop 3 exports in `course-import/`, run `npm run update-courses` |
+| Manual data fixes that survive updates | `docs/data-samples/course_overrides.csv` |
 | Vercel deploy steps | `docs/vercel-setup.md` |
 
 **Do not use** `courses_master.csv` / `courses_master_new.csv` / `course_tags.csv` — removed. Tags are no longer a separate table.
@@ -65,10 +67,11 @@ cd "/Users/benjaminpascu/Documents/Vibe Coding/Cursor/Course planner"
 npm install
 npm run dev              # http://localhost:5173 (or next free port)
 npm run build
-npm test                 # Vitest: compare grouping, shortlist, scoring, storage, export
+npm test                 # Vitest: compare grouping, shortlist, scoring, storage, export, course import
+npm run update-courses   # rebuild a term CSV from course-import/ (add -- --check to preview)
 ```
 
-No database or environment variables. Course data is the CSVs in `docs/data-samples/`, bundled at build time; to update courses, edit a CSV and push to `main`.
+No database or environment variables. Course data is the CSVs in `docs/data-samples/`, bundled at build time; to update courses, follow `docs/updating-course-data.md` (don't hand-edit the term CSVs — use `course_overrides.csv` for fixes) and push to `main`.
 
 ## Key code locations
 

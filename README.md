@@ -24,7 +24,9 @@ Use a **new Cursor agent** (fresh chat) per milestone or focused task — see PR
 | `docs/data-samples/courses_master_fall2026.csv` | Fall 2026 catalog + inline `tags` column (source of truth) |
 | `docs/data-samples/courses_master_spring2027.csv` | Spring 2027 catalog, same columns (source of truth) |
 
-The CSVs are bundled into the app at build time. To update courses, edit a CSV and push to `main`; Vercel redeploys.
+| `docs/data-samples/course_overrides.csv` | Manual fixes re-applied on every update |
+
+The CSVs are bundled into the app at build time. To refresh them from the SOM website, follow [docs/updating-course-data.md](docs/updating-course-data.md), then push to `main`; Vercel redeploys.
 
 ## License
 
