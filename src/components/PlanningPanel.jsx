@@ -53,7 +53,7 @@ export default function PlanningPanel({
       >
         {tip === 'requirements' ? (
           <HintBubble arrow="down" className="absolute bottom-full left-6 mb-3" onDismiss={onDismissTip}>
-            Units per requirement. {calendarOnly ? 'Tap' : 'Hover'} one for details
+            Units your added courses earn per requirement. {calendarOnly ? 'Tap' : 'Hover'} one for details
           </HintBubble>
         ) : null}
         {tip === 'set-targets' ? (
@@ -63,7 +63,7 @@ export default function PlanningPanel({
             className="absolute right-4 bottom-full mb-3"
             onDismiss={onDismissTip}
           >
-            Set unit targets for each requirement
+            Set how many units you want per requirement
           </HintBubble>
         ) : null}
         <TagUnitTracker
@@ -92,12 +92,12 @@ export default function PlanningPanel({
       ) : null}
       {tip === 'calendar-details' ? (
         <HintBubble className="absolute top-28 right-6" onDismiss={onDismissTip}>
-          See your selected courses&apos; timetable. {calendarOnly ? 'Tap' : 'Hover'} for details
+          Timetable of your added courses. {calendarOnly ? 'Tap' : 'Hover'} one for details
         </HintBubble>
       ) : null}
       {tip === 'your-plan' ? (
         <HintBubble arrow="down" className="absolute bottom-12 left-6" onDismiss={onDismissTip}>
-          Click to see all your courses
+          Click to list the courses in your plan
         </HintBubble>
       ) : null}
     </div>

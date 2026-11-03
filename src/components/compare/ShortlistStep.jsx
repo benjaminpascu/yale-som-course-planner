@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { shortlistCard, shortlistQueue } from '../../lib/compareShortlist'
+import HintBubble from '../HintBubble'
 import NoDescription from '../NoDescription'
 import ReviewPanel from './ReviewPanel'
 
@@ -179,7 +180,7 @@ function DecisionButtons({ onDecide }) {
 }
 
 /** Desktop-only progress column to the right of the card (phones skip it). Rows open the review panel. */
-function Progress({ counts, onReview }) {
+function Progress({ counts, onReview, tip, onDismissTip }) {
   const pct = counts.total ? Math.round((counts.decided / counts.total) * 100) : 0
   const rows = [
     { decision: 'yes', n: counts.yes, label: 'Interested', dot: 'bg-[#1e7a3c]', text: 'text-[#145c2c]' },
@@ -187,7 +188,17 @@ function Progress({ counts, onReview }) {
     { decision: 'no', n: counts.no, label: 'Not interested', dot: 'bg-[#c4321f]', text: 'text-[#8f1d14]' },
   ]
   return (
-    <aside aria-label="Progress" className="hidden w-44 shrink-0 flex-col gap-3 self-start pt-1 lg:flex">
+    <aside
+      aria-label="Progress"
+      className={`hidden w-44 shrink-0 flex-col gap-3 self-start pt-1 lg:flex ${
+        tip === 'cmp-review' ? 'relative z-[45]' : ''
+      }`}
+    >
+      {tip === 'cmp-review' ? (
+        <HintBubble arrow="right" className="absolute top-16 right-full mr-4" onDismiss={onDismissTip}>
+          Click Interested, Maybe or Not interested to see or move those courses
+        </HintBubble>
+      ) : null}
       <p className="text-sm text-[#5b6576] tabular-nums">
         <span className="font-semibold text-[#1a1f2b]">{counts.decided}</span> of {counts.total} decided
       </p>
@@ -221,7 +232,24 @@ function Progress({ counts, onReview }) {
  * Arrow keys (← ↓ →) and, on phones, swiping the card left/right decide too;
  * Cmd/Ctrl+Z undoes the last decision.
  */
-export default function ShortlistStep({ groups, term, counts, termLabel, onDecide, onUndo, onGoToScore }) {
+// Phones: tip above the sticky button bar, arrow down. sm+: the bar is in the page, so tip below, arrow up.
+const BELOW_BAR_TIP = 'absolute right-3 bottom-full sm:right-0 mb-3 sm:top-full sm:bottom-auto sm:mt-3 sm:mb-0'
+const BELOW_BAR_ARROW =
+  'right-6 -bottom-[7px] border-r-[1.5px] border-b-[1.5px] sm:-top-[7px] sm:bottom-auto sm:border-r-0 sm:border-b-0 sm:border-t-[1.5px] sm:border-l-[1.5px]'
+const UNDO_KEYS =
+  typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform) ? 'Cmd+Z' : 'Ctrl+Z'
+
+export default function ShortlistStep({
+  groups,
+  term,
+  counts,
+  termLabel,
+  onDecide,
+  onUndo,
+  onGoToScore,
+  tip = null,
+  onDismissTip,
+}) {
   const rootRef = useRef(null)
   const [reviewing, setReviewing] = useState(null)
   const current = shortlistQueue(groups, term.decisions)[0] ?? null
@@ -232,6 +260,12 @@ export default function ShortlistStep({ groups, term, counts, termLabel, onDecid
     : ''
 
   const canUndo = Boolean(lastGroup)
+  const barTip = tip === 'cmp-decide' || tip === 'cmp-undo' || tip === 'cmp-review'
+
+  // Opening Review is what the review tip asks for.
+  useEffect(() => {
+    if (reviewing && tip === 'cmp-review') onDismissTip?.()
+  }, [reviewing, tip, onDismissTip])
 
   useEffect(() => {
     function handleKey(event) {
@@ -269,7 +303,37 @@ export default function ShortlistStep({ groups, term, counts, termLabel, onDecid
               card={shortlistCard(current)}
               onSwipe={(decision) => onDecide(current.key, decision)}
             />
-            <div className="sticky bottom-[calc(3rem+env(safe-area-inset-bottom))] z-10 -mx-3 flex shrink-0 flex-col gap-1 border-t border-[#dde3ea] bg-white px-4 pt-3 pb-2 sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0">
+            <div
+              className={`sticky bottom-[calc(3rem+env(safe-area-inset-bottom))] -mx-3 flex shrink-0 flex-col gap-1 border-t border-[#dde3ea] bg-white px-4 pt-3 pb-2 sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 ${
+                barTip ? `sm:relative ${tip === 'cmp-review' ? 'z-[45] lg:z-auto' : 'z-[45]'}` : 'z-10 sm:static'
+              }`}
+            >
+              {tip === 'cmp-decide' ? (
+                <HintBubble
+                  arrow="down"
+                  arrowStyle={{ left: 'calc(50% - 6px)' }}
+                  className="absolute bottom-full left-1/2 mb-3 -translate-x-1/2"
+                  onDismiss={onDismissTip}
+                >
+                  <span className="lg:hidden">Or swipe the card left or right to choose</span>
+                  <span className="hidden lg:inline">Or press ← ↓ → to choose Not interested, Maybe or Interested</span>
+                </HintBubble>
+              ) : null}
+              {tip === 'cmp-undo' ? (
+                <HintBubble arrowClassName={BELOW_BAR_ARROW} className={BELOW_BAR_TIP} onDismiss={onDismissTip}>
+                  <span className="lg:hidden">Changed your mind? Tap Undo</span>
+                  <span className="hidden lg:inline">Changed your mind? Undo, or {UNDO_KEYS}</span>
+                </HintBubble>
+              ) : null}
+              {tip === 'cmp-review' ? (
+                <HintBubble
+                  arrowClassName={BELOW_BAR_ARROW}
+                  className={`${BELOW_BAR_TIP} lg:hidden`}
+                  onDismiss={onDismissTip}
+                >
+                  Tap <b>Review</b> to see or move courses
+                </HintBubble>
+              ) : null}
               <DecisionButtons onDecide={(d) => onDecide(current.key, d)} />
               <div className="flex min-h-9 items-center justify-between gap-2 text-sm text-[#5b6576]">
                 <span className="min-w-0 truncate">{lastLine}</span>
@@ -318,7 +382,7 @@ export default function ShortlistStep({ groups, term, counts, termLabel, onDecid
           </div>
         )}
       </div>
-      <Progress counts={counts} onReview={setReviewing} />
+      <Progress counts={counts} onReview={setReviewing} tip={tip} onDismissTip={onDismissTip} />
       {reviewing ? (
         <ReviewPanel
           initialDecision={reviewing}

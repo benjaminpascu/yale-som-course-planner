@@ -19,10 +19,11 @@ import { buildCourseGroups } from './lib/compareGroups'
 import { decisionCounts, orderGroups } from './lib/compareShortlist'
 import { ensureShuffledOrder, getTermData } from './lib/compareStorage'
 import { loadAppData } from './lib/loadData'
+import { getConflictingCourseIds } from './lib/scheduleConflicts'
 import {
-  COMPARE_INTRO,
   loadSeenHints,
   nextPlannerHint,
+  nextCompareHint,
   persistSeenHints,
 } from './lib/onboardingHints'
 import {
@@ -164,10 +165,15 @@ function App() {
   const compareCounts = decisionCounts(compareGroups, compareTerm.decisions)
 
   // One tip at a time; computer and phone layouts each get their own next tip.
+  // The Conflict tip waits until a "Conflict" label is actually showing in this term's list.
+  const conflictIds = getConflictingCourseIds(courses, selectedIds)
   const hintState = {
     seen: seenHints,
     selectedCount: selectedIds.size,
     hasPlan: planStore.activePlanId != null,
+    hasConflict: courses.some(
+      (c) => c.termCode === activeTermCode && conflictIds.has(c.courseId) && !selectedIds.has(c.courseId),
+    ),
   }
   const desktopHint = nextPlannerHint({ ...hintState, phone: false })
   const phoneHint = nextPlannerHint({ ...hintState, phone: true })
@@ -184,6 +190,16 @@ function App() {
   })()
   // Lifts the area a tip points at above the dark layer; no size or position change.
   const SPOTLIGHT = 'relative z-[45]'
+
+  // Compare tip (shared by the Compare area and the step tabs in the sub bar).
+  const compareTip = nextCompareHint({
+    seen: seenHints,
+    step: compareStep,
+    hasCard: compareCounts.decided < compareCounts.total,
+    decided: compareCounts.decided,
+    canUndo: compareTerm.history.length > 0,
+    shortlistCount: compareCounts.yes + compareCounts.maybe,
+  })
 
   // Adding a course means the "add a course" tip did its job.
   const prevSelectedCountRef = useRef(selectedIds.size)
@@ -358,6 +374,8 @@ function App() {
     onStepChange: setCompareStep,
     leftCount: compareCounts.total - compareCounts.decided,
     shortlistCount: compareCounts.yes + compareCounts.maybe,
+    tip: compareTip,
+    onDismissTip: () => markHintSeen(compareTip),
   }
 
   const plansPanelProps = {
@@ -407,7 +425,7 @@ function App() {
                 className="absolute top-1/2 left-full ml-4 -translate-y-1/2"
                 onDismiss={() => markHintSeen('save-plan')}
               >
-                Save this plan here
+                Save and name this plan (kept in this browser)
               </HintBubble>
             ) : null}
           </div>
@@ -484,7 +502,7 @@ function App() {
               </>
             ) : (
               <>
-                <b>Conflict</b> = clashes with your plan
+                <b>Conflict</b> = same time as a course you added
               </>
             )}
           </HintBubble>
@@ -534,8 +552,9 @@ function App() {
           termLabel={formatTermLabel(activeTermCode)}
           step={compareStep}
           onStepChange={setCompareStep}
-          showIntro={!seenHints.has(COMPARE_INTRO)}
-          onIntroDone={() => markHintSeen(COMPARE_INTRO)}
+          seenHints={seenHints}
+          onHintSeen={markHintSeen}
+          tip={compareTip}
         />
       </div>
 
@@ -565,7 +584,7 @@ function App() {
             </>
           ) : (
             <>
-              <b>Conflict</b> = clashes with your plan
+              <b>Conflict</b> = same time as a course you added
             </>
           )}
         </HintBubble>

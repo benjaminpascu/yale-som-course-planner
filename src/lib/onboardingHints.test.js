@@ -1,8 +1,11 @@
 import { describe, expect, test } from 'vitest'
 import {
   HINTS_STORAGE_KEY,
+  COMPARE_INTRO,
   PLANNER_HINTS,
+  SCORE_HINTS,
   loadSeenHints,
+  nextCompareHint,
   nextPlannerHint,
   persistSeenHints,
 } from './onboardingHints'
@@ -32,10 +35,13 @@ describe('nextPlannerHint', () => {
     )
   })
 
-  test('clash tip waits for the first course', () => {
+  test('clash tip only once a Conflict label shows; the others go ahead meanwhile', () => {
     const seen = new Set(['add-course'])
     expect(nextPlannerHint({ ...base, seen })).toBe(null)
-    expect(nextPlannerHint({ ...base, seen, selectedCount: 1 })).toBe('clash')
+    expect(nextPlannerHint({ ...base, seen, selectedCount: 1 })).toBe('calendar-details')
+    expect(nextPlannerHint({ ...base, seen, selectedCount: 1, hasConflict: true })).toBe('clash')
+    seen.add('calendar-details')
+    expect(nextPlannerHint({ ...base, seen, selectedCount: 2, hasConflict: true })).toBe('clash')
   })
 
   test('then calendar, requirements, set targets, your plan (computer only)', () => {
@@ -75,5 +81,56 @@ describe('seen-tips storage', () => {
     expect(loadSeenHints(memoryStorage()).size).toBe(0)
     expect(loadSeenHints(memoryStorage({ [HINTS_STORAGE_KEY]: '{oops' })).size).toBe(0)
     expect(loadSeenHints(memoryStorage({ [HINTS_STORAGE_KEY]: '{"a":1}' })).size).toBe(0)
+  })
+})
+
+describe('nextCompareHint', () => {
+  const shortlist = {
+    seen: new Set([COMPARE_INTRO]),
+    step: 'shortlist',
+    hasCard: true,
+    decided: 0,
+    canUndo: false,
+    shortlistCount: 0,
+  }
+
+  test('nothing until the intro box is closed', () => {
+    expect(nextCompareHint({ ...shortlist, seen: new Set() })).toBe(null)
+  })
+
+  test('each step starts with its two step-tab tips', () => {
+    expect(nextCompareHint(shortlist)).toBe('cmp-here-shortlist')
+    const seen = new Set([COMPARE_INTRO, 'cmp-here-shortlist'])
+    expect(nextCompareHint({ ...shortlist, seen, hasCard: false })).toBe('cmp-next-score')
+    expect(nextCompareHint({ ...shortlist, step: 'score' })).toBe('cmp-here-score')
+    expect(
+      nextCompareHint({ ...shortlist, step: 'score', seen: new Set([COMPARE_INTRO, 'cmp-here-score']) }),
+    ).toBe('cmp-back-shortlist')
+  })
+
+  test('shortlist: decide, then undo after a decision, then review after 3', () => {
+    const tabsSeen = [COMPARE_INTRO, 'cmp-here-shortlist', 'cmp-next-score']
+    expect(nextCompareHint({ ...shortlist, seen: new Set(tabsSeen) })).toBe('cmp-decide')
+    const seen = new Set([...tabsSeen, 'cmp-decide'])
+    expect(nextCompareHint({ ...shortlist, seen })).toBe(null)
+    expect(nextCompareHint({ ...shortlist, seen, canUndo: true, decided: 1 })).toBe('cmp-undo')
+    seen.add('cmp-undo')
+    expect(nextCompareHint({ ...shortlist, seen, canUndo: true, decided: 2 })).toBe(null)
+    expect(nextCompareHint({ ...shortlist, seen, canUndo: true, decided: 3 })).toBe('cmp-review')
+  })
+
+  test('shortlist tips wait while every course is decided', () => {
+    const seen = new Set([COMPARE_INTRO, 'cmp-here-shortlist', 'cmp-next-score'])
+    expect(nextCompareHint({ ...shortlist, seen, hasCard: false })).toBe(null)
+  })
+
+  test('score: needs a shortlist, then goes in order', () => {
+    const score = { ...shortlist, step: 'score', seen: new Set([COMPARE_INTRO, ...SCORE_HINTS.slice(0, 2)]) }
+    expect(nextCompareHint(score)).toBe(null)
+    expect(nextCompareHint({ ...score, shortlistCount: 2 })).toBe('cmp-rate')
+    const seen = new Set([COMPARE_INTRO, ...SCORE_HINTS.slice(0, -1)])
+    expect(nextCompareHint({ ...score, seen, shortlistCount: 2 })).toBe('cmp-ranking')
+    seen.add('cmp-ranking')
+    expect(nextCompareHint({ ...score, seen, shortlistCount: 2 })).toBe(null)
   })
 })

@@ -1,3 +1,5 @@
+import HintBubble from './HintBubble'
+
 /** White bar under the nav bar; its content depends on the mode. */
 export function SubBar({ children, className = '' }) {
   return (
@@ -16,11 +18,27 @@ const STEPS = [
   { id: 'score', number: 2, label: 'Score and rank', short: 'Score' },
 ]
 
+// First Compare tips: which step tab each points at, and what it says.
+const STEP_2_TEXT = 'Step 2: rate your Interested and Maybe courses on your criteria to get a ranking'
+const STEP_TAB_TIPS = {
+  'cmp-here-shortlist': {
+    step: 'shortlist',
+    text: 'Step 1: sort each course into Interested, Maybe or Not interested',
+  },
+  'cmp-next-score': { step: 'score', text: STEP_2_TEXT },
+  'cmp-here-score': { step: 'score', text: STEP_2_TEXT },
+  'cmp-back-shortlist': {
+    step: 'shortlist',
+    text: 'Step 1: sort more courses into Interested, Maybe or Not interested',
+  },
+}
+
 /**
  * Compare mode: "1 Shortlist › 2 Score and rank". The inactive step shows a
  * grey count ("98 left" / "8 courses"); phones get two equal tabs instead.
  */
-export function CompareStepTabs({ step, onStepChange, leftCount, shortlistCount }) {
+export function CompareStepTabs({ step, onStepChange, leftCount, shortlistCount, tip, onDismissTip }) {
+  const tabTip = STEP_TAB_TIPS[tip] ?? null
   const hints = {
     shortlist: step === 'score' ? `${leftCount} left` : null,
     score: step === 'shortlist' ? `${shortlistCount} courses` : null,
@@ -32,8 +50,21 @@ export function CompareStepTabs({ step, onStepChange, leftCount, shortlistCount 
     >
       {STEPS.map((s, i) => {
         const active = s.id === step
+        const tipHere = tabTip?.step === s.id
         return (
-          <li key={s.id} className="flex items-stretch gap-2">
+          <li key={s.id} className={`flex items-stretch gap-2 ${tipHere ? 'relative z-[45] bg-white' : ''}`}>
+            {tipHere ? (
+              // Phones: the Score tab is the right half, so its tip hugs the right edge.
+              <HintBubble
+                arrowClassName={`-top-[7px] border-t-[1.5px] border-l-[1.5px] ${
+                  i > 0 ? 'right-6 sm:right-auto sm:left-10' : 'left-6'
+                }`}
+                className={`absolute top-full mt-2 ${i > 0 ? 'right-2 sm:right-auto sm:left-4' : 'left-2'}`}
+                onDismiss={onDismissTip}
+              >
+                {tabTip.text}
+              </HintBubble>
+            ) : null}
             {i > 0 ? (
               <span aria-hidden className="hidden items-center text-[#8a95a5] sm:flex">
                 ›

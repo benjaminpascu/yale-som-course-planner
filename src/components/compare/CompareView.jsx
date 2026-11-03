@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import {
   addCriterion,
   countRatingsForCriterion,
@@ -12,6 +12,7 @@ import {
   undoLastDecision,
 } from '../../lib/compareStorage'
 import { PROFESSOR_CRITERION_ID, professorKey } from '../../lib/compareScoring'
+import { COMPARE_INTRO } from '../../lib/onboardingHints'
 import { HintBackdrop } from '../HintBubble'
 import ScoreStep from './ScoreStep'
 import ShortlistStep from './ShortlistStep'
@@ -33,7 +34,7 @@ function RecoveredNotice({ onDismiss }) {
   )
 }
 
-/** First-time box over the Shortlist, page dimmed behind it; nothing underneath moves. A dialog, so Shortlist shortcuts pause. */
+/** First-time box over the Shortlist, yellow like the tips, page dimmed behind it; nothing underneath moves. A dialog, so Shortlist shortcuts pause. */
 function CompareIntro({ onStart }) {
   return (
     <>
@@ -41,14 +42,10 @@ function CompareIntro({ onStart }) {
     <div
       role="dialog"
       aria-label="About Compare"
-      className="absolute inset-x-0 top-10 z-50 mx-auto w-[min(22rem,calc(100%-2rem))] rounded-lg border border-[#dde3ea] bg-white p-5 text-sm leading-relaxed text-[#1a1f2b] shadow-xl"
+      className="absolute inset-x-0 top-10 z-50 mx-auto w-[min(22rem,calc(100%-2rem))] rounded-lg border-[1.5px] border-[#c58a00] bg-[#fff4d6] p-5 text-sm leading-relaxed text-[#4a3200] shadow-xl"
     >
-      <p>
-        <b>1 Shortlist</b> — sort courses fast
-      </p>
-      <p>
-        <b>2 Score</b> — rate and rank the keepers
-      </p>
+      <p className="font-semibold">Can&apos;t choose between electives? Narrow them down in 2 steps.</p>
+      <p>This doesn&apos;t change your plan.</p>
       <button
         type="button"
         onClick={onStart}
@@ -72,10 +69,20 @@ export default function CompareView({
   termLabel,
   step,
   onStepChange,
-  showIntro,
-  onIntroDone,
+  seenHints,
+  onHintSeen,
+  tip = null,
 }) {
   const { store, update, saveFailed, recovered, dismissRecovered, outdated } = compare
+  const showIntro = !seenHints.has(COMPARE_INTRO)
+  const dismissTip = () => onHintSeen(tip)
+
+  // Making a first decision is what the "decide" tip asks for.
+  const prevDecidedRef = useRef(counts.decided)
+  useEffect(() => {
+    if (counts.decided > prevDecidedRef.current) onHintSeen('cmp-decide')
+    prevDecidedRef.current = counts.decided
+  }, [counts.decided, onHintSeen])
 
   const handleDecide = useCallback(
     (key, decision) => update((s) => decide(s, termCode, key, decision)),
@@ -136,7 +143,10 @@ export default function CompareView({
           Couldn&apos;t save — this browser is blocking storage.
         </p>
       ) : null}
-      {showIntro && step === 'shortlist' ? <CompareIntro onStart={onIntroDone} /> : null}
+      {showIntro && step === 'shortlist' ? (
+        <CompareIntro onStart={() => onHintSeen(COMPARE_INTRO)} />
+      ) : null}
+      {tip ? <HintBackdrop onClick={dismissTip} /> : null}
       {step === 'shortlist' ? (
         <ShortlistStep
           groups={groups}
@@ -146,6 +156,8 @@ export default function CompareView({
           onDecide={handleDecide}
           onUndo={handleUndo}
           onGoToScore={() => onStepChange('score')}
+          tip={tip}
+          onDismissTip={dismissTip}
         />
       ) : (
         <ScoreStep
@@ -161,6 +173,8 @@ export default function CompareView({
           onWeight={(id, weight) => update((s) => setCriterionWeight(s, termCode, id, weight))}
           onFixWeights={() => update((s) => fixWeights(s, termCode))}
           onGoToShortlist={() => onStepChange('shortlist')}
+          tip={tip}
+          onDismissTip={dismissTip}
         />
       )}
     </>

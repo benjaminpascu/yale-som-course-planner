@@ -11,6 +11,7 @@ import {
 } from '../../lib/compareScoring'
 import { formatCourseHeading, formatCourseUnits } from '../../lib/courseDisplay'
 import { formatSessionLabel } from '../../lib/sessionDisplay'
+import HintBubble from '../HintBubble'
 import RatingInput from './RatingInput'
 import WeightInput from './WeightInput'
 
@@ -75,10 +76,20 @@ function scoreColumns(criteriaCount) {
   return `minmax(14rem, 1fr) repeat(${criteriaCount}, 7rem) 6.5rem 2.25rem`
 }
 
-function CriteriaHeader({ criteria, needsFix, onRemove, onWeight, onFixWeights }) {
+function CriteriaHeader({ criteria, needsFix, onRemove, onWeight, onFixWeights, tip, onDismissTip }) {
   const total = criteria.reduce((sum, c) => sum + c.weight, 0)
   return (
-    <div className="border-b border-[#e6eaf0] pb-3">
+    <div className={`border-b border-[#e6eaf0] pb-3 ${tip === 'cmp-weights' ? 'relative z-[45] bg-white' : ''}`}>
+      {tip === 'cmp-weights' ? (
+        <HintBubble
+          arrow="up"
+          arrowStyle={{ left: 'calc(50% - 6px)' }}
+          className="absolute top-full left-1/2 mt-3 -translate-x-1/2"
+          onDismiss={onDismissTip}
+        >
+          Weights set how much each counts. They add up to 1
+        </HintBubble>
+      ) : null}
       <div className={`${GRID_ROW} pt-2`}>
         <span className={`hidden sm:block ${LABEL}`}>Course</span>
         {criteria.map((c, i) => (
@@ -167,7 +178,20 @@ function NoteBox({ courseNumber, value, onChange }) {
   )
 }
 
-function ScoreRow({ group, term, professors, rowIndex, open, onToggle, onRate, onNote, onDecide, rowRef }) {
+function ScoreRow({
+  group,
+  term,
+  professors,
+  rowIndex,
+  open,
+  onToggle,
+  onRate,
+  onNote,
+  onDecide,
+  rowRef,
+  tip = null,
+  onDismissTip,
+}) {
   const { criteria, notes, decisions } = term
   const course = courseRatings(group, term, professors)
   const noProfessor = professorKey(group) == null
@@ -180,7 +204,12 @@ function ScoreRow({ group, term, professors, rowIndex, open, onToggle, onRate, o
     .join(' · ')
 
   return (
-    <div ref={rowRef} className={`border-t border-[#e6eaf0] ${open ? 'bg-[#f8fafc]' : 'bg-white'}`}>
+    <div
+      ref={rowRef}
+      className={`border-t border-[#e6eaf0] ${open ? 'bg-[#f8fafc]' : 'bg-white'} ${
+        tip === 'cmp-rate' || tip === 'cmp-open-course' ? 'relative z-[45]' : ''
+      }`}
+    >
       {/* The whole summary line toggles the row; its own boxes, buttons and links keep their behavior. */}
       <div
         onClick={(event) => {
@@ -189,7 +218,20 @@ function ScoreRow({ group, term, professors, rowIndex, open, onToggle, onRate, o
         }}
         className={`${GRID_ROW} cursor-pointer py-3 hover:bg-[#f8fafc]`}
       >
-        <div className="flex min-w-0 basis-full flex-col gap-0.5 sm:basis-auto">
+        <div
+          className={`flex min-w-0 basis-full flex-col gap-0.5 sm:basis-auto ${tip === 'cmp-open-course' ? 'relative' : ''}`}
+        >
+          {tip === 'cmp-open-course' ? (
+            <HintBubble
+              arrow="down"
+              arrowStyle={{ left: '1.5rem' }}
+              className="absolute bottom-full left-0 mb-3"
+              onDismiss={onDismissTip}
+            >
+              <span className="sm:hidden">Tap a course for its description and notes</span>
+              <span className="hidden sm:inline">Click a course for its description and notes</span>
+            </HintBubble>
+          ) : null}
           <button
             type="button"
             onClick={onToggle}
@@ -202,7 +244,20 @@ function ScoreRow({ group, term, professors, rowIndex, open, onToggle, onRate, o
           {note && !open ? <span className="text-xs text-[#1a1f2b] italic">{note}</span> : null}
         </div>
         {criteria.map((c, colIndex) => (
-          <span key={c.id} className={columnCell(colIndex)}>
+          <span
+            key={c.id}
+            className={`${columnCell(colIndex)} ${tip === 'cmp-rate' && colIndex === 0 ? 'relative' : ''}`}
+          >
+            {tip === 'cmp-rate' && colIndex === 0 ? (
+              // Phones: the first box sits near the left edge, so the tip starts there instead of centering.
+              <HintBubble
+                arrowClassName="-bottom-[7px] left-6 border-r-[1.5px] border-b-[1.5px] sm:left-[calc(50%-6px)]"
+                className="absolute bottom-full left-0 mb-3 sm:left-1/2 sm:-translate-x-1/2"
+                onDismiss={onDismissTip}
+              >
+                Rate each course 1–10 on each criterion (10 = best)
+              </HintBubble>
+            ) : null}
             <RatingInput
               value={course[c.id] ?? null}
               onCommit={(v) => onRate(group, c.id, v)}
@@ -297,14 +352,28 @@ function ExportButton({ groups, term, professors, termLabel }) {
   )
 }
 
-function RankingCard({ shortlist, term, professors, termLabel, onOpen }) {
+function RankingCard({ shortlist, term, professors, termLabel, onOpen, tip, onDismissTip }) {
   const { ranked, unscored } = rankCourses(
     shortlist,
     (group) => courseRatings(group, term, professors),
     term.criteria,
   )
   return (
-    <aside className="flex min-w-0 flex-[1_1_300px] flex-col self-start rounded-lg border border-[#dde3ea] bg-white lg:max-w-[360px]">
+    <aside
+      className={`flex min-w-0 flex-[1_1_300px] flex-col self-start rounded-lg border border-[#dde3ea] bg-white lg:max-w-[360px] ${
+        tip === 'cmp-ranking' ? 'relative z-[45]' : ''
+      }`}
+    >
+      {tip === 'cmp-ranking' ? (
+        // Phones/narrow: the card is last on the page, so the tip goes above it; computers: below.
+        <HintBubble
+          arrowClassName="left-6 -bottom-[7px] border-r-[1.5px] border-b-[1.5px] lg:-top-[7px] lg:bottom-auto lg:border-r-0 lg:border-b-0 lg:border-t-[1.5px] lg:border-l-[1.5px]"
+          className="absolute bottom-full left-4 mb-3 lg:top-full lg:bottom-auto lg:mt-3 lg:mb-0"
+          onDismiss={onDismissTip}
+        >
+          Your ranking updates as you rate. Export to Excel here
+        </HintBubble>
+      ) : null}
       <h2 className="px-5 pt-3.5 pb-2.5 text-base font-bold">Ranking</h2>
       <ol>
         {ranked.map(({ group, score }, i) => {
@@ -360,8 +429,15 @@ export default function ScoreStep({
   onWeight,
   onFixWeights,
   onGoToShortlist,
+  tip = null,
+  onDismissTip,
 }) {
   const [openKey, setOpenKey] = useState(null)
+
+  // Opening a course is what the "open a course" tip asks for.
+  useEffect(() => {
+    if (openKey && tip === 'cmp-open-course') onDismissTip?.()
+  }, [openKey, tip, onDismissTip])
   const [adding, setAdding] = useState(false)
   const rowRefs = useRef(new Map())
   const scrollTo = useRef(null)
@@ -411,15 +487,27 @@ export default function ScoreStep({
           style={{ '--score-cols': scoreColumns(term.criteria.length) }}
           data-rating-grid
         >
-          <div className="flex items-center justify-between gap-3 pt-4 pr-3 pb-2 pl-5">
+          <div className="relative flex items-center justify-between gap-3 pt-4 pr-3 pb-2 pl-5">
             <h2 className="text-base font-bold">Your shortlist</h2>
             <button
               type="button"
               onClick={() => setAdding(true)}
-              className="h-8 rounded-md bg-save-800 px-3 text-sm font-semibold text-white hover:bg-save-900"
+              className={`h-8 rounded-md bg-save-800 px-3 text-sm font-semibold text-white hover:bg-save-900 ${
+                tip === 'cmp-add-criterion' ? 'relative z-[45]' : ''
+              }`}
             >
               + Add criterion
             </button>
+            {tip === 'cmp-add-criterion' ? (
+              <HintBubble
+                arrow="up"
+                arrowStyle={{ left: 'auto', right: '1.5rem' }}
+                className="absolute top-full right-3 mt-1"
+                onDismiss={onDismissTip}
+              >
+                Add your own criterion, like Workload
+              </HintBubble>
+            ) : null}
           </div>
           {adding ? <AddCriterionRow onAdd={onAddCriterion} onClose={() => setAdding(false)} /> : null}
           <CriteriaHeader
@@ -428,6 +516,8 @@ export default function ScoreStep({
             onRemove={onRemoveCriterion}
             onWeight={onWeight}
             onFixWeights={onFixWeights}
+            tip={tip}
+            onDismissTip={onDismissTip}
           />
           {sections.map((s) => (
             <div key={s.name}>
@@ -446,6 +536,8 @@ export default function ScoreStep({
                   onRate={onRate}
                   onNote={onNote}
                   onDecide={onDecide}
+                  tip={group === shortlist[0] ? tip : null}
+                  onDismissTip={onDismissTip}
                   rowRef={(el) => {
                     if (el) rowRefs.current.set(group.key, el)
                     else rowRefs.current.delete(group.key)
@@ -462,6 +554,8 @@ export default function ScoreStep({
         professors={professors}
         termLabel={termLabel}
         onOpen={openFromRanking}
+        tip={tip}
+        onDismissTip={onDismissTip}
       />
     </div>
   )
