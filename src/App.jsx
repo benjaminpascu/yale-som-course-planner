@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import CourseBrowser from './components/CourseBrowser'
 import CompareView from './components/compare/CompareView'
+import ComputerNotice, { shouldShowComputerNotice } from './components/ComputerNotice'
 import HintBubble, { HintBackdrop } from './components/HintBubble'
 import { useCompareStore } from './components/compare/useCompareStore'
 import MobileBottomNav from './components/MobileBottomNav'
@@ -54,6 +55,7 @@ function App() {
   const [catalogTermCode, setCatalogTermCode] = useState(null)
   const planHydratedRef = useRef(false)
   const [seenHints, setSeenHints] = useState(() => loadSeenHints())
+  const [computerNoticeOpen, setComputerNoticeOpen] = useState(() => shouldShowComputerNotice())
 
   const markHintSeen = useCallback((id) => {
     setSeenHints((prev) => {
@@ -180,6 +182,7 @@ function App() {
   // The tip actually on screen: each waits until the spot it points at is showing.
   const desktopTip = view === 'planner' ? desktopHint : null
   const phoneTip = (() => {
+    if (computerNoticeOpen) return null // Phone tips wait until the "Best on a computer" note is closed.
     if (phoneHint === 'phone-courses') return ['catalog', 'compare'].includes(mobileTab) ? null : phoneHint
     if (phoneHint === 'add-course' || phoneHint === 'clash') return mobileTab === 'catalog' ? phoneHint : null
     if (['calendar-details', 'requirements', 'set-targets'].includes(phoneHint)) {
@@ -601,6 +604,8 @@ function App() {
       ) : null}
 
       <MobileBottomNav activeTab={mobileTab} onChange={setMobileTab} />
+
+      {computerNoticeOpen ? <ComputerNotice onContinue={() => setComputerNoticeOpen(false)} /> : null}
     </div>
   )
 }
