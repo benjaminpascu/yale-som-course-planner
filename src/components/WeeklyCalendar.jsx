@@ -15,6 +15,8 @@ import {
 import { formatSessionLabel } from '../lib/sessionDisplay'
 import { hasMeetingTime } from '../lib/parseCourses'
 import { sectionTone } from '../lib/sectionTheme'
+import { termCodeToSemester } from '../lib/academicYear'
+import { courseSemester } from '../lib/tagUnitTracker'
 import CollapseChevron from './CollapseChevron'
 import SectionHeader from './SectionHeader'
 
@@ -254,8 +256,8 @@ function CalendarGrid({
 }
 
 export default function WeeklyCalendar({
-  selectedCourses,
-  hasSelection,
+  selectedCourses: planCourses,
+  termCode = null,
   fallYear = null,
   springYear = null,
   collapsible = true,
@@ -264,6 +266,17 @@ export default function WeeklyCalendar({
   onToggle = () => {},
   className = '',
 }) {
+  // The Fall/Spring switch picks the semester; the tabs then split it into its half-terms.
+  const semester = termCodeToSemester(termCode)
+  const selectedCourses = useMemo(
+    () =>
+      semester
+        ? planCourses.filter((c) => courseSemester(c) === semester)
+        : planCourses,
+    [planCourses, semester],
+  )
+  const hasSelection = selectedCourses.length > 0
+
   const timedCourses = useMemo(
     () => selectedCourses.filter(hasMeetingTime),
     [selectedCourses],

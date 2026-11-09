@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { sectionTone } from '../lib/sectionTheme'
+import { formatTermLabel, termCodeToSemester } from '../lib/academicYear'
 import { formatCourseHeading } from '../lib/courseDisplay'
 import { formatSessionLabel } from '../lib/sessionDisplay'
 import {
@@ -16,7 +17,9 @@ import {
 } from '../lib/requirementTargets'
 import { uniqueRequirementTags } from '../lib/requirementTags'
 import {
+  computePlanUnitTotal,
   computeTagUnitTotals,
+  courseSemester,
   formatTagUnits,
 } from '../lib/tagUnitTracker'
 import RequirementTag from './RequirementTag'
@@ -180,8 +183,15 @@ function RequirementTagItem({ row, fallYear, springYear }) {
         onFocus={hasContributors ? openTooltip : undefined}
         onBlur={hasContributors ? scheduleHideTooltip : undefined}
       >
-        <div className="flex min-w-0 items-start justify-between gap-2">
-          <RequirementTag tagCode={row.tagCode} />
+        <div className="flex min-w-0 items-center gap-2">
+          {row.isTotal ? (
+            // Plain outlined chip, so Total never reads as a requirement tag.
+            <span className="inline-flex shrink-0 items-center rounded border border-gray-300 px-1.5 py-0.5 text-xs font-semibold leading-tight text-gray-700">
+              {row.label}
+            </span>
+          ) : (
+            <RequirementTag tagCode={row.tagCode} />
+          )}
           <span
             className={
               metTarget
@@ -234,10 +244,11 @@ function RequirementsGrid({ rows, fallYear, springYear }) {
 
   return (
     <div className={REQUIREMENTS_BODY_CLASS}>
-      <ul className="grid w-full min-w-0 items-start gap-x-4 gap-y-1.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {/* Each label sits right beside its units; the space goes between items instead. */}
+      <ul className="flex w-full min-w-0 flex-wrap items-center gap-x-10 gap-y-1.5">
         {rows.map((row) => (
           <RequirementTagItem
-            key={row.tagCode}
+            key={row.isTotal ? '__total' : row.tagCode}
             row={row}
             fallYear={fallYear}
             springYear={springYear}
@@ -250,6 +261,7 @@ function RequirementsGrid({ rows, fallYear, springYear }) {
 
 export default function TagUnitTracker({
   selectedCourses,
+  termCode = null,
   courses = [],
   fallYear = null,
   springYear = null,
@@ -264,18 +276,29 @@ export default function TagUnitTracker({
     setTargets(loadRequirementTargets(tagNames))
   }, [tagNames])
 
-  const totals = useMemo(
-    () => computeTagUnitTotals(selectedCourses, tagNames),
-    [selectedCourses, tagNames],
+  // Requirements are planned per semester: every row counts only the semester
+  // picked with the Fall/Spring switch.
+  const semester = termCodeToSemester(termCode) ?? 'fall'
+  const semesterCourses = useMemo(
+    () => selectedCourses.filter((c) => courseSemester(c) === semester),
+    [selectedCourses, semester],
   )
 
+  const totals = useMemo(
+    () => computeTagUnitTotals(semesterCourses, tagNames),
+    [semesterCourses, tagNames],
+  )
+
+  // "Total" (all units this semester) comes first, then one row per tag.
   const visibleRows = useMemo(
-    () =>
-      totals.map((row) => ({
+    () => [
+      { ...computePlanUnitTotal(semesterCourses), targetUnits: null },
+      ...totals.map((row) => ({
         ...row,
         targetUnits: targets[row.tagCode] ?? null,
       })),
-    [totals, targets],
+    ],
+    [semesterCourses, totals, targets],
   )
 
   const handleSaveTargets = (nextTargets) => {
@@ -293,7 +316,7 @@ export default function TagUnitTracker({
       >
         <SectionHeader
           tone="requirements"
-          title="Requirements"
+          title={termCode ? `Requirements · ${formatTermLabel(termCode)}` : 'Requirements'}
         >
           <AddRequirementsButton onClick={() => setModalOpen(true)} />
         </SectionHeader>

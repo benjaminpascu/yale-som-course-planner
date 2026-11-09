@@ -354,6 +354,7 @@ function App() {
 
   const planningPanelProps = {
     selectedCourses,
+    termCode: activeTermCode,
     hasSelection: selectedIds.size > 0,
     fallYear,
     springYear,

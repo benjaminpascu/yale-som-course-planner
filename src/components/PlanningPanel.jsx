@@ -11,6 +11,7 @@ import WeeklyCalendar from './WeeklyCalendar'
 export default function PlanningPanel({
   variant = 'desktop',
   selectedCourses,
+  termCode,
   hasSelection,
   fallYear,
   springYear,
@@ -37,7 +38,7 @@ export default function PlanningPanel({
       <WeeklyCalendar
         className={tip === 'calendar-details' ? 'relative z-[45]' : ''}
         selectedCourses={selectedCourses}
-        hasSelection={hasSelection}
+        termCode={termCode}
         fallYear={fallYear}
         springYear={springYear}
         collapsible={!calendarOnly}
@@ -68,6 +69,7 @@ export default function PlanningPanel({
         ) : null}
         <TagUnitTracker
           selectedCourses={selectedCourses}
+          termCode={termCode}
           courses={courses}
           fallYear={fallYear}
           springYear={springYear}
