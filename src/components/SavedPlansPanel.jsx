@@ -52,6 +52,7 @@ export default function SavedPlansPanel({
   onAddPlan,
   onSelectPlan,
   onRenamePlan,
+  onDuplicatePlan,
   onSavePlan,
   onDeletePlan,
 }) {
@@ -104,6 +105,12 @@ export default function SavedPlansPanel({
       if (!onSelectPlan(planId)) return
     }
     toggleMenu(planId)
+  }
+
+  // The copy opens in the calendar; its options open too, so it can be renamed right away.
+  function handleDuplicate(planId) {
+    const copyId = onDuplicatePlan(planId)
+    if (copyId) setOpenMenuPlanId(copyId)
   }
 
   function handleRenameSubmit(e) {
@@ -308,7 +315,19 @@ export default function SavedPlansPanel({
                           </button>
                         </form>
 
-                        <div className="flex flex-wrap gap-2">
+                        {/* Below the name field: Duplicate, then Delete. */}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleDuplicate(plan.id)}
+                            className="flex items-center gap-1.5 rounded-md border border-yale-300 bg-white px-3 py-1.5 text-xs font-medium text-yale-900 hover:bg-yale-50"
+                          >
+                            <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+                              <rect x="8" y="8" width="12" height="12" rx="2" />
+                              <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+                            </svg>
+                            Duplicate plan
+                          </button>
                           <button
                             type="button"
                             onClick={() => {
@@ -321,8 +340,14 @@ export default function SavedPlansPanel({
                                 setOpenMenuPlanId(null)
                               }
                             }}
-                            className="rounded-md px-3 py-1.5 text-xs font-medium text-red-800 underline hover:text-red-950"
+                            className="flex items-center gap-1.5 rounded-md border border-red-900 bg-red-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-950"
                           >
+                            <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+                              <path d="M4 7h16" />
+                              <path d="M10 11v6M14 11v6" />
+                              <path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12" />
+                              <path d="M9 7V4h6v3" />
+                            </svg>
                             Delete plan
                           </button>
                         </div>

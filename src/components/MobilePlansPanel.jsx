@@ -18,6 +18,7 @@ export default function MobilePlansPanel({
   onAddPlan,
   onSelectPlan,
   onRenamePlan,
+  onDuplicatePlan,
   onSavePlan,
   onDeletePlan,
   onRemoveCourse,
@@ -45,6 +46,7 @@ export default function MobilePlansPanel({
         onAddPlan={onAddPlan}
         onSelectPlan={onSelectPlan}
         onRenamePlan={onRenamePlan}
+        onDuplicatePlan={onDuplicatePlan}
         onSavePlan={onSavePlan}
         onDeletePlan={onDeletePlan}
       />

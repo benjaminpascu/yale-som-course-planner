@@ -12,6 +12,7 @@ export default function PlansMenu({
   onAddPlan,
   onSelectPlan,
   onRenamePlan,
+  onDuplicatePlan,
   onSavePlan,
   onDeletePlan,
 }) {
@@ -110,6 +111,7 @@ export default function PlansMenu({
             onAddPlan={onAddPlan}
             onSelectPlan={handleSelectPlan}
             onRenamePlan={onRenamePlan}
+            onDuplicatePlan={onDuplicatePlan}
             onSavePlan={onSavePlan}
             onDeletePlan={onDeletePlan}
           />

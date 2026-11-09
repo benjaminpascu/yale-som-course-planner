@@ -30,6 +30,7 @@ import {
 import {
   courseIdSetFromArray,
   deletePlanFromStore,
+  duplicatePlanInStore,
   getPlanById,
   loadPlanStore,
   persistPlanStore,
@@ -320,6 +321,27 @@ function App() {
     [persist, planStore],
   )
 
+  // Copy a plan's saved courses into "<name> (2)" right under it and open the copy.
+  // Returns the copy's id, or null if the student kept their unsaved changes.
+  const handleDuplicatePlan = useCallback(
+    (planId) => {
+      if (
+        isDirty &&
+        !window.confirm(
+          'Switch plans? Unsaved changes to the current plan will be lost.',
+        )
+      ) {
+        return null
+      }
+      const { store: next, planId: copyId } = duplicatePlanInStore(planStore, planId)
+      const copy = getPlanById(next, copyId)
+      setSelectedIds(new Set(sanitizeCourseIds(copy.courseIds, validCourseIds)))
+      persist(next)
+      return copyId
+    },
+    [isDirty, persist, planStore, validCourseIds],
+  )
+
   const handleDeletePlan = useCallback(
     (planId) => {
       const plan = getPlanById(planStore, planId)
@@ -395,6 +417,7 @@ function App() {
     onAddPlan: handleAddPlan,
     onSelectPlan: handleSelectPlan,
     onRenamePlan: handleRenamePlan,
+    onDuplicatePlan: handleDuplicatePlan,
     onSavePlan: handleSavePlan,
     onDeletePlan: handleDeletePlan,
     onRemoveCourse: removeCourse,
@@ -421,6 +444,7 @@ function App() {
               onSelectPlan={handleSelectPlan}
               onSavePlan={handleSavePlan}
               onRenamePlan={handleRenamePlan}
+              onDuplicatePlan={handleDuplicatePlan}
               onDeletePlan={handleDeletePlan}
             />
             {desktopTip === 'save-plan' ? (

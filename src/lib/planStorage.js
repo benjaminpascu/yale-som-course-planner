@@ -152,16 +152,42 @@ export function savePlanCourses(store, planId, courseIds) {
   return { ...store, plans }
 }
 
-export function duplicatePlanInStore(store, sourcePlanId, newName) {
+/**
+ * Name for a copy: "Plan A" → "Plan A (2)", or the next free number. Copying
+ * "Plan A (2)" counts from "Plan A", so it becomes "Plan A (3)", not "Plan A (2) (2)".
+ */
+export function nextCopyName(plans, name) {
+  const base = name.trim().replace(/\s\(\d+\)$/, '')
+  const taken = new Set(plans.map((p) => p.name))
+  let n = 2
+  while (taken.has(`${base} (${n})`)) n += 1
+  return `${base} (${n})`
+}
+
+/**
+ * Copy a plan's saved courses into a new plan placed right under it; the copy
+ * becomes the active plan. Returns the new store and the copy's id.
+ */
+export function duplicatePlanInStore(store, sourcePlanId) {
   const source = getPlanById(store, sourcePlanId)
   if (!source) {
     throw new Error('Plan not found.')
   }
-  return upsertPlan(store, {
-    id: null,
-    name: newName,
+  const now = new Date().toISOString()
+  const copy = {
+    id: newPlanId(),
+    name: nextCopyName(store.plans, source.name),
     courseIds: [...source.courseIds],
-  })
+    createdAt: now,
+    updatedAt: now,
+  }
+  const index = store.plans.indexOf(source)
+  const plans = [
+    ...store.plans.slice(0, index + 1),
+    copy,
+    ...store.plans.slice(index + 1),
+  ]
+  return { store: { ...store, activePlanId: copy.id, plans }, planId: copy.id }
 }
 
 export function deletePlanFromStore(store, planId) {
