@@ -54,15 +54,24 @@ export function persistSeenHints(seen, storage = globalThis.localStorage) {
 /**
  * The Planner tip to show now, or null. A tip whose moment hasn't come yet
  * (e.g. the clash tip before any course is added) holds back the ones after it.
+ * `shownCount` is the plan's courses in the semester on screen: with none, the
+ * calendar is empty and the panels sit elsewhere, so course tips wait.
  */
-export function nextPlannerHint({ seen, selectedCount, hasPlan, phone, hasConflict = false }) {
+export function nextPlannerHint({
+  seen,
+  selectedCount,
+  shownCount = selectedCount,
+  hasPlan,
+  phone,
+  hasConflict = false,
+}) {
   for (const id of PLANNER_HINTS) {
     if (seen.has(id)) continue
     // Only worth saying once a Conflict label is on screen; until then the others go ahead.
     if (id === 'clash' && !hasConflict) continue
     if (PHONE_ONLY.has(id) && !phone) continue
     if (COMPUTER_ONLY.has(id) && phone) continue
-    if (NEEDS_A_COURSE.has(id) && selectedCount < 1) return null
+    if (NEEDS_A_COURSE.has(id) && shownCount < 1) return null
     if (id === 'save-plan' && (selectedCount < 3 || hasPlan)) return null
     return id
   }

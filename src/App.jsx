@@ -17,7 +17,9 @@ import {
   formatTermLabel,
   getCatalogTerms,
   getAcademicYears,
+  termCodeToSemester,
 } from './lib/academicYear'
+import { courseSemester } from './lib/tagUnitTracker'
 import { getCalendarViewOptions, getDefaultCalendarView } from './lib/calendarSessionView'
 import { buildCourseGroups } from './lib/compareGroups'
 import {
@@ -213,6 +215,10 @@ function App() {
   const hintState = {
     seen: seenHints,
     selectedCount: selectedIds.size,
+    // Same semester filter as the calendar, so tips wait while it's empty.
+    shownCount: selectedCourses.filter(
+      (c) => courseSemester(c) === termCodeToSemester(activeTermCode),
+    ).length,
     hasPlan: planStore.activePlanId != null,
     hasConflict: courses.some(
       (c) => c.termCode === activeTermCode && conflictIds.has(c.courseId) && !selectedIds.has(c.courseId),

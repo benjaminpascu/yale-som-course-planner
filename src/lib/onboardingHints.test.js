@@ -44,6 +44,13 @@ describe('nextPlannerHint', () => {
     expect(nextPlannerHint({ ...base, seen, selectedCount: 2, hasConflict: true })).toBe('clash')
   })
 
+  test('course tips wait while the semester on screen has none of the plan\'s courses', () => {
+    const seen = new Set(['add-course', 'clash', 'calendar-details', 'set-targets', 'requirements'])
+    // Courses only in Fall while Spring is shown: the calendar is empty, so nothing to point at.
+    expect(nextPlannerHint({ ...base, seen, selectedCount: 2, shownCount: 0 })).toBe(null)
+    expect(nextPlannerHint({ ...base, seen, selectedCount: 2, shownCount: 1 })).toBe('your-plan')
+  })
+
   test('computer order: calendar, set targets, requirements, your plan, plans menu, compare, term switch', () => {
     const seen = new Set(['add-course', 'clash'])
     const order = []
