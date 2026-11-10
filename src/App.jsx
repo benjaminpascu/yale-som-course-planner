@@ -16,7 +16,7 @@ import { SAVE_BUTTON } from './lib/sectionTheme'
 import {
   formatTermLabel,
   getCatalogTerms,
-  getSemesterCalendarYears,
+  getAcademicYears,
 } from './lib/academicYear'
 import { getCalendarViewOptions, getDefaultCalendarView } from './lib/calendarSessionView'
 import { buildCourseGroups } from './lib/compareGroups'
@@ -156,17 +156,14 @@ function App() {
     [courses, selectedIds],
   )
 
-  const { fallYear, springYear } = useMemo(
-    () => getSemesterCalendarYears(courses),
-    [courses],
-  )
-
   const catalogTerms = useMemo(() => getCatalogTerms(courses), [courses])
 
-  /** Term shown in the course browser; defaults to the earliest term loaded. */
+  /** Term shown in the course browser; defaults to the earliest term still running. */
   const activeTermCode = catalogTerms.some((t) => t.id === catalogTermCode)
     ? catalogTermCode
     : (catalogTerms[0]?.id ?? null)
+
+  const { fallYear, springYear } = getAcademicYears(activeTermCode)
 
   const compareCatalog = useMemo(
     () => buildCourseGroups(courses.filter((c) => c.termCode === activeTermCode)),

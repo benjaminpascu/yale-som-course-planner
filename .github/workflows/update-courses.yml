@@ -1,0 +1,78 @@
+# Keeps the course list in sync with Yale SOM's course feed.
+# Every 6 hours: fetch each running/upcoming semester, and if anything changed,
+# commit the new course files to main (Vercel then republishes the site).
+# Run it by hand from the GitHub "Actions" tab → "Update courses" → "Run workflow".
+# Full notes: docs/updating-course-data.md
+name: Update courses
+
+on:
+  schedule:
+    - cron: '23 */6 * * *' # 4 times a day (UTC); off the hour, when GitHub is less busy
+  workflow_dispatch:
+
+permissions:
+  contents: write # commit the updated course files
+  actions: write # keep this schedule from being paused (see the last step)
+
+concurrency:
+  group: update-courses
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Exits with an error if any semester couldn't be updated; the ones that
+      # worked are still saved, and the job is marked failed at the end.
+      - name: Fetch courses from Yale
+        id: fetch
+        continue-on-error: true
+        run: npm run update-courses -- --summary-file "$RUNNER_TEMP/summary.txt"
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git status --porcelain -- docs/data-samples | grep -q .; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Never publish course files that break the tests or the build.
+      - name: Test and build
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          npm test
+          npm run build
+
+      - name: Commit and push
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data-samples
+          summary="$(cat "$RUNNER_TEMP/summary.txt" 2>/dev/null || echo 'course details updated')"
+          git commit -m "chore(courses): update from Yale — $summary"
+          git push
+
+      # GitHub pauses scheduled jobs in public repos after 60 days without
+      # activity (e.g. a quiet summer). Re-enabling the workflow resets that clock.
+      - name: Keep the schedule alive
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/update-courses.yml/enable"
+
+      - name: Report failed semesters
+        if: steps.fetch.outcome == 'failure'
+        run: |
+          echo "::error::Some semesters could not be updated from Yale. Open the 'Fetch courses from Yale' step above for details."
+          exit 1

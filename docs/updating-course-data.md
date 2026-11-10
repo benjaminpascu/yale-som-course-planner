@@ -1,100 +1,97 @@
-# Updating course data from the SOM website
+# Updating course data
 
-Use this whenever Yale adds, drops or changes courses. One command rebuilds a
-term's course file (`docs/data-samples/courses_master_<term>.csv`) from three
-downloads.
+**Short version: you don't.** Courses update themselves from Yale SOM's own
+course feed every 6 hours, including brand-new semesters.
 
-**Short version for an AI agent:** "Follow `docs/updating-course-data.md`."
-The three CSVs are in `course-import/`. Run `npm run update-courses -- --check`,
-show the user the report, and run `npm run update-courses` once they agree.
+## How it works
 
-## 1. Download the three files
+A GitHub job (`.github/workflows/update-courses.yml`) runs 4 times a day:
 
-On the SOM elective courses page (som.yale.edu/elective-core-courses), pick
-**one semester only**, then use the page's CSV download three times:
+1. It asks Yale's feed (`https://som.yale.edu/courses/session-items/<TermCode>`,
+   public, no login; found via Prof. Kyle Jensen's `yale-som-course-search`
+   script) for:
+   - every semester on the site whose last class hasn't happened yet, and
+   - the next two semesters after the newest one, to catch new ones as soon
+     as Yale posts them.
+2. It rebuilds each `docs/data-samples/courses_master_<term>.csv` and applies
+   `course_overrides.csv`.
+3. If anything changed, it runs the tests and the build, then commits to
+   `main` ("chore(courses): update from Yale — …"). Vercel republishes the site.
 
-| File | Filter on the page | File name must… |
-|------|--------------------|-----------------|
-| Full course list | No requirement filter | …not contain "stem" or "gbs" (Yale's `courseslist-….csv` name is fine) |
-| STEM list | STEM requirement only | …contain **stem** (e.g. `STEM Req.csv`) |
-| GBS list | GBS requirement only | …contain **gbs** (e.g. `GBS Req.csv`) |
+**TermCode**: `YYYY01` = spring, `YYYY03` = fall (e.g. 202701 = Spring 2027).
 
-Fall and spring are separate runs: do one semester, then the other.
+**Finished semesters**: the day after a semester's last class, the site hides
+it from the semester switcher and the job stops updating its file. The file
+stays, so students' saved plans keep those courses.
 
-## 2. Put them in `course-import/`
+**New semesters**: a new file (e.g. `courses_master_fall2027.csv`) is created
+and shows up on the site without any code change.
 
-The folder is at the top of the project. Delete the old files there first, so
-it holds **exactly three** `.csv` files. (These raw files are not saved to
-GitHub.)
+## Safety checks
 
-## 3. Preview the changes
+The job keeps the current file (and the site keeps working) when:
 
-```bash
-npm run update-courses -- --check
-```
+- Yale's site can't be reached or answers with an error,
+- the list is empty, or contains another term's courses,
+- a semester suddenly has fewer than half as many courses as before.
 
-This writes nothing. It works out the semester from the files and prints:
+When that happens the job is marked failed and GitHub emails the repo owner.
+Usually it fixes itself on the next run. If it keeps failing, open the failed
+run (GitHub → Actions → Update courses) and read the "Fetch courses from Yale"
+step.
 
-- **New courses** and **Removed courses** (by section)
-- **Changed courses** — room, time, professor, units, tags, etc.; descriptions show as "description updated"
-- **Manual fixes applied** (see step 6)
-- **Problems to look at** — e.g. a meeting time it couldn't read (that section shows as "No time defined")
+GitHub pauses scheduled jobs after 60 days with no repository activity; the
+job's last step resets that clock on every run.
 
-If a removed or changed list looks wrong (say, half the courses vanished), a
-file was probably downloaded with the wrong filter or semester. The script
-stops on its own if the new list is less than half the size of the old one.
+## Run it now
 
-## 4. Write the file
+- **On GitHub**: Actions tab → **Update courses** → **Run workflow**.
+- **On your computer**:
 
-```bash
-npm run update-courses
-```
+  ```bash
+  npm run update-courses -- --check
+  ```
 
-## 5. Check and publish
+  shows what would change without writing anything. Without `--check` it
+  writes the files; then `npm test`, commit and push.
 
-```bash
-npm test
-```
+## How Yale's feed becomes the course file
 
-```bash
-npm run dev
-```
+- Every column is copied from the feed (`courseTitle` → `Course Title`, etc.).
+  `Course Type` uses commas between types, as before.
+- **Leaves out courses Yale marks hidden** (`visible` ≠ 1), e.g. most GNAM
+  courses and the Global Network Week trips. To show a hidden course anyway,
+  that would need a code change in `buildCourseRows`.
+- Builds `days_clean`, `start_24h`, `end_24h` from `daysTimes`
+  (e.g. `T  Th 1:00 PM-2:20 PM` → `Tu,Th`, `13:00`, `14:20`). A time it can't
+  read (e.g. Saturday `S 7:30 AM-9:00 AM`) shows as "No time defined".
+- Sets `tags` from Yale's course attribute codes: `MGMS` → `STEM`,
+  `MGGE` → `GBS Req` (both: `STEM;GBS Req`). More requirement tags: add a line
+  to `TAG_ATTRIBUTES` in `scripts/lib/courseImport.js`.
 
-Open the app, switch to the semester you updated, and spot-check a new course.
-Then commit and push to `main`; Vercel redeploys.
+Code: `scripts/update-courses.js`, `scripts/lib/courseImport.js` (tests next to it).
 
-## 6. Manual fixes that survive updates
+## Manual fixes that survive updates
 
-Sometimes Yale's export is wrong or blank where the website is right (e.g. a
-missing room). Don't edit the course file directly: the
-next update would undo it. Add a line to
-`docs/data-samples/course_overrides.csv` instead:
+If Yale's feed is wrong where the SOM site is right, don't edit the course
+file (the next update would undo it). Add a line to
+`docs/data-samples/course_overrides.csv`:
 
 ```
 TermCode,Course ID,Column,Value,Note
 202701,21645,Room,EVANS 4230,MGMT 7305 room from the SOM site
 ```
 
-- **TermCode**: `YYYY01` = spring, `YYYY03` = fall (e.g. 202701 = Spring 2027)
 - **Course ID**: the section's ID from the course file
 - **Column**: exact column name (e.g. `Room`, `days_clean`, `start_24h`, `tags`)
 
-The report tells you when a fix is no longer needed (Yale caught up) or its
+The update log says when a fix is no longer needed (Yale caught up) or its
 course is gone, so you can delete that line.
-
-## What the script does
-
-- Copies every column from the full list, in the same order, keeping Yale's order of rows.
-- **Shows every course**: sets `Visible` to `1` even when Yale's export says `0` (it hides some courses the SOM site lists, like GNAM courses). The report names the ones Yale had hidden.
-- Builds `days_clean`, `start_24h`, `end_24h` from Yale's `Daytimes` (e.g. `T  Th 1:00 PM-2:20 PM` → `Tu,Th`, `13:00`, `14:20`), falling back to the `Timings` columns.
-- Sets `tags`: `STEM` if the section's Course ID is in the STEM file, `GBS Req` if it's in the GBS file, both as `STEM;GBS Req`.
-- Applies `course_overrides.csv`.
-- Writes the file in the same CSV style as before, so git shows only real changes.
-
-Code: `scripts/update-courses.js`, `scripts/lib/courseImport.js` (tests next to it).
 
 ## Things to know
 
-- **A new semester** (e.g. Fall 2027) gets a new file, `courses_master_fall2027.csv`. The script warns that the app doesn't load it yet; adding it to `src/lib/loadData.js` is a small code change to ask an agent for.
-- **More requirement lists** (beyond STEM and GBS) need one line added to `TAG_LISTS` in `scripts/lib/courseImport.js`.
-- **Compare Courses data** is keyed on course number + EMBA category (plus title when one number covers several courses, e.g. MGT 416 trips). If Yale renumbers a course, students' Compare notes for it start fresh.
+- **Compare Courses data** is keyed on course number + EMBA category (plus
+  title when one number covers several courses, e.g. MGT 416 trips). If Yale
+  renumbers a course, students' Compare notes for it start fresh.
+- **Course category typos** in Yale's data (e.g. `MMG GBS`) are merged for
+  display in `src/lib/categoryDisplay.js`.

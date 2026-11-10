@@ -30,34 +30,25 @@ export function termCodeToCalendarYear(termCode) {
 
 /**
  * @typedef {Object} SemesterCalendarYears
- * @property {number | null} fallYear — lowest fall TermCode year (term 03)
- * @property {number | null} springYear — highest spring TermCode year (term 01)
+ * @property {number | null} fallYear
+ * @property {number | null} springYear
  */
 
 /**
- * Fall uses the lowest fall calendar year in the catalog; spring uses the highest
- * spring year (e.g. fallYear 2025, springYear 2026 for 202503 + 202601).
+ * Calendar years of the academic year a term belongs to, used for session
+ * labels like "Fall 2026": Fall 2026 and Spring 2027 both give
+ * { fallYear: 2026, springYear: 2027 }.
  *
- * @param {{ termCode?: string }[]} courses
+ * @param {string | null | undefined} termCode
  * @returns {SemesterCalendarYears}
  */
-export function getSemesterCalendarYears(courses) {
-  let fallYear = null
-  let springYear = null
-
-  for (const course of courses) {
-    const semester = termCodeToSemester(course.termCode)
-    const year = termCodeToCalendarYear(course.termCode)
-    if (semester == null || year == null) continue
-
-    if (semester === 'fall') {
-      fallYear = fallYear == null ? year : Math.min(fallYear, year)
-    } else if (semester === 'spring') {
-      springYear = springYear == null ? year : Math.max(springYear, year)
-    }
-  }
-
-  return { fallYear, springYear }
+export function getAcademicYears(termCode) {
+  const semester = termCodeToSemester(termCode)
+  const year = termCodeToCalendarYear(termCode)
+  if (semester == null || year == null) return { fallYear: null, springYear: null }
+  return semester === 'fall'
+    ? { fallYear: year, springYear: year + 1 }
+    : { fallYear: year - 1, springYear: year }
 }
 
 /**
@@ -74,14 +65,30 @@ export function formatTermLabel(termCode) {
   return `${name} ${year}`
 }
 
+/** @param {Date} date → "YYYY-MM-DD" in local time (same format as course.sessionEnd) */
+function isoDay(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
+
 /**
- * Terms present in the catalog, oldest first (TermCode sorts chronologically).
+ * Terms students can pick, oldest first (TermCode sorts chronologically).
+ * A term is hidden once its last class is over; if every term is over, the
+ * newest one stays so the site is never empty.
  *
- * @param {{ termCode?: string }[]} courses
+ * @param {{ termCode?: string, sessionEnd?: string | null }[]} courses
+ * @param {Date} [today]
  * @returns {{ id: string, label: string }[]}
  */
-export function getCatalogTerms(courses) {
-  return [...new Set(courses.map((c) => c.termCode).filter(Boolean))]
-    .sort()
-    .map((termCode) => ({ id: termCode, label: formatTermLabel(termCode) }))
+export function getCatalogTerms(courses, today = new Date()) {
+  const lastDay = new Map()
+  for (const { termCode, sessionEnd } of courses) {
+    if (!termCode) continue
+    const end = sessionEnd ?? ''
+    if (!lastDay.has(termCode) || end > lastDay.get(termCode)) lastDay.set(termCode, end)
+  }
+  const all = [...lastDay.keys()].sort()
+  const todayIso = isoDay(today)
+  const open = all.filter((termCode) => !lastDay.get(termCode) || lastDay.get(termCode) >= todayIso)
+  const shown = open.length > 0 ? open : all.slice(-1)
+  return shown.map((termCode) => ({ id: termCode, label: formatTermLabel(termCode) }))
 }

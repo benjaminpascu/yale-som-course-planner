@@ -1,7 +1,7 @@
 /**
- * Turns the three Yale SOM website exports (full course list, STEM list,
- * GBS list) into one term CSV in the app's format. Used by
- * scripts/update-courses.js; see docs/updating-course-data.md.
+ * Turns Yale SOM's course feed into one term CSV in the app's format, and
+ * works out which terms to update. Used by scripts/update-courses.js; see
+ * docs/updating-course-data.md.
  */
 import Papa from 'papaparse'
 
@@ -32,37 +32,50 @@ export const OUTPUT_COLUMNS = [
   'tags',
 ]
 
-/** Columns copied straight from the Yale export. */
-export const COPIED_COLUMNS = OUTPUT_COLUMNS.slice(0, OUTPUT_COLUMNS.indexOf('days_clean'))
+/**
+ * Yale course feed: one JSON list of every course in a term. Public, no login.
+ * Found via Prof. Kyle Jensen's yale-som-course-search script.
+ *
+ * @param {string} termCode — YYYY01 spring, YYYY03 fall
+ */
+export function feedUrl(termCode) {
+  return `https://som.yale.edu/courses/session-items/${termCode}`
+}
 
-/** Columns the Yale export must have (copied columns + meeting-time columns). */
-export const SOURCE_COLUMNS = [...COPIED_COLUMNS, 'Daytimes']
+/** Feed field for each column copied straight from Yale. */
+const FEED_FIELDS = {
+  'Bid Or Permission': 'bidOrPermission',
+  'Course Category': 'courseCategory',
+  'Course Description': 'courseDescription',
+  'Course ID': 'courseID',
+  'Course Number': 'courseNumber',
+  'Course Session': 'courseSession',
+  'Course Session End Date': 'courseSessionEndDate',
+  'Course Session Start date': 'courseSessionStartDate',
+  'Course Title': 'courseTitle',
+  'Course Type': 'courseType',
+  'Faculty 1': 'faculty1',
+  'Faculty 1 Email': 'faculty1Email',
+  'Old Syllabus': 'oldSyllabus',
+  Room: 'room',
+  Section: 'section',
+  Syllabus: 'syllabus',
+  TermCode: 'termCode',
+  Units: 'units',
+  Visible: 'visible',
+}
 
-/** Tag written for each requirement list, in the order tags are listed. */
-export const TAG_LISTS = [
-  { key: 'stem', tag: 'STEM' },
-  { key: 'gbs', tag: 'GBS Req' },
+/** Tag written for each Yale course attribute code, in the order tags are listed. */
+export const TAG_ATTRIBUTES = [
+  { attribute: 'MGMS', tag: 'STEM' },
+  { attribute: 'MGGE', tag: 'GBS Req' },
 ]
 
 const DAY_CODES = { M: 'Mo', T: 'Tu', W: 'We', Th: 'Th', F: 'Fr', Sa: 'Sa', Su: 'Su' }
 
-/**
- * Which export a file is, from its name: "stem" or "gbs" in the name marks a
- * requirement list; anything else is the full course list.
- *
- * @param {string} fileName
- * @returns {'stem' | 'gbs' | 'full'}
- */
-export function classifyExportFile(fileName) {
-  const name = fileName.toLowerCase()
-  if (name.includes('stem')) return 'stem'
-  if (name.includes('gbs')) return 'gbs'
-  return 'full'
-}
-
 /** @param {string} csvText */
 export function parseCsv(csvText) {
-  const text = csvText.replace(/^﻿/, '')
+  const text = csvText.replace(/^\uFEFF/, '')
   const { data, meta } = Papa.parse(text, { header: true, skipEmptyLines: true })
   return { rows: data, headers: meta.fields ?? [] }
 }
@@ -81,10 +94,10 @@ export function to24h(value) {
 }
 
 /**
- * Yale "Daytimes" (e.g. "M  W 1:00 PM-2:20 PM") → app meeting fields.
+ * Yale "daysTimes" (e.g. "M  W 1:00 PM-2:20 PM") → app meeting fields.
  * Empty input gives empty fields; unreadable input gives null.
  *
- * @param {string | undefined} daytimes
+ * @param {string | null | undefined} daytimes
  * @returns {{ days_clean: string, start_24h: string, end_24h: string } | null}
  */
 export function parseDaytimes(daytimes) {
@@ -101,74 +114,61 @@ export function parseDaytimes(daytimes) {
   return { days_clean: days.join(','), start_24h: start, end_24h: end }
 }
 
-/**
- * Meeting fields for one export row: "Daytimes" first, then the separate
- * "Timings" columns Yale fills for a few courses.
- *
- * @param {Record<string, string>} row
- */
-export function meetingFields(row) {
-  const fromDaytimes = parseDaytimes(row.Daytimes)
-  if (fromDaytimes?.days_clean) return fromDaytimes
-
-  const day = row['Timings Day']?.trim()
-  const start = to24h(row['Timings StartTime'] ?? '')
-  const end = to24h(row['Timings EndTime'] ?? '')
-  if (day && start && end) return { days_clean: day, start_24h: start, end_24h: end }
-
-  return fromDaytimes
+/** @param {unknown} value */
+function text(value) {
+  return value == null ? '' : String(value)
 }
 
 /**
- * Builds the term CSV rows from the three exports. Every row is made
- * visible (Visible = 1), whatever the export says.
+ * Builds the term CSV rows from Yale's feed items. Courses Yale marks hidden
+ * (visible ≠ 1) are left out.
  *
- * @param {{ full: Record<string, string>[], stem: Record<string, string>[], gbs: Record<string, string>[] }} exportsByKind
+ * @param {Record<string, unknown>[]} items — the feed's data.items
  * @returns {{ rows: Record<string, string>[], problems: string[] }}
  */
-export function buildCourseRows(exportsByKind) {
+export function buildCourseRows(items) {
   const problems = []
-  const fullIds = new Set(exportsByKind.full.map((row) => row['Course ID']?.trim()))
-
-  const tagIds = TAG_LISTS.map(({ key, tag }) => {
-    const ids = new Set(exportsByKind[key].map((row) => row['Course ID']?.trim()))
-    for (const row of exportsByKind[key]) {
-      if (!fullIds.has(row['Course ID']?.trim())) {
-        problems.push(`${tag} list has ${row['Course Number']} section ${row.Section} (ID ${row['Course ID']}), which is not in the full course list.`)
-      }
-    }
-    return { tag, ids }
-  })
-
   const seen = new Set()
-  const rows = exportsByKind.full.map((source) => {
-    const id = source['Course ID']?.trim()
-    if (seen.has(id)) problems.push(`Course ID ${id} (${source['Course Number']}) appears more than once in the full list.`)
-    seen.add(id)
+  const rows = []
+
+  for (const item of items) {
+    if (text(item.visible).trim() !== '1') continue
+    const daytimes = text(item.daysTimes).trim()
 
     const row = {}
-    for (const column of COPIED_COLUMNS) row[column] = source[column] ?? ''
-    // Show every course, even ones Yale's export marks hidden: the SOM site
-    // lists some of them (e.g. GNAM courses).
-    row.Visible = '1'
+    for (const [column, field] of Object.entries(FEED_FIELDS)) row[column] = text(item[field])
+    // The feed separates course types with "|"; the app's files use ",".
+    row['Course Type'] = row['Course Type'].split('|').join(',')
 
-    let meeting = meetingFields(source)
+    const id = row['Course ID'].trim()
+    if (!id) {
+      problems.push(`A course in Yale's list has no Course ID (${row['Course Number']} ${row['Course Title']}); skipped.`)
+      continue
+    }
+    if (seen.has(id)) {
+      problems.push(`Course ID ${id} (${row['Course Number']}) appears more than once in Yale's list; kept the first.`)
+      continue
+    }
+    seen.add(id)
+
+    let meeting = parseDaytimes(daytimes)
     if (!meeting) {
-      problems.push(`Could not read the meeting time "${source.Daytimes}" for ${source['Course Number']} section ${source.Section}; it will show as "No time defined".`)
+      problems.push(`Could not read the meeting time "${daytimes}" for ${row['Course Number']} section ${row.Section}; it will show as "No time defined".`)
       meeting = { days_clean: '', start_24h: '', end_24h: '' }
     }
     Object.assign(row, meeting)
 
-    row.tags = tagIds.filter(({ ids }) => ids.has(id)).map(({ tag }) => tag).join(';')
-    return row
-  })
+    const attributes = text(item.courseAttributes).split('|').map((code) => code.trim())
+    row.tags = TAG_ATTRIBUTES.filter(({ attribute }) => attributes.includes(attribute)).map(({ tag }) => tag).join(';')
+    rows.push(row)
+  }
 
   return { rows, problems }
 }
 
 /**
  * Applies manual fixes from docs/data-samples/course_overrides.csv.
- * Reports fixes whose course is gone and fixes Yale's export now matches.
+ * Reports fixes whose course is gone and fixes Yale's list now matches.
  *
  * @param {Record<string, string>[]} rows
  * @param {Record<string, string>[]} overrides — TermCode, Course ID, Column, Value, Note
@@ -193,7 +193,7 @@ export function applyOverrides(rows, overrides, termCode) {
       continue
     }
     if (row[column] === fix.Value) {
-      notes.push(`Override for ${row['Course Number']} ${column} is no longer needed: Yale's export now says "${fix.Value}". You can delete that line.`)
+      notes.push(`Override for ${row['Course Number']} ${column} is no longer needed: Yale's list now says "${fix.Value}". You can delete that line.`)
       continue
     }
     applied.push(`${row['Course Number']} section ${row.Section}: ${column} "${row[column]}" → "${fix.Value}"${fix.Note ? ` (${fix.Note})` : ''}`)
@@ -265,4 +265,74 @@ export function termFileSlug(termCode) {
   const match = /^(\d{4})(01|03)$/.exec(termCode)
   if (!match) return null
   return `${match[2] === '03' ? 'fall' : 'spring'}${match[1]}`
+}
+
+/**
+ * The term after this one: fall → next spring, spring → fall.
+ *
+ * @param {string} termCode
+ */
+export function nextTermCode(termCode) {
+  const year = Number(termCode.slice(0, 4))
+  return termCode.endsWith('03') ? `${year + 1}01` : `${year}03`
+}
+
+/**
+ * Term running (or next up) on a date: Jan–May spring, Jun–Dec fall.
+ *
+ * @param {Date} today
+ */
+export function currentTermCode(today) {
+  const year = today.getFullYear()
+  return today.getMonth() < 5 ? `${year}01` : `${year}03`
+}
+
+/** @param {Date} date → "YYYYMMDD" */
+function dayStamp(date) {
+  return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`
+}
+
+/**
+ * True once the last class of a term is over. Yale dates look like
+ * "20270504 000000.000". A term with no end dates is never over.
+ *
+ * @param {Record<string, string>[]} rows — rows of one term CSV
+ * @param {Date} today
+ */
+export function termHasEnded(rows, today) {
+  const ends = rows.map((row) => /^\d{8}/.exec(row['Course Session End Date'] ?? '')?.[0]).filter(Boolean)
+  if (ends.length === 0) return false
+  return ends.sort().at(-1) < dayStamp(today)
+}
+
+/**
+ * Which terms to fetch: every saved term that hasn't ended (finished terms
+ * stay frozen), plus the next two after the newest saved term so new
+ * semesters are picked up as soon as Yale posts them.
+ *
+ * @param {{ termCode: string, rows: Record<string, string>[] }[]} savedTerms
+ * @param {Date} today
+ * @returns {{ termCode: string, isNew: boolean }[]}
+ */
+export function termsToUpdate(savedTerms, today) {
+  const open = savedTerms
+    .filter(({ rows }) => !termHasEnded(rows, today))
+    .map(({ termCode }) => ({ termCode, isNew: false }))
+
+  const newest = savedTerms.map(({ termCode }) => termCode).sort().at(-1)
+  const first = newest ? nextTermCode(newest) : currentTermCode(today)
+  const probes = [first, nextTermCode(first)].map((termCode) => ({ termCode, isNew: true }))
+
+  return [...open, ...probes].sort((a, b) => a.termCode.localeCompare(b.termCode))
+}
+
+/**
+ * "courses_master_spring2027.csv" → "202701"; null for other names.
+ *
+ * @param {string} fileName
+ */
+export function termCodeFromFileName(fileName) {
+  const match = /^courses_master_(fall|spring)(\d{4})\.csv$/.exec(fileName)
+  if (!match) return null
+  return `${match[2]}${match[1] === 'fall' ? '03' : '01'}`
 }
