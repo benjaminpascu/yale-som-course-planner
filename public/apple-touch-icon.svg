@@ -1,4 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-label="Yale SOM Course Planner">
-  <rect width="180" height="180" rx="36" fill="#002a54"/>
-  <text x="90" y="118" text-anchor="middle" fill="#fff" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="88" font-weight="700">Y</text>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" width="180" height="180" role="img" aria-label="SOMtimes"><title>SOMtimes</title><rect width="180" height="180" rx="0" fill="#0d2951"/><path d="M136.38 63.23 A53.55 53.55 0 1 0 143.55 90" fill="none" stroke="#ffffff" stroke-width="15.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M90 59.71 L90 90 L113.06 76.69" fill="none" stroke="#86cb95" stroke-width="9.18" stroke-linecap="round" stroke-linejoin="round"/></svg>

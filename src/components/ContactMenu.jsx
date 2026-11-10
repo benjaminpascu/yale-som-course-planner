@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 
 const CONTACT_EMAIL = 'benjamin.pascu@yale.edu'
 const SLACK_HANDLE = 'benjamin.pascu'
-const EMAIL_SUBJECT = 'Course Planner feedback'
+const EMAIL_SUBJECT = 'SOMtimes feedback'
 const YALE_COURSE_LIST_URL = 'https://som.yale.edu/elective-core-courses'
 
 export default function ContactMenu() {
@@ -123,6 +123,7 @@ export default function ContactMenu() {
               Yale SOM Course List
             </a>
           </p>
+          <p className="mt-1 text-gray-500">Student-built. Not affiliated with Yale University.</p>
         </div>
       ) : null}
     </div>
