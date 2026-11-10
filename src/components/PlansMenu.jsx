@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { PLAN_BUTTON_EDITING, SAVE_BUTTON } from '../lib/sectionTheme'
+import { downloadPlanExport, parsePlanImport } from '../lib/planTransfer'
 import SavedPlansPanel from './SavedPlansPanel'
 
 export default function PlansMenu({
@@ -15,11 +16,45 @@ export default function PlansMenu({
   onDuplicatePlan,
   onSavePlan,
   onDeletePlan,
+  onImportPlans,
   // 'right' when the button sits at the right edge (Weekly calendar bar), so the panel opens leftward.
   align = 'left',
 }) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef(null)
+  const fileInputRef = useRef(null)
+  // null | { choose: plans } (add or replace?) | { note, missing } | { error }
+  const [importState, setImportState] = useState(null)
+
+  const coursesById = useMemo(
+    () => new Map(courses.map((course) => [course.courseId, course])),
+    [courses],
+  )
+
+  useEffect(() => {
+    if (!open) setImportState(null)
+  }, [open])
+
+  async function handleFileChosen(event) {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    let imported
+    try {
+      imported = parsePlanImport(await file.text())
+    } catch (err) {
+      setImportState({ error: err.message })
+      return
+    }
+    if (plans.length === 0) finishImport(imported, 'add')
+    else setImportState({ choose: imported })
+  }
+
+  function finishImport(imported, mode) {
+    const missing = onImportPlans(imported, mode)
+    const count = imported.length
+    setImportState({ note: `Imported ${count} ${count === 1 ? 'plan' : 'plans'}`, missing })
+  }
 
   useEffect(() => {
     if (!open) return
@@ -56,6 +91,9 @@ export default function PlansMenu({
   return (
     <div ref={rootRef} className="relative flex shrink-0">
       <div className="flex flex-wrap items-center gap-2">
+        {isDirty ? (
+          <span className="shrink-0 text-sm font-medium text-amber-700">unsaved</span>
+        ) : null}
         <button
           type="button"
           onClick={() => setOpen((prev) => !prev)}
@@ -69,9 +107,6 @@ export default function PlansMenu({
           <span className="max-w-[12rem] truncate">{label}</span>
           <span aria-hidden>▾</span>
         </button>
-        {isDirty ? (
-          <span className="shrink-0 text-sm font-medium text-amber-700">unsaved</span>
-        ) : null}
         {activePlanId && isDirty ? (
           <button
             type="button"
@@ -92,14 +127,95 @@ export default function PlansMenu({
         >
           <div className="sticky top-0 z-10 flex items-center justify-between border-b border-yale-150 bg-white px-4 py-2.5">
             <p className="text-sm font-semibold text-yale-950">Manage Plans</p>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="rounded border border-yale-200 px-2 py-0.5 text-xs font-medium text-yale-800 hover:bg-yale-50"
-            >
-              Close
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => downloadPlanExport(plans, coursesById)}
+                disabled={plans.length === 0}
+                className="rounded border border-yale-200 px-2 py-0.5 text-xs font-medium text-yale-800 hover:bg-yale-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Export
+              </button>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="rounded border border-yale-200 px-2 py-0.5 text-xs font-medium text-yale-800 hover:bg-yale-50"
+              >
+                Import
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json,application/json"
+                onChange={handleFileChosen}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="rounded border border-yale-200 px-2 py-0.5 text-xs font-medium text-yale-800 hover:bg-yale-50"
+              >
+                Close
+              </button>
+            </div>
           </div>
+          {importState?.choose ? (
+            <div className="flex flex-wrap items-center gap-2 border-b border-yale-150 bg-yale-50 px-4 py-2.5">
+              <p className="mr-auto text-sm font-medium text-yale-950">
+                Import {importState.choose.length}{' '}
+                {importState.choose.length === 1 ? 'plan' : 'plans'}
+              </p>
+              <button
+                type="button"
+                onClick={() => finishImport(importState.choose, 'add')}
+                className="rounded-md bg-yale-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-yale-900"
+              >
+                Add to my plans
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.confirm('Replace all your plans? This cannot be undone.')) {
+                    finishImport(importState.choose, 'replace')
+                  }
+                }}
+                className="rounded-md border border-red-900 bg-red-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-950"
+              >
+                Replace my plans
+              </button>
+              <button
+                type="button"
+                onClick={() => setImportState(null)}
+                className="rounded-md border border-yale-300 bg-white px-3 py-1.5 text-xs font-medium text-yale-900 hover:bg-yale-50"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : null}
+          {importState?.note || importState?.error ? (
+            <div className="flex items-start gap-2 border-b border-yale-150 bg-yale-50 px-4 py-2.5 text-sm">
+              <div className="min-w-0 flex-1">
+                {importState.error ? (
+                  <p className="text-red-800">{importState.error}</p>
+                ) : (
+                  <p className="text-yale-950">{importState.note}</p>
+                )}
+                {importState.missing?.length ? (
+                  <p className="mt-1 text-amber-800">
+                    Left out, no longer in the catalog: {importState.missing.join(', ')}
+                  </p>
+                ) : null}
+              </div>
+              <button
+                type="button"
+                onClick={() => setImportState(null)}
+                aria-label="Dismiss"
+                className="shrink-0 rounded px-1 text-yale-700 hover:bg-yale-100"
+              >
+                ×
+              </button>
+            </div>
+          ) : null}
           <SavedPlansPanel
             variant="flat"
             plans={plans}

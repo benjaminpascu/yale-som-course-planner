@@ -84,6 +84,7 @@ No database or environment variables. Course data is the CSVs in `docs/data-samp
 | Weekly calendar | `src/components/WeeklyCalendar.jsx` |
 | Requirement tag units | `src/components/TagUnitTracker.jsx`, `src/lib/tagUnitTracker.js` |
 | Saved plans UI + localStorage | `src/components/PlansMenu.jsx`, `src/components/SavedPlansPanel.jsx`, `src/lib/planStorage.js` |
+| Export / Import plans (JSON file, Plans menu) | `src/lib/planTransfer.js`, `PlansMenu.jsx`; `handleImportPlans` in `App.jsx` |
 | Section colors / in-plan highlight | `src/lib/sectionTheme.js` |
 | Fall/spring catalog years + header label | `src/lib/academicYear.js`, `App.jsx` |
 | Session- and term-aware conflicts | `src/lib/scheduleConflicts.js` |

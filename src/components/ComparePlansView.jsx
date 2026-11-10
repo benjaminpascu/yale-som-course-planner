@@ -68,12 +68,15 @@ export default function ComparePlansView({
 
   const calendarOpen = expandedPane === 'calendar'
 
-  // Plan menu (+ unsaved / Save plan) at the right of each calendar header, so the
+  // "unsaved" + Plan menu (+ Save plan) at the right of each calendar header, so the
   // grey bar lines up with the course list's header as in the normal view.
   const planMenu = (side) => {
     const planId = slots[side]
     return (
       <div className="flex items-center gap-2">
+        {side === editSide && isDirty ? (
+          <span className="shrink-0 text-sm font-medium text-amber-700">unsaved</span>
+        ) : null}
         {/* Looks like the "Plan:" button; an invisible menu on top keeps the ▾ right after the name. */}
         <label
           className={`relative flex h-9 min-w-0 items-center gap-1.5 rounded-md border px-3 text-sm focus-within:ring-2 focus-within:ring-yale-300 ${
@@ -98,7 +101,6 @@ export default function ComparePlansView({
         </label>
         {side === editSide && isDirty ? (
           <>
-            <span className="shrink-0 text-sm font-medium text-amber-700">unsaved</span>
             <button
               type="button"
               onClick={() => onSavePlan(planId)}

@@ -52,6 +52,7 @@ import {
   savePlanCourses,
   upsertPlan,
 } from './lib/planStorage'
+import { importPlansIntoStore } from './lib/planTransfer'
 
 function App() {
   const [courses, setCourses] = useState([])
@@ -380,6 +381,23 @@ function App() {
     [isDirty, persist, planStore, validCourseIds],
   )
 
+  // Plans from an exported file: 'add' next to the current ones, or 'replace' them all
+  // (then the first imported plan opens). Returns the courses that were left out.
+  const handleImportPlans = useCallback(
+    (imported, mode) => {
+      const { store: next, missing } = importPlansIntoStore(planStore, imported, {
+        mode,
+        validCourseIds,
+      })
+      persist(next)
+      if (mode === 'replace') {
+        setSelectedIds(new Set(getPlanById(next, next.activePlanId).courseIds))
+      }
+      return missing
+    },
+    [persist, planStore, validCourseIds],
+  )
+
   const handleDeletePlan = useCallback(
     (planId) => {
       const plan = getPlanById(planStore, planId)
@@ -639,6 +657,7 @@ function App() {
                     onRenamePlan={handleRenamePlan}
                     onDuplicatePlan={handleDuplicatePlan}
                     onDeletePlan={handleDeletePlan}
+                    onImportPlans={handleImportPlans}
                   />
                   {desktopTip === 'plans-menu' ? (
                     <HintBubble
@@ -648,7 +667,8 @@ function App() {
                       onDismiss={() => markHintSeen('plans-menu')}
                     >
                       Click here to manage your plans: save, rename, duplicate or switch
-                      between them. Plans are kept in this browser
+                      between them. Plans are kept in this browser, so use <b>Export</b> and{' '}
+                      <b>Import</b> to move them to another computer
                     </HintBubble>
                   ) : null}
                 </div>
