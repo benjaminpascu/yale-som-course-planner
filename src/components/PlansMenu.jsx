@@ -78,7 +78,7 @@ export default function PlansMenu({
             onClick={() => onSavePlan(activePlanId)}
             className={`h-9 rounded-md px-3 text-sm font-medium ${SAVE_BUTTON}`}
           >
-            Save plan
+            Save Plan
           </button>
         ) : null}
       </div>
@@ -91,7 +91,7 @@ export default function PlansMenu({
           className={`absolute ${align === 'right' ? 'right-0' : 'left-0'} top-full z-50 mt-2 max-h-[min(32rem,calc(100dvh-8rem))] w-[min(32rem,calc(100vw-2rem))] overflow-y-auto rounded-lg border border-yale-200 bg-white shadow-xl`}
         >
           <div className="sticky top-0 z-10 flex items-center justify-between border-b border-yale-150 bg-white px-4 py-2.5">
-            <p className="text-sm font-semibold text-yale-950">Manage plans</p>
+            <p className="text-sm font-semibold text-yale-950">Manage Plans</p>
             <button
               type="button"
               onClick={() => setOpen(false)}

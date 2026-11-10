@@ -454,7 +454,10 @@ function App() {
   const termSwitchProps = {
     terms: catalogTerms,
     termCode: activeTermCode,
-    onTermChange: setCatalogTermCode,
+    onTermChange: (termCode) => {
+      markHintSeen('term-switch') // Using the switch is what that tip asks for.
+      setCatalogTermCode(termCode)
+    },
   }
 
   const compareStepTabsProps = {
@@ -493,25 +496,57 @@ function App() {
       {/* Sub bar: Single plan / Compare plans (Plan) or steps (Rank) on the left; half-term and term switches on the right. */}
       <SubBar className="hidden lg:block">
         {view === 'planner' ? (
-          <PlanViewSwitch
-            comparing={Boolean(planSlots)}
-            canCompare={canComparePlans(planStore.plans)}
-            onChange={(compare) => {
-              if (!compare) setComparePlansOn(false)
-              else if (!planSlots) startComparePlans()
-            }}
-          />
+          // Wrapper only anchors the Compare Plans tip below the switch; it adds no space.
+          <div className={desktopTip === 'compare-plans' ? SPOTLIGHT : 'relative'}>
+            <PlanViewSwitch
+              comparing={Boolean(planSlots)}
+              canCompare={canComparePlans(planStore.plans)}
+              onChange={(compare) => {
+                if (!compare) setComparePlansOn(false)
+                else if (!planSlots) {
+                  markHintSeen('compare-plans')
+                  startComparePlans()
+                }
+              }}
+            />
+            {desktopTip === 'compare-plans' ? (
+              <HintBubble
+                arrow="up"
+                className="absolute top-full left-0 mt-3"
+                onDismiss={() => markHintSeen('compare-plans')}
+              >
+                Click <b>Compare Plans</b> to see 2 saved plans side by side, e.g. a plan and a{' '}
+                <b>Duplicate</b> of it with one course swapped
+              </HintBubble>
+            ) : null}
+          </div>
         ) : (
           <CompareStepTabs {...compareStepTabsProps} />
         )}
-        <div className="flex items-center gap-4">
+        <div
+          className={`flex items-center gap-4 ${desktopTip === 'term-switch' ? SPOTLIGHT : 'relative'}`}
+        >
+          {desktopTip === 'term-switch' ? (
+            <HintBubble
+              arrow="up"
+              arrowStyle={{ left: 'auto', right: '2.5rem' }}
+              className="absolute top-full right-0 mt-3"
+              onDismiss={() => markHintSeen('term-switch')}
+            >
+              Switch between <b>Fall</b> and <b>Spring</b> here. When your plan has half-term
+              courses, you can also switch between <b>Fall 1</b> and <b>Fall 2</b>
+            </HintBubble>
+          ) : null}
           {view === 'planner' && sessionOptions.length > 1 ? (
             <div className="flex items-center gap-1.5">
               <SessionTabHint />
               <CalendarSessionTabs
                 options={sessionOptions}
                 value={sessionView}
-                onChange={setSessionViewChoice}
+                onChange={(id) => {
+                  markHintSeen('term-switch')
+                  setSessionViewChoice(id)
+                }}
               />
             </div>
           ) : null}
@@ -535,7 +570,7 @@ function App() {
                 onClick={() => handleSavePlan(planStore.activePlanId)}
                 className={`h-9 shrink-0 rounded-md px-3 text-sm font-medium ${SAVE_BUTTON}`}
               >
-                Save plan
+                Save Plan
               </button>
             ) : null}
           </div>
@@ -589,7 +624,7 @@ function App() {
               headerAction={
                 // Same spot as the plan menus in Compare plans: right of the Weekly calendar bar.
                 // The wrapper only anchors the save tip below the menu; it adds no space.
-                <div className={desktopTip === 'save-plan' ? SPOTLIGHT : 'relative'}>
+                <div className={desktopTip === 'plans-menu' ? SPOTLIGHT : 'relative'}>
                   <PlansMenu
                     align="right"
                     plans={planStore.plans}
@@ -605,14 +640,15 @@ function App() {
                     onDuplicatePlan={handleDuplicatePlan}
                     onDeletePlan={handleDeletePlan}
                   />
-                  {desktopTip === 'save-plan' ? (
+                  {desktopTip === 'plans-menu' ? (
                     <HintBubble
                       arrow="up"
                       arrowStyle={{ left: 'auto', right: '2.5rem' }}
                       className="absolute top-full right-0 mt-3"
-                      onDismiss={() => markHintSeen('save-plan')}
+                      onDismiss={() => markHintSeen('plans-menu')}
                     >
-                      Save and name this plan (kept in this browser)
+                      Click here to manage your plans: save, rename, <b>Duplicate</b> or switch
+                      between them. Plans are kept in this browser
                     </HintBubble>
                   ) : null}
                 </div>
@@ -634,11 +670,11 @@ function App() {
           >
             {desktopTip === 'add-course' ? (
               <>
-                Click a course, then <b>Add to plan</b>
+                Click a course to see its details, then <b>Add to Plan</b> to put it in your plan
               </>
             ) : (
               <>
-                <b>Conflict</b> = same time as a course you added
+                <b>Conflict</b> means the course overlaps in time with a course already in your plan
               </>
             )}
           </HintBubble>
@@ -716,11 +752,11 @@ function App() {
         >
           {phoneTip === 'add-course' ? (
             <>
-              Tap a course, then <b>Add to plan</b>
+              Tap a course to see its details, then <b>Add to Plan</b> to put it in your plan
             </>
           ) : (
             <>
-              <b>Conflict</b> = same time as a course you added
+              <b>Conflict</b> means the course overlaps in time with a course already in your plan
             </>
           )}
         </HintBubble>

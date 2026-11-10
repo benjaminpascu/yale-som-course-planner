@@ -104,7 +104,7 @@ export default function ComparePlansView({
               onClick={() => onSavePlan(planId)}
               className={`h-9 shrink-0 rounded-md px-3 text-sm font-medium ${SAVE_BUTTON}`}
             >
-              Save plan
+              Save Plan
             </button>
           </>
         ) : null}

@@ -5,20 +5,33 @@
 export const HINTS_STORAGE_KEY = 'yale-som-course-planner-hints'
 
 /**
- * Planner tips in the order they appear. `phone-courses` is phone-only; `your-plan`
- * is computer-only (phones manage the plan in the Plans tab).
+ * Plan tips in the order they appear. `phone-courses` and `save-plan` are phone-only;
+ * `your-plan`, `plans-menu`, `compare-plans` and `term-switch` are computer-only.
  */
 export const PLANNER_HINTS = [
   'phone-courses',
   'add-course',
   'clash',
   'calendar-details',
-  'requirements',
   'set-targets',
+  'requirements',
   'your-plan',
+  'plans-menu',
   'save-plan',
+  'compare-plans',
+  'term-switch',
 ]
-const NEEDS_A_COURSE = new Set(['calendar-details', 'requirements', 'set-targets', 'your-plan'])
+const NEEDS_A_COURSE = new Set([
+  'calendar-details',
+  'set-targets',
+  'requirements',
+  'your-plan',
+  'plans-menu',
+  'compare-plans',
+  'term-switch',
+])
+const PHONE_ONLY = new Set(['phone-courses', 'save-plan'])
+const COMPUTER_ONLY = new Set(['your-plan', 'plans-menu', 'compare-plans', 'term-switch'])
 export const COMPARE_INTRO = 'compare-intro'
 
 export function loadSeenHints(storage = globalThis.localStorage) {
@@ -47,8 +60,8 @@ export function nextPlannerHint({ seen, selectedCount, hasPlan, phone, hasConfli
     if (seen.has(id)) continue
     // Only worth saying once a Conflict label is on screen; until then the others go ahead.
     if (id === 'clash' && !hasConflict) continue
-    if (id === 'phone-courses' && !phone) continue
-    if (id === 'your-plan' && phone) continue
+    if (PHONE_ONLY.has(id) && !phone) continue
+    if (COMPUTER_ONLY.has(id) && phone) continue
     if (NEEDS_A_COURSE.has(id) && selectedCount < 1) return null
     if (id === 'save-plan' && (selectedCount < 3 || hasPlan)) return null
     return id

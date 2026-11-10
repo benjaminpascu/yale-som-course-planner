@@ -295,7 +295,7 @@ export default function CourseBrowser({
       >
         <SectionHeader
           tone="catalog"
-          title="Course catalog"
+          title="Course Catalog"
           subtitle={catalogSubtitle}
         />
 
@@ -337,7 +337,7 @@ export default function CourseBrowser({
       >
         <SectionHeader
           tone="catalog"
-          title="Course catalog"
+          title="Course Catalog"
           subtitle={catalogSubtitle}
         />
 

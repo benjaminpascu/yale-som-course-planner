@@ -50,7 +50,7 @@ function AddRequirementsButton({ onClick, inverse = false }) {
           : 'shrink-0 rounded border border-yale-300 bg-white px-2.5 py-1 text-xs font-medium text-yale-900 hover:bg-yale-50'
       }
     >
-      Set targets
+      Set Targets
     </button>
   )
 }

@@ -93,14 +93,14 @@ export default function PlanPanel({
           className={`flex w-full shrink-0 cursor-pointer items-center gap-2 border-b text-left text-xs font-semibold text-yale-950 ${headerPad} ${planTone.header}`}
         >
           <CollapseChevron open={expanded} />
-          <span className="flex-1">Your plan</span>
+          <span className="flex-1">Your Plan</span>
           {summaryEl}
         </button>
       ) : (
         <div
           className={`flex w-full shrink-0 items-center gap-2 border-b text-xs font-semibold text-yale-950 ${headerPad} ${planTone.header}`}
         >
-          <span className="flex-1">Your plan</span>
+          <span className="flex-1">Your Plan</span>
           {summaryEl}
         </div>
       )}
@@ -132,7 +132,7 @@ export default function PlanPanel({
                   onClick={onSavePlan}
                   className={`shrink-0 rounded-md px-3 py-1.5 text-xs font-medium ${SAVE_BUTTON}`}
                 >
-                  Save plan
+                  Save Plan
                 </button>
               ) : null}
             </div>

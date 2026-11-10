@@ -137,8 +137,8 @@ export function TermSwitch({ terms, termCode, onTermChange }) {
 }
 
 const PLAN_VIEWS = [
-  { id: 'single', label: 'Single plan' },
-  { id: 'compare', label: 'Compare plans' },
+  { id: 'single', label: 'Single Plan' },
+  { id: 'compare', label: 'Compare Plans' },
 ]
 
 /** Single plan / Compare plans switch, styled like the Fall / Spring switch. */

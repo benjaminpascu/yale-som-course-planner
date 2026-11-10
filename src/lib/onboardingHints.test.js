@@ -44,24 +44,39 @@ describe('nextPlannerHint', () => {
     expect(nextPlannerHint({ ...base, seen, selectedCount: 2, hasConflict: true })).toBe('clash')
   })
 
-  test('then calendar, requirements, set targets, your plan (computer only)', () => {
+  test('computer order: calendar, set targets, requirements, your plan, plans menu, compare, term switch', () => {
     const seen = new Set(['add-course', 'clash'])
-    expect(nextPlannerHint({ ...base, seen, selectedCount: 1 })).toBe('calendar-details')
-    seen.add('calendar-details')
-    expect(nextPlannerHint({ ...base, seen, selectedCount: 1 })).toBe('requirements')
-    seen.add('requirements')
-    expect(nextPlannerHint({ ...base, seen, selectedCount: 1 })).toBe('set-targets')
-    seen.add('set-targets')
-    expect(nextPlannerHint({ ...base, seen, selectedCount: 1 })).toBe('your-plan')
-    seen.add('phone-courses')
-    expect(nextPlannerHint({ ...base, seen, selectedCount: 3, phone: true })).toBe('save-plan')
+    const order = []
+    for (;;) {
+      const id = nextPlannerHint({ ...base, seen, selectedCount: 1 })
+      if (!id) break
+      order.push(id)
+      seen.add(id)
+    }
+    expect(order).toEqual([
+      'calendar-details',
+      'set-targets',
+      'requirements',
+      'your-plan',
+      'plans-menu',
+      'compare-plans',
+      'term-switch',
+    ])
   })
 
-  test('save tip needs 3 courses and no saved plan', () => {
-    const seen = new Set(PLANNER_HINTS.filter((id) => id !== 'save-plan'))
-    expect(nextPlannerHint({ ...base, seen, selectedCount: 2 })).toBe(null)
-    expect(nextPlannerHint({ ...base, seen, selectedCount: 3 })).toBe('save-plan')
-    expect(nextPlannerHint({ ...base, seen, selectedCount: 3, hasPlan: true })).toBe(null)
+  test('computer: a saved plan does not hold back the later tips', () => {
+    const seen = new Set(['add-course', 'clash', 'calendar-details', 'set-targets', 'requirements', 'your-plan'])
+    expect(nextPlannerHint({ ...base, seen, selectedCount: 1, hasPlan: true })).toBe('plans-menu')
+  })
+
+  test('phone: no computer-only tips; save tip needs 3 courses and no saved plan', () => {
+    const seen = new Set(['phone-courses', 'add-course', 'clash', 'calendar-details', 'set-targets', 'requirements'])
+    const phone = { ...base, seen, phone: true }
+    expect(nextPlannerHint({ ...phone, selectedCount: 2 })).toBe(null)
+    expect(nextPlannerHint({ ...phone, selectedCount: 3 })).toBe('save-plan')
+    expect(nextPlannerHint({ ...phone, selectedCount: 3, hasPlan: true })).toBe(null)
+    seen.add('save-plan')
+    expect(nextPlannerHint({ ...phone, selectedCount: 3 })).toBe(null)
   })
 
   test('nothing once every tip is seen', () => {

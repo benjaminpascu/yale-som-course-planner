@@ -464,7 +464,7 @@ export default function WeeklyCalendar({
       >
         <SectionHeader
           tone={fillViewport ? 'catalog' : 'calendar'}
-          title="Weekly calendar"
+          title="Weekly Calendar"
           subtitle={
             fillViewport
               ? 'Add courses in the Courses tab to build your schedule.'
@@ -485,7 +485,7 @@ export default function WeeklyCalendar({
       aria-label="Weekly schedule"
     >
       <div className="lg:hidden">
-        <SectionHeader tone="catalog" title="Weekly calendar" subtitle={periodSubtitle}>
+        <SectionHeader tone="catalog" title="Weekly Calendar" subtitle={periodSubtitle}>
           {mixedNonOverlappingSessions ? <SessionTabHint inverse /> : null}
         </SectionHeader>
         {sessionTabs ? (
@@ -508,7 +508,7 @@ export default function WeeklyCalendar({
                 <CollapseChevron open={expanded} />
                 <div className="min-w-0 flex-1">
                   <h2 className="text-sm font-semibold text-yale-950">
-                    Weekly calendar
+                    Weekly Calendar
                   </h2>
                   <p className="mt-0.5 text-xs leading-snug text-yale-700">
                     {periodSubtitle}
@@ -518,7 +518,7 @@ export default function WeeklyCalendar({
             ) : (
               <div className="min-w-0 flex-1">
                 <h2 className="text-sm font-semibold text-yale-950">
-                  Weekly calendar
+                  Weekly Calendar
                 </h2>
                 <p className="mt-0.5 text-xs leading-snug text-yale-700">
                   {periodSubtitle}

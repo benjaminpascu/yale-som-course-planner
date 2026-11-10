@@ -58,7 +58,7 @@ export default function PlanningPanel({
       >
         {tip === 'requirements' ? (
           <HintBubble arrow="down" className="absolute bottom-full left-6 mb-3" onDismiss={onDismissTip}>
-            Units your added courses earn per requirement. {calendarOnly ? 'Tap' : 'Hover'} one for details
+            {calendarOnly ? 'Tap' : 'Hover over'} a requirement to see which courses count toward it
           </HintBubble>
         ) : null}
         {tip === 'set-targets' ? (
@@ -68,7 +68,8 @@ export default function PlanningPanel({
             className="absolute right-4 bottom-full mb-3"
             onDismiss={onDismissTip}
           >
-            Set how many units you want per requirement
+            <b>Requirements</b> tracks the units your courses earn toward your credit requirements.{' '}
+            {calendarOnly ? 'Tap' : 'Click'} <b>Set Targets</b> to define how many units you need
           </HintBubble>
         ) : null}
         <TagUnitTracker
@@ -99,12 +100,13 @@ export default function PlanningPanel({
       ) : null}
       {tip === 'calendar-details' ? (
         <HintBubble className="absolute top-28 right-6" onDismiss={onDismissTip}>
-          Timetable of your added courses. {calendarOnly ? 'Tap' : 'Hover'} one for details
+          The <b>Weekly Calendar</b> is a timetable of the courses you&apos;ve added.{' '}
+          {calendarOnly ? 'Tap' : 'Hover over'} a course for its details
         </HintBubble>
       ) : null}
       {tip === 'your-plan' ? (
         <HintBubble arrow="down" className="absolute bottom-12 left-6" onDismiss={onDismissTip}>
-          Click to list the courses in your plan
+          <b>Your Plan</b> is an overview of all courses in the plan you have open. Click to see it
         </HintBubble>
       ) : null}
     </div>

@@ -123,7 +123,7 @@ export default function CourseRow({
               >
                 {isSelected ? (
                   <span className="rounded bg-save-800 px-1 py-px text-[10px] font-medium leading-tight text-white">
-                    In plan
+                    In Plan
                   </span>
                 ) : null}
                 {hasConflict && !isSelected ? (
@@ -196,7 +196,7 @@ export default function CourseRow({
                 : 'border-save-900 bg-save-800 text-white hover:bg-save-900'
             }`}
           >
-            {isSelected ? 'Remove from plan' : 'Add to plan'}
+            {isSelected ? 'Remove from Plan' : 'Add to Plan'}
           </button>
         </div>
       ) : null}
