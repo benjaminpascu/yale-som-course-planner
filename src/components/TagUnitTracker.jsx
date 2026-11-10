@@ -320,7 +320,8 @@ export default function TagUnitTracker({
   return (
     <>
       <section
-        className={`shrink-0 border-b ${reqTone.section}`}
+        // The header-only bar (Compare plans) has no bottom line of its own, so it looks like single view.
+        className={`shrink-0 ${part === 'header' ? '' : 'border-b'} ${reqTone.section}`}
         aria-label="Requirements"
       >
         {part === 'rows' ? null : (

@@ -76,7 +76,9 @@ export default function PlanPanel({
 
   return (
     <section
-      className={`flex flex-col border-b ${className} ${planTone.section} ${
+      // Open in Compare plans: the shared bar has no bottom line of its own (the lists below
+      // have theirs), so it looks like single view.
+      className={`flex flex-col ${part === 'header' && expanded ? '' : 'border-b'} ${className} ${planTone.section} ${
         part === 'header' ? 'shrink-0' :
         expanded && collapsible
           ? 'min-h-0 flex-1 overflow-hidden'
