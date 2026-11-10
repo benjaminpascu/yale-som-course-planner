@@ -11,6 +11,7 @@
     "update-courses": "node scripts/update-courses.js"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "exceljs": "^4.4.0",
     "papaparse": "^5.5.2",
     "react": "^19.1.0",
