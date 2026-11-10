@@ -54,6 +54,10 @@ import {
 } from './lib/planStorage'
 import { importPlansIntoStore } from './lib/planTransfer'
 
+// Rank is hidden for launch; only links ending in ?rank show it (the owner's private link).
+const RANK_UNLOCKED =
+  typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('rank')
+
 function App() {
   const [courses, setCourses] = useState([])
   const [status, setStatus] = useState('loading')
@@ -509,7 +513,7 @@ function App() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-gray-50 lg:h-dvh lg:overflow-hidden">
-      <NavBar mode={view} onModeChange={setView} onShowTips={resetHints} />
+      <NavBar mode={view} onModeChange={setView} onShowTips={resetHints} showRank={RANK_UNLOCKED} />
 
       {/* Sub bar: Single plan / Compare plans (Plan) or steps (Rank) on the left; half-term and term switches on the right. */}
       <SubBar className="hidden lg:block">
@@ -730,25 +734,27 @@ function App() {
       </div>
 
       {/* One Compare area for every screen size (so keyboard shortcuts never fire twice). */}
-      <div
-        className={`${mobileTab === 'compare' ? 'flex' : 'hidden'} ${
-          view === 'compare' ? 'lg:flex' : 'lg:hidden'
-        } relative min-h-0 flex-1 flex-col bg-[#f3f5f8] pb-[calc(3rem+env(safe-area-inset-bottom))] lg:overflow-y-auto lg:pb-0`}
-      >
-        <CompareView
-          compare={compare}
-          groups={compareGroups}
-          term={compareTerm}
-          counts={compareCounts}
-          termCode={activeTermCode}
-          termLabel={formatTermLabel(activeTermCode)}
-          step={compareStep}
-          onStepChange={setCompareStep}
-          seenHints={seenHints}
-          onHintSeen={markHintSeen}
-          tip={compareTip}
-        />
-      </div>
+      {RANK_UNLOCKED ? (
+        <div
+          className={`${mobileTab === 'compare' ? 'flex' : 'hidden'} ${
+            view === 'compare' ? 'lg:flex' : 'lg:hidden'
+          } relative min-h-0 flex-1 flex-col bg-[#f3f5f8] pb-[calc(3rem+env(safe-area-inset-bottom))] lg:overflow-y-auto lg:pb-0`}
+        >
+          <CompareView
+            compare={compare}
+            groups={compareGroups}
+            term={compareTerm}
+            counts={compareCounts}
+            termCode={activeTermCode}
+            termLabel={formatTermLabel(activeTermCode)}
+            step={compareStep}
+            onStepChange={setCompareStep}
+            seenHints={seenHints}
+            onHintSeen={markHintSeen}
+            tip={compareTip}
+          />
+        </div>
+      ) : null}
 
       {/* Phone tips float just above the bottom nav, pointing at the tab to tap. */}
       {desktopTip ? (
@@ -758,8 +764,9 @@ function App() {
       {phoneTip === 'phone-courses' ? (
         <HintBubble
           arrow="down"
-          arrowStyle={{ left: 'calc(2rem - 6px)' }}
-          className="fixed bottom-[calc(3.75rem+env(safe-area-inset-bottom))] left-[calc(37.5vw-2rem)] lg:hidden"
+          // With Rank hidden, Courses is the middle of 3 tabs, so the tip centers over it.
+          arrowStyle={{ left: RANK_UNLOCKED ? 'calc(2rem - 6px)' : 'calc(50% - 6px)' }}
+          className={`fixed bottom-[calc(3.75rem+env(safe-area-inset-bottom))] ${RANK_UNLOCKED ? 'left-[calc(37.5vw-2rem)]' : 'left-1/2 -translate-x-1/2'} lg:hidden`}
           onDismiss={() => markHintSeen('phone-courses')}
         >
           Tap <b>Courses</b> to add courses
@@ -785,14 +792,14 @@ function App() {
         <HintBubble
           arrow="down"
           arrowStyle={{ right: 'calc(2rem - 6px)' }}
-          className="fixed right-[calc(37.5vw-2rem)] bottom-[calc(3.75rem+env(safe-area-inset-bottom))] lg:hidden"
+          className={`fixed ${RANK_UNLOCKED ? 'right-[calc(37.5vw-2rem)]' : 'right-[calc(16.667vw-2rem)]'} bottom-[calc(3.75rem+env(safe-area-inset-bottom))] lg:hidden`}
           onDismiss={() => markHintSeen('save-plan')}
         >
           Tap <b>Plans</b> to save this plan
         </HintBubble>
       ) : null}
 
-      <MobileBottomNav activeTab={mobileTab} onChange={setMobileTab} />
+      <MobileBottomNav activeTab={mobileTab} onChange={setMobileTab} showRank={RANK_UNLOCKED} />
 
       {computerNoticeOpen ? <ComputerNotice onContinue={() => setComputerNoticeOpen(false)} /> : null}
     </div>

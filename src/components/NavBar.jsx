@@ -9,32 +9,37 @@ const MODES = [
  * Global navy bar, the same on every page: title, Plan | Rank tabs
  * (desktop; phones switch modes in the bottom nav), Help (shows the tips again), contact button.
  */
-export default function NavBar({ mode, onModeChange, onShowTips }) {
+export default function NavBar({ mode, onModeChange, onShowTips, showRank = true }) {
   return (
     <header className="shrink-0 bg-yale-900 text-white">
       {/* Computer: 1rem edges, lined up with the sub bar and the panels below. */}
       <div className="flex min-h-14 flex-wrap items-center gap-x-8 gap-y-2 px-4 sm:px-8 lg:px-4">
-        <h1 className="py-3 text-base font-bold">Yale SOM Course Planner</h1>
-        <nav className="hidden self-stretch lg:flex" aria-label="Mode">
-          {MODES.map((m) => {
-            const active = m.id === mode
-            return (
-              <button
-                key={m.id}
-                type="button"
-                onClick={() => onModeChange(m.id)}
-                aria-current={active ? 'page' : undefined}
-                className={`flex items-center border-b-[3px] px-3 text-sm ${
-                  active
-                    ? 'border-white font-semibold text-white'
-                    : 'border-transparent font-medium text-[#c9d6e8] hover:text-white'
-                }`}
-              >
-                {m.label}
-              </button>
-            )
-          })}
-        </nav>
+        <h1 className="py-3">
+          <img src="/somtimes-wordmark.svg" alt="SOMtimes" className="block h-[22px] w-auto" />
+        </h1>
+        {/* With Rank hidden there is only Plan, so the tabs are left out. */}
+        {showRank ? (
+          <nav className="hidden self-stretch lg:flex" aria-label="Mode">
+            {MODES.map((m) => {
+              const active = m.id === mode
+              return (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => onModeChange(m.id)}
+                  aria-current={active ? 'page' : undefined}
+                  className={`flex items-center border-b-[3px] px-3 text-sm ${
+                    active
+                      ? 'border-white font-semibold text-white'
+                      : 'border-transparent font-medium text-[#c9d6e8] hover:text-white'
+                  }`}
+                >
+                  {m.label}
+                </button>
+              )
+            })}
+          </nav>
+        ) : null}
         <button
           type="button"
           onClick={onShowTips}

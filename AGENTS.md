@@ -35,6 +35,7 @@ The user is a non-technical student. Explain clearly; ask explicitly when a prod
 | **Live** | ✅ Vercel; share link privately; fix issues as feedback comes in |
 | **Compare Courses + two-bar header** | ✅ Live (Nov 2026) |
 | **Compare Plans** (two plans side by side; tabs renamed Plan / Rank) | ✅ Built (Nov 2026) |
+| **Rank hidden for launch** | Only links ending in `?rank` show the Rank tab (`RANK_UNLOCKED` in `App.jsx`) |
 | **Wider promo** | When you choose (not a separate dev milestone) |
 
 Full detail: **`docs/PROJECT_STATUS.md`**.

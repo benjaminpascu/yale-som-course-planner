@@ -120,6 +120,8 @@ Desktop (`lg+`): unchanged — catalog sidebar + planning stack; **Plans** in he
 
 ### Compare Courses ✅ (live Nov 2026)
 
+> **Hidden for launch (Nov 2026).** The Rank tab only shows when the link ends in `?rank` (e.g. `https://<site>/?rank`), the owner's private link. Everyone else sees Plan only (no Plan/Rank tabs; 3 phone tabs). Saved Rank data in a browser is kept. Switch: `RANK_UNLOCKED` in `src/App.jsx`. Why: most students only need Plan, and Rank needs a redesign first (146 courses to sort incl. EMBA/PhD/core, ignores the plan, own visual style, many tips).
+
 Visual spec: `docs/design/compare/` (screenshots + `.dc.html` mockups).
 
 - **Header:** global navy bar (title, Planner | Compare, contact pill) + white sub bar per mode (Planner: plans menu; Compare: step tabs + term switch). Phones switch modes in the bottom nav.
@@ -178,3 +180,4 @@ After CSV changes: check locally with `npm run dev`, then push to `main` (Vercel
 | Oct 2026 | Two-bar header; Compare Courses (Shortlist + Score and rank, per-term saving, Excel export); Vitest added |
 | Nov 2026 | Compare Courses live: review panel for past decisions, shared professor ratings, final review fixes; merged to `main` |
 | Nov 2026 | Compare Plans (two plans side by side); nav tabs renamed Plan / Rank |
+| Nov 2026 | Rank hidden for launch; only `?rank` links show it |
