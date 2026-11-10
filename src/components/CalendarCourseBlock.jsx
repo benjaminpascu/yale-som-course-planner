@@ -9,6 +9,7 @@ import {
 import { formatSessionLabel } from '../lib/sessionDisplay'
 import {
   CALENDAR_DESCRIPTION_LINE_COUNT,
+  LARGE_DESCRIPTION_LINE_COUNT,
   TOOLTIP_HIDE_DELAY_MS,
   calendarCourseTooltipStyle,
   clampPortaledTooltipLeft,
@@ -18,6 +19,8 @@ export function CalendarCourseDetail({
   course,
   fallYear = null,
   springYear = null,
+  // Your Plan's bigger popup shows more description before it scrolls.
+  descriptionLines = CALENDAR_DESCRIPTION_LINE_COUNT,
 }) {
   const timeRange =
     course.startTime && course.endTime
@@ -104,7 +107,7 @@ export function CalendarCourseDetail({
             <p
               data-tooltip-description-body
               className="mt-1 overflow-y-auto text-xs leading-relaxed text-gray-600"
-              style={{ maxHeight: `${CALENDAR_DESCRIPTION_LINE_COUNT}lh` }}
+              style={{ maxHeight: `min(${descriptionLines}lh, var(--tooltip-desc-max, 100vh))` }}
             >
               {course.description}
             </p>
@@ -144,6 +147,7 @@ export default function CalendarCourseBlock({
       calendarCourseTooltipStyle(buttonRef.current, {
         above: preferAbove,
         hasDescription: Boolean(course.description),
+        large: true, // Same size as the Your Plan hover box.
       }),
     )
   }, [preferAbove, course.description])
@@ -250,7 +254,7 @@ export default function CalendarCourseBlock({
               ref={tooltipRef}
               id={tooltipId}
               role="tooltip"
-              className="rounded-lg border border-gray-200 bg-white p-3 text-left shadow-xl max-md:hidden"
+              className="overflow-y-auto rounded-lg border border-gray-200 bg-white p-4 text-left shadow-xl max-md:hidden"
               style={tooltipStyle}
               onMouseEnter={openDesktopTooltip}
               onMouseLeave={scheduleHideDesktopTooltip}
@@ -259,6 +263,7 @@ export default function CalendarCourseBlock({
                 course={course}
                 fallYear={fallYear}
                 springYear={springYear}
+                descriptionLines={LARGE_DESCRIPTION_LINE_COUNT}
               />
             </div>,
             document.body,

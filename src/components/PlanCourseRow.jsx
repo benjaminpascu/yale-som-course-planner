@@ -8,6 +8,7 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import {
+  LARGE_DESCRIPTION_LINE_COUNT,
   TOOLTIP_HIDE_DELAY_MS,
   calendarCourseTooltipStyle,
   clampPortaledTooltipLeft,
@@ -53,6 +54,7 @@ export default function PlanCourseRow({
       calendarCourseTooltipStyle(triggerRef.current, {
         above: preferAbove(),
         hasDescription: Boolean(course.description),
+        large: true,
       }),
     )
   }, [course.description, preferAbove])
@@ -181,7 +183,7 @@ export default function PlanCourseRow({
               ref={tooltipRef}
               id={detailId}
               role="tooltip"
-              className="rounded-lg border border-gray-200 bg-white p-3 text-left shadow-xl max-md:hidden"
+              className="overflow-y-auto rounded-lg border border-gray-200 bg-white p-4 text-left shadow-xl max-md:hidden"
               style={tooltipStyle}
               onMouseEnter={openDesktopTooltip}
               onMouseLeave={scheduleHideDesktopTooltip}
@@ -190,6 +192,7 @@ export default function PlanCourseRow({
                 course={course}
                 fallYear={fallYear}
                 springYear={springYear}
+                descriptionLines={LARGE_DESCRIPTION_LINE_COUNT}
               />
             </div>,
             document.body,

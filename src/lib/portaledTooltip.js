@@ -5,9 +5,15 @@ export const CALENDAR_TOOLTIP_MIN_WIDTH = 288
 export const CALENDAR_TOOLTIP_MAX_WIDTH = 448
 /** Description body height in the calendar hover popup (matches ~metadata column). */
 export const CALENDAR_DESCRIPTION_LINE_COUNT = 13
+/** Course hover popup (Weekly Calendar + Your Plan): wide and tall, so most descriptions fit without scrolling. */
+export const LARGE_TOOLTIP_MAX_WIDTH = 640
+export const LARGE_TOOLTIP_MAX_HEIGHT_PX = 560
+export const LARGE_DESCRIPTION_LINE_COUNT = 22
 
 const VIEWPORT_MARGIN = 16
 const TOOLTIP_MAX_HEIGHT_PX = 320
+/** Popup padding + course title + "Description" label, around the scrolling description. */
+const DESCRIPTION_CHROME_PX = 84
 
 /** Height of fixed mobile bottom nav (3rem row + safe area), or 0 on desktop. */
 export function getViewportBottomInsetPx() {
@@ -18,14 +24,14 @@ export function getViewportBottomInsetPx() {
 }
 
 /** Max tooltip width that fits for this anchor (left- or right-aligned). */
-export function maxTooltipWidthForAnchor(anchorEl) {
+export function maxTooltipWidthForAnchor(anchorEl, maxWidth = CALENDAR_TOOLTIP_MAX_WIDTH) {
   const rect = anchorEl.getBoundingClientRect()
   const viewportMax = window.innerWidth - VIEWPORT_MARGIN * 2
   const fromLeftAlign = window.innerWidth - VIEWPORT_MARGIN - rect.left
   const fromRightAlign = rect.right - VIEWPORT_MARGIN
   return Math.max(
     CALENDAR_TOOLTIP_MIN_WIDTH,
-    Math.min(CALENDAR_TOOLTIP_MAX_WIDTH, viewportMax, Math.max(fromLeftAlign, fromRightAlign)),
+    Math.min(maxWidth, viewportMax, Math.max(fromLeftAlign, fromRightAlign)),
   )
 }
 
@@ -92,51 +98,47 @@ export function basePortaledTooltipStyle(
   }
 }
 
-/** Calendar popup with description: fixed width, description scrolls at 15 lines. */
-export function calendarCourseTooltipStyle(anchorEl, { above = true, hasDescription = false } = {}) {
+/**
+ * Calendar popup with description: fixed width, description scrolls past a set number
+ * of lines. `large` (Your Plan) is wider and taller.
+ */
+export function calendarCourseTooltipStyle(
+  anchorEl,
+  { above: preferAbove = true, hasDescription = false, large = false } = {},
+) {
   if (!hasDescription) {
-    return basePortaledTooltipStyle(anchorEl, { above })
+    return basePortaledTooltipStyle(anchorEl, { above: preferAbove })
   }
 
   const rect = anchorEl.getBoundingClientRect()
   const gap = 8
-  const width = maxTooltipWidthForAnchor(anchorEl)
+  const widthCap = large ? LARGE_TOOLTIP_MAX_WIDTH : CALENDAR_TOOLTIP_MAX_WIDTH
+  const heightCap = large ? LARGE_TOOLTIP_MAX_HEIGHT_PX : TOOLTIP_MAX_HEIGHT_PX
+  const width = maxTooltipWidthForAnchor(anchorEl, widthCap)
   const bottomInsetPx = getViewportBottomInsetPx()
 
-  if (above) {
-    const bottomFromAnchor = window.innerHeight - rect.top + gap
-    const bottom = Math.max(bottomInsetPx + gap, bottomFromAnchor)
-    const maxHeight = Math.min(
-      TOOLTIP_MAX_HEIGHT_PX,
-      window.innerHeight - bottom - VIEWPORT_MARGIN,
-    )
+  const roomAbove = rect.top - gap - VIEWPORT_MARGIN
+  const roomBelow = window.innerHeight - bottomInsetPx - VIEWPORT_MARGIN - rect.bottom - gap
+  // The big popup opens on whichever side has more room.
+  const above = large ? roomAbove > roomBelow : preferAbove
+  const maxHeight = Math.max(96, Math.min(heightCap, above ? roomAbove : roomBelow))
 
-    return {
-      position: 'fixed',
-      left: computePortaledTooltipLeft(rect, width),
-      width,
-      maxWidth: CALENDAR_TOOLTIP_MAX_WIDTH,
-      zIndex: TOOLTIP_Z_INDEX,
-      maxHeight: Math.max(96, maxHeight),
-      bottom,
-    }
-  }
-
-  const top = rect.bottom + gap
-  const maxHeight = Math.min(
-    TOOLTIP_MAX_HEIGHT_PX,
-    window.innerHeight - bottomInsetPx - VIEWPORT_MARGIN - top,
-  )
-
-  return {
+  const style = {
     position: 'fixed',
     left: computePortaledTooltipLeft(rect, width),
     width,
-    maxWidth: CALENDAR_TOOLTIP_MAX_WIDTH,
+    maxWidth: widthCap,
     zIndex: TOOLTIP_Z_INDEX,
-    maxHeight: Math.max(96, maxHeight),
-    top,
+    maxHeight,
+    // Only the description scrolls: it gets the popup's height minus title and padding.
+    '--tooltip-desc-max': `${Math.max(64, maxHeight - DESCRIPTION_CHROME_PX)}px`,
   }
+  if (above) {
+    style.bottom = Math.max(bottomInsetPx + gap, window.innerHeight - rect.top + gap)
+  } else {
+    style.top = rect.bottom + gap
+  }
+  return style
 }
 
 /** Keep a portaled tooltip inside the viewport after it has rendered. */
