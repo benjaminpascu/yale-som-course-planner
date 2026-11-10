@@ -10,24 +10,19 @@ import {
   clampPortaledTooltipLeft,
   getViewportBottomInsetPx,
 } from '../lib/portaledTooltip'
+import { formatRequirementProgress } from '../lib/requirementTargets'
 import {
-  formatRequirementProgress,
-  loadRequirementTargets,
-  persistRequirementTargets,
-} from '../lib/requirementTargets'
+  loadRequirementSettings,
+  persistRequirementSettings,
+  requirementRows,
+} from '../lib/requirementSettings'
 import { uniqueRequirementTags } from '../lib/requirementTags'
-import {
-  computePlanUnitTotal,
-  computeTagUnitTotals,
-  courseSemester,
-  formatTagUnits,
-} from '../lib/tagUnitTracker'
+import { formatTagUnits } from '../lib/tagUnitTracker'
 import RequirementTag from './RequirementTag'
-import RequirementTargetsModal from './RequirementTargetsModal'
+import RequirementSettingsModal from './RequirementSettingsModal'
 import SectionHeader from './SectionHeader'
 
-const EMPTY_HINT =
-  'No requirement tags in this catalog yet.'
+const EMPTY_HINT = 'Nothing selected'
 
 /** Desktop: fixed body height so tag rows never push the calendar layout. Mobile: auto height. */
 const REQUIREMENTS_BODY_CLASS =
@@ -50,7 +45,7 @@ function AddRequirementsButton({ onClick, inverse = false }) {
           : 'shrink-0 rounded border border-yale-300 bg-white px-2.5 py-1 text-xs font-medium text-yale-900 hover:bg-yale-50'
       }
     >
-      Set Targets
+      Select Requirements
     </button>
   )
 }
@@ -248,7 +243,7 @@ function RequirementsGrid({ rows, fallYear, springYear }) {
       <ul className="flex w-full min-w-0 flex-wrap items-center gap-x-10 gap-y-1.5">
         {rows.map((row) => (
           <RequirementTagItem
-            key={row.isTotal ? '__total' : row.tagCode}
+            key={row.isTotal ? `__${row.label}` : row.tagCode}
             row={row}
             fallYear={fallYear}
             springYear={springYear}
@@ -259,7 +254,7 @@ function RequirementsGrid({ rows, fallYear, springYear }) {
   )
 }
 
-const TARGETS_CHANGED_EVENT = 'requirement-targets-changed'
+const SETTINGS_CHANGED_EVENT = 'requirement-settings-changed'
 
 export default function TagUnitTracker({
   selectedCourses,
@@ -271,48 +266,29 @@ export default function TagUnitTracker({
   part = 'all',
 }) {
   const tagNames = useMemo(() => uniqueRequirementTags(courses), [courses])
-  const [targets, setTargets] = useState(() =>
-    loadRequirementTargets(tagNames),
-  )
+  const [settings, setSettings] = useState(() => loadRequirementSettings(tagNames))
   const [modalOpen, setModalOpen] = useState(false)
 
   useEffect(() => {
-    setTargets(loadRequirementTargets(tagNames))
-    // Compare Plans shows two trackers; targets set in one show in the other.
-    const reload = () => setTargets(loadRequirementTargets(tagNames))
-    window.addEventListener(TARGETS_CHANGED_EVENT, reload)
-    return () => window.removeEventListener(TARGETS_CHANGED_EVENT, reload)
+    setSettings(loadRequirementSettings(tagNames))
+    // Compare Plans shows two trackers; choices made in one show in the other.
+    const reload = () => setSettings(loadRequirementSettings(tagNames))
+    window.addEventListener(SETTINGS_CHANGED_EVENT, reload)
+    return () => window.removeEventListener(SETTINGS_CHANGED_EVENT, reload)
   }, [tagNames])
 
-  // Requirements are planned per semester: every row counts only the semester
-  // picked with the Fall/Spring switch.
+  // Semester Total and requirements count the semester picked with the Fall/Spring
+  // switch; Year Total counts the whole plan. Only ticked lines show.
   const semester = termCodeToSemester(termCode) ?? 'fall'
-  const semesterCourses = useMemo(
-    () => selectedCourses.filter((c) => courseSemester(c) === semester),
-    [selectedCourses, semester],
-  )
-
-  const totals = useMemo(
-    () => computeTagUnitTotals(semesterCourses, tagNames),
-    [semesterCourses, tagNames],
-  )
-
-  // "Total" (all units this semester) comes first, then one row per tag.
   const visibleRows = useMemo(
-    () => [
-      { ...computePlanUnitTotal(semesterCourses), targetUnits: null },
-      ...totals.map((row) => ({
-        ...row,
-        targetUnits: targets[row.tagCode] ?? null,
-      })),
-    ],
-    [semesterCourses, totals, targets],
+    () => requirementRows({ planCourses: selectedCourses, semester, tagNames, settings }),
+    [selectedCourses, semester, tagNames, settings],
   )
 
-  const handleSaveTargets = (nextTargets) => {
-    setTargets(nextTargets)
-    persistRequirementTargets(nextTargets, tagNames)
-    window.dispatchEvent(new Event(TARGETS_CHANGED_EVENT))
+  const handleSaveSettings = (next) => {
+    setSettings(next)
+    persistRequirementSettings(next, tagNames)
+    window.dispatchEvent(new Event(SETTINGS_CHANGED_EVENT))
   }
 
   const reqTone = sectionTone('requirements')
@@ -342,12 +318,12 @@ export default function TagUnitTracker({
       </section>
 
       {part === 'rows' ? null : (
-        <RequirementTargetsModal
+        <RequirementSettingsModal
           open={modalOpen}
-          targets={targets}
+          settings={settings}
           tagNames={tagNames}
           onClose={() => setModalOpen(false)}
-          onSave={handleSaveTargets}
+          onSave={handleSaveSettings}
         />
       )}
     </>

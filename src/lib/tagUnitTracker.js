@@ -146,9 +146,9 @@ export function computeTagUnitTotals(selectedCourses, tagNames) {
  *
  * @param {import('./parseCourses.js').Course[]} courses
  */
-export function computePlanUnitTotal(courses) {
+export function computePlanUnitTotal(courses, label = 'Total') {
   return {
-    ...buildUnitRow(courses, 'Total', () => true),
+    ...buildUnitRow(courses, label, () => true),
     isTotal: true,
   }
 }

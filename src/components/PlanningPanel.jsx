@@ -69,7 +69,8 @@ export default function PlanningPanel({
             onDismiss={onDismissTip}
           >
             <b>Requirements</b> tracks the units your courses earn toward your credit requirements.{' '}
-            {calendarOnly ? 'Tap' : 'Click'} <b>Set Targets</b> to define how many units you need
+            {calendarOnly ? 'Tap' : 'Click'} <b>Select Requirements</b> to choose which ones to track and
+            how many units you need
           </HintBubble>
         ) : null}
         <TagUnitTracker

@@ -67,7 +67,7 @@
 - **Requirements** panel: one row per unique tag found in the catalog; sums **units** (not course count)
 - Live update as courses are added/removed from the working plan
 - Hover tooltip lists contributing courses and units per tag
-- Optional student-set unit targets (“Set targets”)
+- **Select Requirements** (Nov 2026): tick which lines show — Semester Total (on by default), Year Total (off), and each catalog tag (none by default, e.g. for MBAs) — each with an optional unit target. Saved in `localStorage` key `yale-som-course-planner-requirements` (`src/lib/requirementSettings.js`); old per-tag targets are ticked on first load.
 - Student-maintained disclaimer (§7.3)
 - Code: `src/components/TagUnitTracker.jsx`, `src/lib/tagUnitTracker.js`
 
@@ -114,7 +114,7 @@ Desktop (`lg+`): unchanged — catalog sidebar + planning stack; **Plans** in he
 - **Single plan | Compare plans** switch (navy, like Fall / Spring) on the left of the Plan sub bar (computer only; Compare needs two saved plans). Course list stays left; two plans side by side, each with its own calendar, Requirements and Your plan.
 - Fixed spots in both views: the Plan menu sits at the right of the Weekly calendar bar (one per half when comparing); Fall 1 / Fall 2 and Fall / Spring switches sit at the right of the sub bar (phones keep the half-term tabs on the calendar).
 - The open plan is the side being edited (green "Plan:" button; grey on the other side); "Add to plan", remove and Save apply there. The other side shows its saved courses; clicking anywhere on it opens that plan (usual unsaved-changes warning).
-- One full-width Requirements bar with one Set targets (targets are shared); calendar ↔ Your plan opens on both sides together.
+- One full-width Requirements bar with one Select Requirements (choices are shared); calendar ↔ Your plan opens on both sides together.
 - Nav tabs renamed: **Plan** (was Planner) and **Rank** (was Compare; Compare Courses code keeps its names).
 - Code: `src/lib/comparePlans.js` (+ tests), `src/components/ComparePlansView.jsx`, `App.jsx`.
 

@@ -1,4 +1,6 @@
-const STORAGE_KEY = 'yale-som-course-planner-requirement-targets'
+/** Old (pre Nov 2026) per-requirement targets; read once to tick those requirements in Select Requirements. */
+export const REQUIREMENT_TARGETS_KEY = 'yale-som-course-planner-requirement-targets'
+const STORAGE_KEY = REQUIREMENT_TARGETS_KEY
 
 /**
  * @typedef {Partial<Record<string, number>>} RequirementTargets
