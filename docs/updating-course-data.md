@@ -20,9 +20,12 @@ A GitHub job (`.github/workflows/update-courses.yml`) runs 4 times a day:
 
 **TermCode**: `YYYY01` = spring, `YYYY03` = fall (e.g. 202701 = Spring 2027).
 
-**Finished semesters**: the day after a semester's last class, the site hides
-it from the semester switcher and the job stops updating its file. The file
-stays, so students' saved plans keep those courses.
+**Past semesters**: the site hides a semester from the switcher once the next
+semester's classes start (e.g. Fall 2026 when Spring 2027 begins in January),
+or the day after its own last class if that comes first. The job keeps
+updating a semester until its last class is over (some EMBA courses run into
+the next term), then leaves its file alone. The file stays, so students'
+saved plans keep those courses.
 
 **New semesters**: a new file (e.g. `courses_master_fall2027.csv`) is created
 and shows up on the site without any code change.

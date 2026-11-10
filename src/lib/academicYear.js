@@ -72,23 +72,37 @@ function isoDay(date) {
 
 /**
  * Terms students can pick, oldest first (TermCode sorts chronologically).
- * A term is hidden once its last class is over; if every term is over, the
- * newest one stays so the site is never empty.
+ * A term is hidden once the next loaded term has started, or the day after
+ * its own last class if that comes first. Start dates outside the term's
+ * calendar year are ignored (Yale typos, e.g. MGT 640 listed as 2026 in
+ * Spring 2027). If every term is hidden, the newest stays so the site is
+ * never empty.
  *
- * @param {{ termCode?: string, sessionEnd?: string | null }[]} courses
+ * @param {{ termCode?: string, sessionStart?: string | null, sessionEnd?: string | null }[]} courses
  * @param {Date} [today]
  * @returns {{ id: string, label: string }[]}
  */
 export function getCatalogTerms(courses, today = new Date()) {
-  const lastDay = new Map()
-  for (const { termCode, sessionEnd } of courses) {
+  /** @type {Map<string, { lastDay: string, firstDay: string }>} */
+  const terms = new Map()
+  for (const { termCode, sessionStart, sessionEnd } of courses) {
     if (!termCode) continue
-    const end = sessionEnd ?? ''
-    if (!lastDay.has(termCode) || end > lastDay.get(termCode)) lastDay.set(termCode, end)
+    const term = terms.get(termCode) ?? { lastDay: '', firstDay: '' }
+    if ((sessionEnd ?? '') > term.lastDay) term.lastDay = sessionEnd
+    const inYear = sessionStart?.startsWith(String(termCodeToCalendarYear(termCode)))
+    if (inYear && (!term.firstDay || sessionStart < term.firstDay)) term.firstDay = sessionStart
+    terms.set(termCode, term)
   }
-  const all = [...lastDay.keys()].sort()
+
+  const all = [...terms.keys()].sort()
   const todayIso = isoDay(today)
-  const open = all.filter((termCode) => !lastDay.get(termCode) || lastDay.get(termCode) >= todayIso)
+  const open = all.filter((termCode, i) => {
+    const { lastDay } = terms.get(termCode)
+    const nextStart = terms.get(all[i + 1])?.firstDay
+    if (lastDay && lastDay < todayIso) return false
+    if (nextStart && nextStart <= todayIso) return false
+    return true
+  })
   const shown = open.length > 0 ? open : all.slice(-1)
   return shown.map((termCode) => ({ id: termCode, label: formatTermLabel(termCode) }))
 }
