@@ -34,11 +34,11 @@ function keepAvailable(selected, available) {
   return next.size === selected.size ? selected : next
 }
 
-function formatCatalogSubtitle(filteredCount, rangeStart, rangeEnd, inPlanCount) {
-  if (filteredCount === 0) {
-    return `${filteredCount} matched · ${inPlanCount} in plan`
-  }
-  return `Showing ${rangeStart}–${rangeEnd} of ${filteredCount} matched · ${inPlanCount} in plan`
+/** "Showing 1–25 of 200 courses" (the count follows the search and filters). */
+function formatCatalogSubtitle(filteredCount, rangeStart, rangeEnd) {
+  const courses = filteredCount === 1 ? 'course' : 'courses'
+  if (filteredCount === 0) return `0 ${courses}`
+  return `Showing ${rangeStart}–${rangeEnd} of ${filteredCount} ${courses}`
 }
 
 function CatalogPagination({ page, totalPages, onPageChange }) {
@@ -273,12 +273,7 @@ export default function CourseBrowser({
   const filterTone = sectionTone('filters')
   const catalogTone = sectionTone('catalog')
 
-  const catalogSubtitle = formatCatalogSubtitle(
-    filtered.length,
-    rangeStart,
-    rangeEnd,
-    selectedCourses.length,
-  )
+  const catalogSubtitle = formatCatalogSubtitle(filtered.length, rangeStart, rangeEnd)
 
   useEffect(() => {
     function handleKeyDown(event) {
