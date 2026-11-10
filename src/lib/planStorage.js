@@ -1,4 +1,5 @@
-const STORAGE_KEY = 'yale-som-course-planner-plans'
+export const PLAN_STORAGE_KEY = 'yale-som-course-planner-plans'
+const STORAGE_KEY = PLAN_STORAGE_KEY
 const STORE_VERSION = 1
 
 export function createEmptyPlanStore() {

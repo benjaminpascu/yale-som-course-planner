@@ -98,6 +98,7 @@ No database or environment variables. Course data is the CSVs in `docs/data-samp
 | Compare Courses UI | `src/components/compare/` (`CompareView`, `ShortlistStep`, `ScoreStep`, `RatingInput`, `WeightInput`) — visual spec in `docs/design/compare/` |
 | Compare Plans (two plans side by side) | `src/lib/comparePlans.js`, `src/components/ComparePlansView.jsx`; state in `App.jsx` |
 | Header (nav bar + mode sub bar) | `src/components/NavBar.jsx`, `src/components/SubBar.jsx` |
+| Old address → new address move (forwards with saved data; keep while old links are around) | `src/lib/domainMove.js`, called from `src/main.jsx` |
 
 ## Tech stack
 
@@ -105,4 +106,4 @@ Vite + React + Tailwind. No backend or database (Supabase removed Oct 2026). Sav
 
 ## Git / deploy
 
-GitHub: `benjaminpascu/yale-som-course-planner`. **Production:** Vercel (link shared directly; no separate beta vs launch deploy). Only create git commits when the user asks.
+GitHub: `benjaminpascu/yale-som-course-planner`. **Production:** Vercel at `https://somtimes.vercel.app` (renamed SOMtimes Nov 2026; the old `yale-som-course-planner.vercel.app` stays connected to Production, not a Vercel redirect, so `domainMove.js` can carry saved plans over). Storage keys keep the old `yale-som-course-planner-` prefix on purpose. Only create git commits when the user asks.
