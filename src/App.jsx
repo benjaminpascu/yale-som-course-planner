@@ -515,8 +515,8 @@ function App() {
                 className="absolute top-full left-0 mt-3"
                 onDismiss={() => markHintSeen('compare-plans')}
               >
-                Click <b>Compare Plans</b> to see 2 saved plans side by side, e.g. a plan and a{' '}
-                <b>Duplicate</b> of it with one course swapped
+                Click <b>Compare Plans</b> to see 2 saved plans side by side, e.g. a plan and a
+                duplicate of it with one course swapped
               </HintBubble>
             ) : null}
           </div>
@@ -647,7 +647,7 @@ function App() {
                       className="absolute top-full right-0 mt-3"
                       onDismiss={() => markHintSeen('plans-menu')}
                     >
-                      Click here to manage your plans: save, rename, <b>Duplicate</b> or switch
+                      Click here to manage your plans: save, rename, duplicate or switch
                       between them. Plans are kept in this browser
                     </HintBubble>
                   ) : null}
