@@ -4,7 +4,7 @@
 **Status:** Draft v5 — **live on Vercel** (Milestones 1–6 done). Private link sharing now; wider promo when the owner chooses.
 **Last updated:** July 2026
 
-**Agent handoff:** New Cursor chats should read `AGENTS.md` and `docs/PROJECT_STATUS.md` before coding.
+**Agent handoff:** New agent chats should read `AGENTS.md` and `docs/PROJECT_STATUS.md` before coding.
 
 ---
 
@@ -231,20 +231,20 @@ Status detail: `docs/PROJECT_STATUS.md`.
 
 **After milestone 6:** App is **deployed on Vercel** and treated as launched. Share the production URL with friends for feedback; fix bugs in follow-up tasks. **Public promotion** (student channels, demo video, shopping-period push) is a separate **marketing** step when ready — not milestones 7–8 in the build plan.
 
-## 12. Development workflow (Cursor)
+## 12. Development workflow
 
 This project is built in **small increments** with human review between steps.
 
 ### New task → new agent
 
-- **Start a new Cursor agent** (fresh chat) for each PRD milestone or distinct task (e.g. “Milestone 3 filters”, “fix import script”). Do not continue unrelated milestones in one long thread.
+- **Start a new agent chat** for each PRD milestone or distinct task (e.g. “Milestone 3 filters”, “fix import script”). Do not continue unrelated milestones in one long thread.
 - The new agent must read **`AGENTS.md`** and **`docs/PROJECT_STATUS.md`** first, then the relevant PRD sections.
 - After completing a milestone: summarize changes, give exact test commands (e.g. `npm run dev`), and **stop** until the user replies **approve**.
 
 ### Maintainer habits
 
 - Update **`docs/PROJECT_STATUS.md`** when a milestone is approved (mark done, set next).
-- Course catalog / tag changes: edit the term CSV (`courses_master_fall2026.csv` or `courses_master_spring2027.csv`, including the `tags` column), check with `npm run dev`, then push to `main`.
+- Course catalog / tag changes: automatic every 6 hours from Yale SOM's course feed (`docs/updating-course-data.md`). Don't hand-edit the term CSVs; one-off fixes go in `docs/data-samples/course_overrides.csv`.
 
 ### Decision points
 

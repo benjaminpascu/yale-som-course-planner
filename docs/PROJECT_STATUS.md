@@ -1,7 +1,7 @@
 # Project status
 
-**Last updated:** October 2026  
-**Purpose:** Handoff doc for new Cursor agents/chats. Update this when a milestone is approved.
+**Last updated:** November 2026  
+**Purpose:** Handoff doc for new agent chats. Update this when a milestone is approved.
 
 ---
 
@@ -14,13 +14,10 @@
 - Basic course list: number, title, faculty, schedule line, units, session
 - Amber warning for courses without weekly meeting time
 
-### Milestone 2 — Data layer + Supabase ✅
+### Milestone 2 — Data layer ✅
 
-- Postgres `courses` table (`supabase/migrations/`; tags are a column on `courses` as of migration `003`)
-- `npm run import:data` with column validation
-- App reads Supabase when `VITE_SUPABASE_*` in `.env`, else bundled CSV
-- User has Supabase project configured locally
-- **Removed Oct 2026** — the app now reads only the bundled CSVs (see Spring 2027 section)
+- CSV parsing with column validation (`src/lib/csvColumns.js`)
+- Originally backed by Supabase; removed Oct 2026. The app reads only the bundled CSVs.
 
 ### Data fix — scheduling columns ✅
 
@@ -37,7 +34,7 @@
 ### Spring 2027 catalog + term selector ✅ (Oct 2026, live)
 
 - Second file: `docs/data-samples/courses_master_spring2027.csv` (217 rows, 216 visible, TermCode `202701`); same columns as fall
-- App + import script load both files into one list (416 visible courses)
+- App loads both files into one list
 - **Term** switch (Fall 2026 / Spring 2027) at the top of the course catalog; filter options follow the selected term
 - Conflicts: different terms never conflict; spring-1/spring-2 behave like fall-1/fall-2; session dates outside the term year are ignored (MGT 640 typo)
 - Sections of the same course share requirement tags at load time (Yale tagged only some sections, e.g. only G1 with `GBS Req`)
@@ -88,7 +85,7 @@
 
 | Phase | What you do |
 |-------|-------------|
-| **Now** | App is live. Send the Vercel URL to friends for real-world use; fix bugs and polish in small follow-up tasks (new Cursor chat per issue is fine). |
+| **Now** | App is live. Send the Vercel URL to friends for real-world use; fix bugs and polish in small follow-up tasks (a new agent chat per issue is fine). |
 | **Later** | Wider promotion (GroupMe, student gov, demo video, etc.) when you choose — not a separate engineering milestone. |
 
 Repo: `benjaminpascu/yale-som-course-planner`. No environment variables needed.
@@ -159,7 +156,7 @@ npm run dev
 - Most rows: `Mo,We · 13:00–16:00` style times
 - Some rows: semester date range + **No time defined — won't show on calendar**
 
-After CSV changes: check locally with `npm run dev`, then push to `main` (Vercel redeploys).
+Course CSVs update themselves every 6 hours (`docs/updating-course-data.md`); for code changes, check locally with `npm run dev`, then push to `main` (Vercel redeploys).
 
 ---
 
@@ -181,3 +178,4 @@ After CSV changes: check locally with `npm run dev`, then push to `main` (Vercel
 | Nov 2026 | Compare Courses live: review panel for past decisions, shared professor ratings, final review fixes; merged to `main` |
 | Nov 2026 | Compare Plans (two plans side by side); nav tabs renamed Plan / Rank |
 | Nov 2026 | Rank hidden for launch; only `?rank` links show it |
+| Nov 2026 | Courses update automatically every 6 hours from Yale SOM's course feed (GitHub job); new semesters added, finished ones hidden; Yale-hidden courses left out; legacy cleanup (Cursor rules, Supabase leftovers, manual import) |

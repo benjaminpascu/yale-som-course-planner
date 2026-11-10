@@ -19,48 +19,6 @@ export function courseSemester(course) {
 }
 
 /**
- * One line per semester when units span both; otherwise null.
- *
- * @param {{ fall: number, spring: number }} bySemester
- * @param {{ fallYear?: number | null, springYear?: number | null }} [years]
- * @returns {{ key: 'fall' | 'spring', text: string }[] | null}
- */
-export function getSemesterBreakdownLines(bySemester, years = {}) {
-  const { fallYear = null, springYear = null } = years
-  const lines = []
-
-  if (bySemester.fall > 0) {
-    const label = fallYear != null ? `Fall ${fallYear}` : 'Fall'
-    lines.push({
-      key: 'fall',
-      text: `${label}: ${formatTagUnits(bySemester.fall)}`,
-    })
-  }
-  if (bySemester.spring > 0) {
-    const label = springYear != null ? `Spring ${springYear}` : 'Spring'
-    lines.push({
-      key: 'spring',
-      text: `${label}: ${formatTagUnits(bySemester.spring)}`,
-    })
-  }
-
-  return lines.length >= 2 ? lines : null
-}
-
-/**
- * Single-line fall/spring breakdown when units span both semesters.
- *
- * @param {{ fall: number, spring: number }} bySemester
- * @param {{ fallYear?: number | null, springYear?: number | null }} [years]
- * @returns {string | null}
- */
-export function formatSemesterBreakdown(bySemester, years = {}) {
-  const lines = getSemesterBreakdownLines(bySemester, years)
-  if (!lines) return null
-  return lines.map((line) => line.text).join(' · ')
-}
-
-/**
  * Units, contributors, and per-session groups for the plan courses that pass `include`.
  *
  * @param {import('./parseCourses.js').Course[]} selectedCourses
@@ -71,7 +29,6 @@ function buildUnitRow(selectedCourses, label, include) {
   const contributors = []
   /** @type {Map<string, { units: number, contributors: typeof contributors }>} */
   const bySession = new Map()
-  const bySemester = { fall: 0, spring: 0 }
   let totalUnits = 0
 
   for (const course of selectedCourses) {
@@ -84,10 +41,6 @@ function buildUnitRow(selectedCourses, label, include) {
       units: course.units,
     }
     contributors.push(entry)
-
-    const semester = courseSemester(course)
-    if (semester === 'fall') bySemester.fall += course.units
-    else if (semester === 'spring') bySemester.spring += course.units
 
     const sessionKey = course.session?.trim() || 'Other'
     let group = bySession.get(sessionKey)
@@ -119,7 +72,6 @@ function buildUnitRow(selectedCourses, label, include) {
     label,
     totalUnits,
     contributors,
-    bySemester,
     contributorGroups,
   }
 }

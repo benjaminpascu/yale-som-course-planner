@@ -5,13 +5,13 @@ alwaysApply: true
 
 # Agent handoff — Yale SOM Course Planner
 
-**Read this file first** when starting a new Cursor chat or a **new agent** on this project.
+**Read this file first** when starting a **new agent** on this project.
 
 ## Workflow (required)
 
 Per `docs/PRD.md` §12:
 
-1. **One milestone or focused task = one new Cursor agent** (fresh chat). Do not continue unrelated work in a long, stale thread.
+1. **One milestone or focused task = one new agent** (fresh chat). Do not continue unrelated work in a long, stale thread.
 2. Read **`docs/PROJECT_STATUS.md`** for what is done and what is next.
 3. Read **`docs/PRD.md`** for product requirements (especially §6 data model and §11 milestones).
 4. Work **one milestone at a time**. When finished: summarize changes, give exact test steps, then **stop** and wait for the user to approve before the next milestone.
@@ -25,7 +25,6 @@ The user is a non-technical student. Explain clearly; ask explicitly when a prod
 |------|--------|
 | Milestone 1 — Scaffold + course list | ✅ Done |
 | Milestone 2 — Data layer | ✅ Done (Supabase removed Oct 2026; CSV only) |
-| Course data fix (`courses_master_new.csv`) | ✅ Done (superseded by Fall 2026) |
 | Milestone 3 — Search + filters | ✅ Done |
 | Milestone 4 — Calendar + conflicts | ✅ Done |
 | Milestone 5 — Tag unit tracker | ✅ Done |
@@ -36,6 +35,7 @@ The user is a non-technical student. Explain clearly; ask explicitly when a prod
 | **Compare Courses + two-bar header** | ✅ Live (Nov 2026) |
 | **Compare Plans** (two plans side by side; tabs renamed Plan / Rank) | ✅ Built (Nov 2026) |
 | **Rank hidden for launch** | Only links ending in `?rank` show the Rank tab (`RANK_UNLOCKED` in `App.jsx`) |
+| **Automatic course updates** | ✅ Every 6 hours from Yale SOM's feed (Nov 2026); new semesters appear, finished ones hide |
 | **Wider promo** | When you choose (not a separate dev milestone) |
 
 Full detail: **`docs/PROJECT_STATUS.md`**.
@@ -45,13 +45,11 @@ Full detail: **`docs/PROJECT_STATUS.md`**.
 | Data | Path |
 |------|------|
 | Product spec | `docs/PRD.md` |
-| **Courses (one file per term)** | `docs/data-samples/courses_master_fall2026.csv`, `docs/data-samples/courses_master_spring2027.csv` (identical columns) |
-| Tags | Inline `tags` column on those CSVs (semicolon-separated names; not a separate file). Sections of one course share tags at load time (`harmonizeSectionTags`). |
-| **Updating courses from the SOM site** | `docs/updating-course-data.md` — drop 3 exports in `course-import/`, run `npm run update-courses` |
+| **Courses (one file per term)** | `docs/data-samples/courses_master_<term>.csv`, e.g. `fall2026`, `spring2027` (identical columns; new terms appear automatically) |
+| Tags | Inline `tags` column on those CSVs (semicolon-separated names), set from Yale's attribute codes (`MGMS` → STEM, `MGGE` → GBS Req). Sections of one course share tags at load time (`harmonizeSectionTags`). |
+| **Updating courses** | Automatic: a GitHub job (`.github/workflows/update-courses.yml`) pulls Yale SOM's course feed every 6 hours, adds new semesters and commits changes. Details: `docs/updating-course-data.md` |
 | Manual data fixes that survive updates | `docs/data-samples/course_overrides.csv` |
 | Vercel deploy steps | `docs/vercel-setup.md` |
-
-**Do not use** `courses_master.csv` / `courses_master_new.csv` / `course_tags.csv` — removed. Tags are no longer a separate table.
 
 ### Scheduling columns (courses CSV)
 
@@ -65,15 +63,15 @@ Use only: `days_clean`, `start_24h`, `end_24h` → app fields `meetingDays`, `st
 ## Commands
 
 ```bash
-cd "/Users/benjaminpascu/Documents/Vibe Coding/Cursor/Course planner"
+cd ~/Developer/course-planner
 npm install
 npm run dev              # http://localhost:5173 (or next free port)
 npm run build
 npm test                 # Vitest: compare grouping, shortlist, scoring, storage, export, course import
-npm run update-courses   # rebuild a term CSV from course-import/ (add -- --check to preview)
+npm run update-courses   # pull the latest courses from Yale now (add -- --check to preview)
 ```
 
-No database or environment variables. Course data is the CSVs in `docs/data-samples/`, bundled at build time; to update courses, follow `docs/updating-course-data.md` (don't hand-edit the term CSVs — use `course_overrides.csv` for fixes) and push to `main`.
+No database or environment variables. Course data is the CSVs in `docs/data-samples/`, bundled at build time and kept current by the 6-hourly GitHub job (`docs/updating-course-data.md`). Don't hand-edit the term CSVs — the next update overwrites them; use `course_overrides.csv` for fixes.
 
 ## Key code locations
 
@@ -87,10 +85,10 @@ No database or environment variables. Course data is the CSVs in `docs/data-samp
 | Saved plans UI + localStorage | `src/components/PlansMenu.jsx`, `src/components/SavedPlansPanel.jsx`, `src/lib/planStorage.js` |
 | Export / Import plans (JSON file, Plans menu) | `src/lib/planTransfer.js`, `PlansMenu.jsx`; `handleImportPlans` in `App.jsx` |
 | Section colors / in-plan highlight | `src/lib/sectionTheme.js` |
-| Fall/spring catalog years + header label | `src/lib/academicYear.js`, `App.jsx` |
+| Fall/spring years + which terms show (finished terms hidden) | `src/lib/academicYear.js`, `App.jsx` |
 | Session- and term-aware conflicts | `src/lib/scheduleConflicts.js` |
 | Term selector (Fall / Spring) | `TermSwitch` in `src/components/SubBar.jsx` (top right of the sub bar, both modes); term list from `getCatalogTerms` in `academicYear.js` |
-| Load data (bundled term CSVs) | `src/lib/loadData.js` |
+| Load data (every `courses_master_*.csv`, bundled; no code change for a new term) | `src/lib/loadData.js` |
 | Parse courses + `hasMeetingTime` + inline tags | `src/lib/parseCourses.js` |
 | Category typo aliases only (new CSV values pass through) | `src/lib/categoryDisplay.js` |
 | CSV column validation | `src/lib/csvColumns.js` |
@@ -102,7 +100,7 @@ No database or environment variables. Course data is the CSVs in `docs/data-samp
 
 ## Tech stack
 
-Vite + React + Tailwind. No backend or database (Supabase removed Oct 2026). Saved plans in `localStorage` — `src/lib/planStorage.js`, `src/components/PlanManager.jsx`.
+Vite + React + Tailwind. No backend or database (Supabase removed Oct 2026). Saved plans in `localStorage` — `src/lib/planStorage.js`, `src/components/PlansMenu.jsx`.
 
 ## Git / deploy
 

@@ -1,6 +1,5 @@
 /** Old (pre Nov 2026) per-requirement targets; read once to tick those requirements in Select Requirements. */
 export const REQUIREMENT_TARGETS_KEY = 'yale-som-course-planner-requirement-targets'
-const STORAGE_KEY = REQUIREMENT_TARGETS_KEY
 
 /**
  * @typedef {Partial<Record<string, number>>} RequirementTargets
@@ -33,40 +32,6 @@ export function normalizeRequirementTargets(raw, knownTags) {
     out[name] = n
   }
   return out
-}
-
-/**
- * @param {Iterable<string>} [knownTags]
- * @returns {RequirementTargets}
- */
-export function loadRequirementTargets(knownTags) {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return createEmptyRequirementTargets()
-    return normalizeRequirementTargets(JSON.parse(raw), knownTags)
-  } catch {
-    return createEmptyRequirementTargets()
-  }
-}
-
-/**
- * @param {RequirementTargets} targets
- * @param {Iterable<string>} [knownTags]
- */
-export function persistRequirementTargets(targets, knownTags) {
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(normalizeRequirementTargets(targets, knownTags)),
-  )
-}
-
-/**
- * @param {RequirementTargets} targets
- * @param {string[]} knownTags
- * @returns {string[]}
- */
-export function configuredTargetTagCodes(targets, knownTags) {
-  return knownTags.filter((name) => (targets[name] ?? 0) > 0)
 }
 
 /**

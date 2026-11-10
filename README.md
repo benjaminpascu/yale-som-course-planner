@@ -1,32 +1,30 @@
-# Yale SOM Course Planner
+# SOMtimes
 
-Student-run web app for browsing Yale SOM courses, building a weekly schedule, and tracking requirement-tag units.
+Student-run web app for Yale SOM students: browse courses, build a weekly schedule, and track requirement-tag units. Live at [somtimes.vercel.app](https://somtimes.vercel.app).
 
 ## For humans
 
 1. `npm install && npm run dev` (no database or environment variables needed)
 2. See [docs/vercel-setup.md](docs/vercel-setup.md) to deploy on Vercel.
 
-## For Cursor agents (new chat)
+## For agents (new chat)
 
 **Start here:**
 
-1. [AGENTS.md](AGENTS.md) — workflow, current milestone, key paths  
-2. [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) — what’s done / what’s next  
-3. [docs/PRD.md](docs/PRD.md) — full product spec  
+1. [AGENTS.md](AGENTS.md) — workflow, current state, key paths
+2. [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) — what's done / what's next
+3. [docs/PRD.md](docs/PRD.md) — full product spec
 
-Use a **new Cursor agent** (fresh chat) per milestone or focused task — see PRD §12.
+Use a fresh agent chat per milestone or focused task — see PRD §12.
 
-## Data files
+## Course data
 
 | File | Role |
 |------|------|
-| `docs/data-samples/courses_master_fall2026.csv` | Fall 2026 catalog + inline `tags` column (source of truth) |
-| `docs/data-samples/courses_master_spring2027.csv` | Spring 2027 catalog, same columns (source of truth) |
+| `docs/data-samples/courses_master_<term>.csv` | One catalog per semester (e.g. `fall2026`, `spring2027`), with an inline `tags` column |
+| `docs/data-samples/course_overrides.csv` | Manual fixes re-applied on every update (normally empty) |
 
-| `docs/data-samples/course_overrides.csv` | Manual fixes re-applied on every update |
-
-The CSVs are bundled into the app at build time. To refresh them from the SOM website, follow [docs/updating-course-data.md](docs/updating-course-data.md), then push to `main`; Vercel redeploys.
+The CSVs are bundled into the app at build time. They update themselves every 6 hours from Yale SOM's course feed, and new semesters appear on their own — see [docs/updating-course-data.md](docs/updating-course-data.md).
 
 ## License
 

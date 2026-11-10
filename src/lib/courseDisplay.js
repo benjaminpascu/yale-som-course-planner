@@ -113,9 +113,6 @@ export const BID_TYPE_CONFIG = {
   },
 }
 
-/** @type {(keyof typeof BID_TYPE_CONFIG)[]} */
-export const BID_TYPE_IDS = Object.keys(BID_TYPE_CONFIG)
-
 /** @param {string} bidOrPermission — raw CSV value */
 export function bidBadge(bidOrPermission) {
   const type = normalizeBidType(bidOrPermission)

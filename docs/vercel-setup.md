@@ -73,7 +73,7 @@ Course data changes: edit the CSV in `docs/data-samples/`, commit, and push — 
 If you prefer CLI (after `npm i -g vercel` and `vercel login`):
 
 ```bash
-cd "/Users/benjaminpascu/Documents/Cursor/Course planner"
+cd ~/Developer/course-planner
 vercel --prod
 ```
 
