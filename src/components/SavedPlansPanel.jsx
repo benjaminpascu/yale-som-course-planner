@@ -64,6 +64,10 @@ export default function SavedPlansPanel({
 
   const savesCurrentSelection =
     hasSelection && (!activePlanId || isDirty)
+  // No plans yet: say what to do above the name field (dark, not grey), and when there
+  // are courses to save, make the field and button green like Save Plan elsewhere.
+  const firstPlan = plans.length === 0
+  const highlightSave = firstPlan && savesCurrentSelection
 
   const coursesById = useMemo(
     () => new Map(courses.map((course) => [course.courseId, course])),
@@ -132,17 +136,40 @@ export default function SavedPlansPanel({
       ) : null}
 
       <div className={`flex flex-col ${contentGap} ${contentPad}`}>
+        {firstPlan ? (
+          <p
+            className={`-mb-1 font-medium ${
+              highlightSave ? 'text-save-900' : 'text-yale-950'
+            } ${compact ? 'text-xs' : 'text-sm'}`}
+          >
+            {hasSelection ? (
+              <>
+                Name your plan, then {compact ? 'tap' : 'click'}{' '}
+                <b>{compact ? 'Save' : 'Save to plan'}</b>
+              </>
+            ) : compact ? (
+              'Add courses from the Courses tab, then save them here'
+            ) : (
+              'Add courses from the list, then save them here'
+            )}
+          </p>
+        ) : null}
         <form
           onSubmit={handleAddSubmit}
           className={`flex w-full gap-2 ${compact ? 'items-stretch' : 'items-center'}`}
         >
           <input
             ref={newNameInputRef}
+            autoFocus={highlightSave && !compact}
             type="text"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder="Plan name"
-            className={`min-w-0 flex-1 rounded-md border border-yale-200 bg-white text-gray-900 shadow-sm focus:border-yale-500 focus:outline-none focus:ring-1 focus:ring-yale-500 ${
+            className={`min-w-0 flex-1 rounded-md border bg-white text-gray-900 shadow-sm focus:outline-none ${
+              highlightSave
+                ? 'border-save-800 ring-2 ring-save-100 focus:ring-save-100'
+                : 'border-yale-200 focus:border-yale-500 focus:ring-1 focus:ring-yale-500'
+            } ${
               compact
                 ? 'min-h-10 px-2.5 py-2 text-sm'
                 : 'px-3 py-1.5 text-sm'
@@ -152,7 +179,11 @@ export default function SavedPlansPanel({
           <button
             type="submit"
             disabled={!newName.trim()}
-            className={`shrink-0 rounded-md bg-yale-800 font-medium text-white hover:bg-yale-900 disabled:cursor-not-allowed disabled:opacity-50 ${
+            className={`shrink-0 rounded-md font-medium ${
+              savesCurrentSelection
+                ? SAVE_BUTTON
+                : 'bg-yale-800 text-white hover:bg-yale-900 disabled:cursor-not-allowed disabled:opacity-50'
+            } ${
               compact
                 ? 'flex min-h-10 min-w-[4.5rem] items-center justify-center px-3 text-xs'
                 : 'px-3 py-1.5 text-sm'
@@ -162,18 +193,8 @@ export default function SavedPlansPanel({
           </button>
         </form>
 
-        <div className={`min-w-0 ${compact ? '' : `border-l-2 border-yale-200 ${listIndent}`}`}>
-          {plans.length === 0 ? (
-            <p className={compact ? 'text-xs text-yale-700' : 'text-sm text-yale-700'}>
-              {hasSelection
-                ? compact
-                  ? 'Name it, then tap Save'
-                  : 'Name it, then click Save to plan'
-                : compact
-                  ? 'Add courses from the Courses tab, then save them here'
-                  : 'Add courses from the list, then save them here'}
-            </p>
-          ) : (
+        {plans.length > 0 ? (
+          <div className={`min-w-0 ${compact ? '' : `border-l-2 border-yale-200 ${listIndent}`}`}>
             <ul className={planListGap}>
               {plans.map((plan) => {
                 const isActive = plan.id === activePlanId
@@ -357,8 +378,8 @@ export default function SavedPlansPanel({
                 )
               })}
             </ul>
-          )}
-        </div>
+          </div>
+        ) : null}
       </div>
     </>
   )
