@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { PLAN_BUTTON_EDITING, SAVE_BUTTON } from '../lib/sectionTheme'
 import { downloadPlanExport, parsePlanImport } from '../lib/planTransfer'
 import SavedPlansPanel from './SavedPlansPanel'
@@ -22,6 +23,10 @@ export default function PlansMenu({
 }) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef(null)
+  const panelRef = useRef(null)
+  // Where the panel floats. It renders on the page itself (not inside the calendar box,
+  // which cuts off anything that spills out), pinned under the button.
+  const [panelPos, setPanelPos] = useState(null)
   const fileInputRef = useRef(null)
   // null | { choose: plans } (add or replace?) | { note, missing } | { error }
   const [importState, setImportState] = useState(null)
@@ -64,9 +69,9 @@ export default function PlansMenu({
     }
 
     function handlePointerDown(event) {
-      if (rootRef.current && !rootRef.current.contains(event.target)) {
-        setOpen(false)
-      }
+      const inside =
+        rootRef.current?.contains(event.target) || panelRef.current?.contains(event.target)
+      if (!inside) setOpen(false)
     }
 
     window.addEventListener('keydown', handleKeyDown)
@@ -76,6 +81,34 @@ export default function PlansMenu({
       document.removeEventListener('pointerdown', handlePointerDown)
     }
   }, [open])
+
+  useLayoutEffect(() => {
+    if (!open) {
+      setPanelPos(null)
+      return
+    }
+
+    function place() {
+      const rect = rootRef.current?.getBoundingClientRect()
+      if (!rect) return
+      const top = rect.bottom + 8
+      setPanelPos({
+        top,
+        maxHeight: Math.max(160, window.innerHeight - top - 16),
+        ...(align === 'right'
+          ? { right: Math.max(16, window.innerWidth - rect.right) }
+          : { left: Math.max(16, rect.left) }),
+      })
+    }
+
+    place()
+    window.addEventListener('resize', place)
+    window.addEventListener('scroll', place, true)
+    return () => {
+      window.removeEventListener('resize', place)
+      window.removeEventListener('scroll', place, true)
+    }
+  }, [open, align])
 
   function handleSelectPlan(planId) {
     const ok = onSelectPlan(planId)
@@ -118,12 +151,14 @@ export default function PlansMenu({
         ) : null}
       </div>
 
-      {open ? (
+      {open && panelPos ? createPortal(
         <div
+          ref={panelRef}
           id={menuId}
           role="dialog"
           aria-label="Manage plans"
-          className={`absolute ${align === 'right' ? 'right-0' : 'left-0'} top-full z-50 mt-2 max-h-[min(32rem,calc(100dvh-8rem))] w-[min(32rem,calc(100vw-2rem))] overflow-y-auto rounded-lg border border-yale-200 bg-white shadow-xl`}
+          style={panelPos}
+          className="fixed z-50 w-[min(32rem,calc(100vw-2rem))] overflow-y-auto rounded-lg border border-yale-200 bg-white shadow-xl"
         >
           <div className="sticky top-0 z-10 flex items-center justify-between border-b border-yale-150 bg-white px-4 py-2.5">
             <p className="text-sm font-semibold text-yale-950">Manage Plans</p>
@@ -230,7 +265,8 @@ export default function PlansMenu({
             onSavePlan={onSavePlan}
             onDeletePlan={onDeletePlan}
           />
-        </div>
+        </div>,
+        document.body,
       ) : null}
     </div>
   )
