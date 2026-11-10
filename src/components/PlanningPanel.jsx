@@ -58,7 +58,7 @@ export default function PlanningPanel({
       >
         {tip === 'requirements' ? (
           <HintBubble arrow="down" className="absolute bottom-full left-6 mb-3" onDismiss={onDismissTip}>
-            {calendarOnly ? 'Tap' : 'Hover over'} a requirement to see which courses count toward it
+            {calendarOnly ? 'Tap' : 'Hover over'} a total or requirement to see which courses count toward it
           </HintBubble>
         ) : null}
         {tip === 'set-targets' ? (
