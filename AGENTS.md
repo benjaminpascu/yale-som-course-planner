@@ -34,6 +34,7 @@ The user is a non-technical student. Explain clearly; ask explicitly when a prod
 | **Spring 2027 data + term selector** | ✅ Live (Oct 2026) |
 | **Live** | ✅ Vercel; share link privately; fix issues as feedback comes in |
 | **Compare Courses + two-bar header** | ✅ Live (Nov 2026) |
+| **Compare Plans** (two plans side by side; tabs renamed Plan / Rank) | ✅ Built (Nov 2026) |
 | **Wider promo** | When you choose (not a separate dev milestone) |
 
 Full detail: **`docs/PROJECT_STATUS.md`**.
@@ -93,6 +94,7 @@ No database or environment variables. Course data is the CSVs in `docs/data-samp
 | CSV column validation | `src/lib/csvColumns.js` |
 | Compare Courses logic (grouping, shortlist, scoring, storage, Excel) | `src/lib/compareGroups.js`, `compareShortlist.js`, `compareScoring.js`, `compareStorage.js`, `compareExport.js` |
 | Compare Courses UI | `src/components/compare/` (`CompareView`, `ShortlistStep`, `ScoreStep`, `RatingInput`, `WeightInput`) — visual spec in `docs/design/compare/` |
+| Compare Plans (two plans side by side) | `src/lib/comparePlans.js`, `src/components/ComparePlansView.jsx`; state in `App.jsx` |
 | Header (nav bar + mode sub bar) | `src/components/NavBar.jsx`, `src/components/SubBar.jsx` |
 
 ## Tech stack

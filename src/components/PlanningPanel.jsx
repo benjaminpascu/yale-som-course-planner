@@ -24,6 +24,8 @@ export default function PlanningPanel({
   onClearPlan,
   tip = null,
   onDismissTip,
+  sessionView,
+  headerAction = null,
 }) {
   const [expandedPane, setExpandedPane] = useState('calendar')
   const calendarOnly = variant === 'calendar'
@@ -41,6 +43,8 @@ export default function PlanningPanel({
         termCode={termCode}
         fallYear={fallYear}
         springYear={springYear}
+        sessionView={sessionView}
+        headerAction={headerAction}
         collapsible={!calendarOnly}
         fillViewport={calendarOnly}
         expanded={calendarOnly ? true : expandedPane === 'calendar'}
@@ -77,6 +81,7 @@ export default function PlanningPanel({
       </div>
       {!calendarOnly ? (
         <PlanPanel
+          showHeaderSummary={false}
           className={tip === 'your-plan' ? 'relative z-[45]' : ''}
           selectedCourses={selectedCourses}
           activePlanName={activePlanName}

@@ -8,7 +8,6 @@ import {
   planHasNonOverlappingSessions,
 } from '../lib/calendarSessionView'
 import {
-  formatCourseUnits,
   parseTimeToMinutes,
   WEEKDAYS,
 } from '../lib/courseDisplay'
@@ -110,15 +109,17 @@ function formatHourLabel(hour) {
   return `${h12} ${period}`
 }
 
-function formatCoursesInPeriod(count) {
-  if (count === 1) return '1 course in period'
-  return `${count} courses in period`
+/** "6 courses in Fall 1" (or just "6 courses" when there's no half-term to name). */
+function formatCoursesInPeriod(count, periodLabel) {
+  const courses = count === 1 ? '1 course' : `${count} courses`
+  return periodLabel ? `${courses} in ${periodLabel}` : courses
 }
 
 const FULL_TERM_TAB_HINT =
   'Full-term courses appear on both half-term tabs.'
 
-function SessionTabHint({ inverse = false }) {
+/** (i) explaining full-term courses; on computers it sits next to the Fall 1 / Fall 2 switch. */
+export function SessionTabHint({ inverse = false }) {
   return (
     <span className="group/hint relative inline-flex shrink-0">
       <button
@@ -255,6 +256,38 @@ function CalendarGrid({
   )
 }
 
+/** Fall 1 / Fall 2 (or Spring 1 / 2) pills; also the shared switch in Compare Plans. */
+export function CalendarSessionTabs({ options, value, onChange, className = '' }) {
+  return (
+    <div
+      className={`flex flex-wrap items-center gap-1.5 ${className}`}
+      role="tablist"
+      aria-label="Calendar session view"
+    >
+      {options.map((opt) => {
+        const active = value === opt.id
+        return (
+          <button
+            key={opt.id}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            onClick={() => onChange(opt.id)}
+            // Light blue when picked: a sub-choice of the solid navy Fall / Spring switch.
+            className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+              active
+                ? 'bg-yale-100 font-semibold text-yale-800 ring-1 ring-yale-800'
+                : 'bg-white text-yale-800 ring-1 ring-yale-200 hover:bg-yale-50'
+            }`}
+          >
+            {opt.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 export default function WeeklyCalendar({
   selectedCourses: planCourses,
   termCode = null,
@@ -265,6 +298,10 @@ export default function WeeklyCalendar({
   expanded = true,
   onToggle = () => {},
   className = '',
+  // Compare Plans: one Fall 1 / Fall 2 switch above both calendars drives this view.
+  sessionView,
+  // Compare Plans: the plan menu, shown at the right of the header.
+  headerAction = null,
 }) {
   // The Fall/Spring switch picks the semester; the tabs then split it into its half-terms.
   const semester = termCodeToSemester(termCode)
@@ -292,7 +329,9 @@ export default function WeeklyCalendar({
     [timedCourses],
   )
 
-  const [calendarView, setCalendarView] = useState(defaultView)
+  const [ownCalendarView, setCalendarView] = useState(defaultView)
+  const sharedSwitch = sessionView !== undefined
+  const calendarView = sharedSwitch ? sessionView : ownCalendarView
   const [openDetailKey, setOpenDetailKey] = useState(null)
   const isDesktop = useDesktopCalendar()
   const gridBodyRef = useRef(null)
@@ -339,11 +378,6 @@ export default function WeeklyCalendar({
     [selectedCourses, calendarView],
   )
 
-  const periodUnits = useMemo(
-    () => periodCourses.reduce((sum, c) => sum + c.units, 0),
-    [periodCourses],
-  )
-
   const periodUntimedCount = useMemo(
     () => periodCourses.filter((c) => !hasMeetingTime(c)).length,
     [periodCourses],
@@ -371,17 +405,11 @@ export default function WeeklyCalendar({
   }, [pxPerMinute])
 
   const calendarTone = sectionTone('calendar')
-  const activeViewLabel = useMemo(() => {
-    const fromTab = viewOptions.find((o) => o.id === calendarView)?.label
-    if (fromTab) return fromTab
-    if (calendarView) {
-      return formatSessionLabel(calendarView, { fallYear, springYear })
-    }
-    const session = selectedCourses.find((c) => c.session)?.session
-    return session
-      ? formatSessionLabel(session, { fallYear, springYear })
-      : ''
-  }, [viewOptions, calendarView, fallYear, springYear, selectedCourses])
+  // The half-term shown, e.g. "Fall 1" (the switch already shows the year).
+  const periodLabel = useMemo(() => {
+    const session = calendarView || selectedCourses.find((c) => c.session)?.session
+    return session ? formatSessionLabel(session) : ''
+  }, [calendarView, selectedCourses])
 
   const sectionLayoutClass = `flex flex-col border-b ${className} ${calendarTone.section} lg:min-h-0 ${
     fillViewport && hasSelection
@@ -404,13 +432,12 @@ export default function WeeklyCalendar({
     setOpenDetailKey,
   }
 
-  const showSessionTabs = viewOptions.length > 1
+  const showSessionTabs = !sharedSwitch && viewOptions.length > 1
 
   const periodSubtitle = (
     <>
-      {!showSessionTabs && activeViewLabel ? `${activeViewLabel} · ` : null}
-      {formatCoursesInPeriod(periodCourses.length)} (
-      {formatCourseUnits(periodUnits)})
+      {/* No units here: the semester's units are the Total under Requirements. */}
+      {formatCoursesInPeriod(periodCourses.length, periodLabel)}
       {periodUntimedCount > 0 ? (
         <span className="text-amber-200 lg:text-amber-700">
           {` · ${periodUntimedCount} without weekly time`}
@@ -420,31 +447,12 @@ export default function WeeklyCalendar({
   )
 
   const sessionTabs = showSessionTabs ? (
-    <div
-      className="flex flex-wrap items-center gap-1.5 lg:justify-end"
-      role="tablist"
-      aria-label="Calendar session view"
-    >
-      {viewOptions.map((opt) => {
-        const active = calendarView === opt.id
-        return (
-          <button
-            key={opt.id}
-            type="button"
-            role="tab"
-            aria-selected={active}
-            onClick={() => setCalendarView(opt.id)}
-            className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
-              active
-                ? 'bg-yale-800 text-white shadow-sm'
-                : 'bg-white text-yale-800 ring-1 ring-yale-200 hover:bg-yale-50'
-            }`}
-          >
-            {opt.label}
-          </button>
-        )
-      })}
-    </div>
+    <CalendarSessionTabs
+      options={viewOptions}
+      value={calendarView}
+      onChange={setCalendarView}
+      className="lg:justify-end"
+    />
   ) : null
 
   if (!hasSelection) {
@@ -462,7 +470,9 @@ export default function WeeklyCalendar({
               ? 'Add courses in the Courses tab to build your schedule.'
               : '← Add courses from the list'
           }
-        />
+        >
+          {headerAction}
+        </SectionHeader>
         <div className="flex-1 py-10" />
       </section>
     )
@@ -515,15 +525,16 @@ export default function WeeklyCalendar({
                 </p>
               </div>
             )}
-            {mixedNonOverlappingSessions ? <SessionTabHint /> : null}
+            {mixedNonOverlappingSessions && !sharedSwitch ? <SessionTabHint /> : null}
           </div>
-          {sessionTabs ? (
+          {sessionTabs || headerAction ? (
             <div
               className={`flex shrink-0 flex-wrap items-center justify-end gap-1.5 ${
                 collapsible ? 'pl-6 sm:pl-0' : ''
               }`}
             >
               {sessionTabs}
+              {headerAction}
             </div>
           ) : null}
         </div>

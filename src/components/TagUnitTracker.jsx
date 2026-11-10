@@ -259,12 +259,16 @@ function RequirementsGrid({ rows, fallYear, springYear }) {
   )
 }
 
+const TARGETS_CHANGED_EVENT = 'requirement-targets-changed'
+
 export default function TagUnitTracker({
   selectedCourses,
   termCode = null,
   courses = [],
   fallYear = null,
   springYear = null,
+  // Compare Plans: one full-width header ('header') above each plan's units ('rows').
+  part = 'all',
 }) {
   const tagNames = useMemo(() => uniqueRequirementTags(courses), [courses])
   const [targets, setTargets] = useState(() =>
@@ -274,6 +278,10 @@ export default function TagUnitTracker({
 
   useEffect(() => {
     setTargets(loadRequirementTargets(tagNames))
+    // Compare Plans shows two trackers; targets set in one show in the other.
+    const reload = () => setTargets(loadRequirementTargets(tagNames))
+    window.addEventListener(TARGETS_CHANGED_EVENT, reload)
+    return () => window.removeEventListener(TARGETS_CHANGED_EVENT, reload)
   }, [tagNames])
 
   // Requirements are planned per semester: every row counts only the semester
@@ -304,6 +312,7 @@ export default function TagUnitTracker({
   const handleSaveTargets = (nextTargets) => {
     setTargets(nextTargets)
     persistRequirementTargets(nextTargets, tagNames)
+    window.dispatchEvent(new Event(TARGETS_CHANGED_EVENT))
   }
 
   const reqTone = sectionTone('requirements')
@@ -314,26 +323,32 @@ export default function TagUnitTracker({
         className={`shrink-0 border-b ${reqTone.section}`}
         aria-label="Requirements"
       >
-        <SectionHeader
-          tone="requirements"
-          title={termCode ? `Requirements · ${formatTermLabel(termCode)}` : 'Requirements'}
-        >
-          <AddRequirementsButton onClick={() => setModalOpen(true)} />
-        </SectionHeader>
-        <RequirementsGrid
-          rows={visibleRows}
-          fallYear={fallYear}
-          springYear={springYear}
-        />
+        {part === 'rows' ? null : (
+          <SectionHeader
+            tone="requirements"
+            title={termCode ? `Requirements · ${formatTermLabel(termCode)}` : 'Requirements'}
+          >
+            <AddRequirementsButton onClick={() => setModalOpen(true)} />
+          </SectionHeader>
+        )}
+        {part === 'header' ? null : (
+          <RequirementsGrid
+            rows={visibleRows}
+            fallYear={fallYear}
+            springYear={springYear}
+          />
+        )}
       </section>
 
-      <RequirementTargetsModal
-        open={modalOpen}
-        targets={targets}
-        tagNames={tagNames}
-        onClose={() => setModalOpen(false)}
-        onSave={handleSaveTargets}
-      />
+      {part === 'rows' ? null : (
+        <RequirementTargetsModal
+          open={modalOpen}
+          targets={targets}
+          tagNames={tagNames}
+          onClose={() => setModalOpen(false)}
+          onSave={handleSaveTargets}
+        />
+      )}
     </>
   )
 }

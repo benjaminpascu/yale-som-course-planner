@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import CourseBrowser from './components/CourseBrowser'
 import CompareView from './components/compare/CompareView'
+import ComparePlansView from './components/ComparePlansView'
 import ComputerNotice, { shouldShowComputerNotice } from './components/ComputerNotice'
 import HintBubble, { HintBackdrop } from './components/HintBubble'
 import { useCompareStore } from './components/compare/useCompareStore'
@@ -9,14 +10,24 @@ import MobilePlansPanel from './components/MobilePlansPanel'
 import NavBar from './components/NavBar'
 import PlansMenu from './components/PlansMenu'
 import PlanningPanel from './components/PlanningPanel'
-import { CompareStepTabs, SubBar, TermSwitch } from './components/SubBar'
+import { CalendarSessionTabs, SessionTabHint } from './components/WeeklyCalendar'
+import { CompareStepTabs, PlanViewSwitch, SubBar, TermSwitch } from './components/SubBar'
 import { SAVE_BUTTON } from './lib/sectionTheme'
 import {
   formatTermLabel,
   getCatalogTerms,
   getSemesterCalendarYears,
 } from './lib/academicYear'
+import { getCalendarViewOptions, getDefaultCalendarView } from './lib/calendarSessionView'
 import { buildCourseGroups } from './lib/compareGroups'
+import {
+  canComparePlans,
+  initialCompareSlots,
+  normalizeCompareSlots,
+  savedPlanCourses,
+  setSlotPlan,
+  sharedCalendarCourses,
+} from './lib/comparePlans'
 import { decisionCounts, orderGroups } from './lib/compareShortlist'
 import { ensureShuffledOrder, getTermData } from './lib/compareStorage'
 import { loadAppData } from './lib/loadData'
@@ -57,6 +68,12 @@ function App() {
   const planHydratedRef = useRef(false)
   const [seenHints, setSeenHints] = useState(() => loadSeenHints())
   const [computerNoticeOpen, setComputerNoticeOpen] = useState(() => shouldShowComputerNotice())
+  // Compare Plans (computer only): two plans side by side; [left, right] plan ids.
+  const [comparePlansOn, setComparePlansOn] = useState(false)
+  const [compareSlots, setCompareSlots] = useState([])
+  const [compareEditSide, setCompareEditSide] = useState(0)
+  // Fall 1 / Fall 2 (or Spring 1 / 2) shown on the computer calendar(s); switch in the sub bar.
+  const [sessionViewChoice, setSessionViewChoice] = useState('')
 
   const markHintSeen = useCallback((id) => {
     setSeenHints((prev) => {
@@ -167,6 +184,27 @@ function App() {
   }, [compareOpen, activeTermCode, compareCatalog, updateCompare])
   const compareCounts = decisionCounts(compareGroups, compareTerm.decisions)
 
+  // Compare Plans: the open plan is always one side (the one being edited);
+  // the other side shows its plan's saved courses.
+  const planSlots = comparePlansOn
+    ? normalizeCompareSlots(compareSlots, planStore.plans, planStore.activePlanId, compareEditSide)
+    : null
+  const editSide = planSlots
+    ? Math.max(0, planSlots.indexOf(planStore.activePlanId))
+    : 0
+  const sideCourses = planSlots
+    ? planSlots.map((id, side) =>
+        side === editSide ? selectedCourses : savedPlanCourses(getPlanById(planStore, id), courses),
+      )
+    : null
+  // One Fall 1 / Fall 2 switch in the sub bar (computer), offering every half-term
+  // the plan (or either compared plan) uses this semester.
+  const sessionCourses = sharedCalendarCourses(sideCourses ?? [selectedCourses], activeTermCode)
+  const sessionOptions = getCalendarViewOptions(sessionCourses, fallYear, springYear)
+  const sessionView = sessionOptions.some((o) => o.id === sessionViewChoice)
+    ? sessionViewChoice
+    : getDefaultCalendarView(sessionCourses)
+
   // One tip at a time; computer and phone layouts each get their own next tip.
   // The Conflict tip waits until a "Conflict" label is actually showing in this term's list.
   const conflictIds = getConflictingCourseIds(courses, selectedIds)
@@ -181,7 +219,7 @@ function App() {
   const desktopHint = nextPlannerHint({ ...hintState, phone: false })
   const phoneHint = nextPlannerHint({ ...hintState, phone: true })
   // The tip actually on screen: each waits until the spot it points at is showing.
-  const desktopTip = view === 'planner' ? desktopHint : null
+  const desktopTip = view === 'planner' && !planSlots ? desktopHint : null
   const phoneTip = (() => {
     if (computerNoticeOpen) return null // Phone tips wait until the "Best on a computer" note is closed.
     if (phoneHint === 'phone-courses') return ['catalog', 'compare'].includes(mobileTab) ? null : phoneHint
@@ -357,6 +395,30 @@ function App() {
     [persist, planStore],
   )
 
+  const startComparePlans = () => {
+    const slots = initialCompareSlots(planStore.plans, planStore.activePlanId)
+    if (!slots) return
+    if (!planStore.activePlanId && !handleSelectPlan(slots[0])) return
+    setCompareSlots(slots)
+    setCompareEditSide(0)
+    setComparePlansOn(true)
+  }
+
+  // Clicking the faded side makes it the plan you edit (same warning as switching plans).
+  const activateCompareSide = (side) => {
+    if (!planSlots) return false
+    if (side === editSide) return true
+    if (!handleSelectPlan(planSlots[side])) return false
+    setCompareEditSide(side)
+    return true
+  }
+
+  const pickComparePlan = (side, planId) => {
+    if (!planSlots) return
+    if (side === editSide && !handleSelectPlan(planId)) return
+    setCompareSlots(setSlotPlan(planSlots, side, planId))
+  }
+
   if (status === 'loading') {
     return (
       <div className="px-4 py-6 text-gray-600">
@@ -428,39 +490,33 @@ function App() {
     <div className="flex min-h-dvh flex-col bg-gray-50 lg:h-dvh lg:overflow-hidden">
       <NavBar mode={view} onModeChange={setView} onShowTips={resetHints} />
 
-      {/* Sub bar: plan (Planner) or steps (Compare) on the left, term switch on the right. */}
+      {/* Sub bar: Single plan / Compare plans (Plan) or steps (Rank) on the left; half-term and term switches on the right. */}
       <SubBar className="hidden lg:block">
         {view === 'planner' ? (
-          // Wrapper only anchors the save tip beside the Plan button; it adds no space.
-          <div className={desktopTip === 'save-plan' ? SPOTLIGHT : 'relative'}>
-            <PlansMenu
-              plans={planStore.plans}
-              courses={courses}
-              activePlanId={planStore.activePlanId}
-              activePlanName={activePlan?.name ?? null}
-              hasSelection={selectedIds.size > 0}
-              isDirty={isDirty}
-              onAddPlan={handleAddPlan}
-              onSelectPlan={handleSelectPlan}
-              onSavePlan={handleSavePlan}
-              onRenamePlan={handleRenamePlan}
-              onDuplicatePlan={handleDuplicatePlan}
-              onDeletePlan={handleDeletePlan}
-            />
-            {desktopTip === 'save-plan' ? (
-              <HintBubble
-                arrow="left"
-                className="absolute top-1/2 left-full ml-4 -translate-y-1/2"
-                onDismiss={() => markHintSeen('save-plan')}
-              >
-                Save and name this plan (kept in this browser)
-              </HintBubble>
-            ) : null}
-          </div>
+          <PlanViewSwitch
+            comparing={Boolean(planSlots)}
+            canCompare={canComparePlans(planStore.plans)}
+            onChange={(compare) => {
+              if (!compare) setComparePlansOn(false)
+              else if (!planSlots) startComparePlans()
+            }}
+          />
         ) : (
           <CompareStepTabs {...compareStepTabsProps} />
         )}
-        <TermSwitch {...termSwitchProps} />
+        <div className="flex items-center gap-4">
+          {view === 'planner' && sessionOptions.length > 1 ? (
+            <div className="flex items-center gap-1.5">
+              <SessionTabHint />
+              <CalendarSessionTabs
+                options={sessionOptions}
+                value={sessionView}
+                onChange={setSessionViewChoice}
+              />
+            </div>
+          ) : null}
+          <TermSwitch {...termSwitchProps} />
+        </div>
       </SubBar>
 
       {/* Phones follow the bottom-nav tab; plans are managed in the Plans tab. */}
@@ -508,15 +564,67 @@ function App() {
           />
         </aside>
         <section className="flex min-h-0 flex-col overflow-hidden">
-          <PlanningPanel
-            {...planningPanelProps}
-            tip={
-              ['calendar-details', 'requirements', 'set-targets', 'your-plan'].includes(desktopTip)
-                ? desktopTip
-                : null
-            }
-            onDismissTip={() => markHintSeen(desktopTip)}
-          />
+          {planSlots ? (
+            <ComparePlansView
+              plans={planStore.plans}
+              slots={planSlots}
+              editSide={editSide}
+              sideCourses={sideCourses}
+              isDirty={isDirty}
+              courses={courses}
+              termCode={activeTermCode}
+              fallYear={fallYear}
+              springYear={springYear}
+              sessionView={sessionView}
+              onPickPlan={pickComparePlan}
+              onActivateSide={activateCompareSide}
+              onSavePlan={handleSavePlan}
+              onRemoveCourse={removeCourse}
+              onClearPlan={clearPlan}
+            />
+          ) : (
+            <PlanningPanel
+              {...planningPanelProps}
+              sessionView={sessionView}
+              headerAction={
+                // Same spot as the plan menus in Compare plans: right of the Weekly calendar bar.
+                // The wrapper only anchors the save tip below the menu; it adds no space.
+                <div className={desktopTip === 'save-plan' ? SPOTLIGHT : 'relative'}>
+                  <PlansMenu
+                    align="right"
+                    plans={planStore.plans}
+                    courses={courses}
+                    activePlanId={planStore.activePlanId}
+                    activePlanName={activePlan?.name ?? null}
+                    hasSelection={selectedIds.size > 0}
+                    isDirty={isDirty}
+                    onAddPlan={handleAddPlan}
+                    onSelectPlan={handleSelectPlan}
+                    onSavePlan={handleSavePlan}
+                    onRenamePlan={handleRenamePlan}
+                    onDuplicatePlan={handleDuplicatePlan}
+                    onDeletePlan={handleDeletePlan}
+                  />
+                  {desktopTip === 'save-plan' ? (
+                    <HintBubble
+                      arrow="up"
+                      arrowStyle={{ left: 'auto', right: '2.5rem' }}
+                      className="absolute top-full right-0 mt-3"
+                      onDismiss={() => markHintSeen('save-plan')}
+                    >
+                      Save and name this plan (kept in this browser)
+                    </HintBubble>
+                  ) : null}
+                </div>
+              }
+              tip={
+                ['calendar-details', 'requirements', 'set-targets', 'your-plan'].includes(desktopTip)
+                  ? desktopTip
+                  : null
+              }
+              onDismissTip={() => markHintSeen(desktopTip)}
+            />
+          )}
         </section>
         {desktopTip === 'add-course' || desktopTip === 'clash' ? (
           <HintBubble

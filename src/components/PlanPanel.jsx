@@ -38,6 +38,10 @@ export default function PlanPanel({
   onSavePlan,
   onRemoveCourse,
   onClearPlan,
+  // Compare plans: one full-width "Your plan" bar ('header') above each plan's list ('body').
+  part = 'all',
+  // Computer Plan tab: no count/units on the bar (semester units = Requirements Total).
+  showHeaderSummary = true,
 }) {
   const grouped = useMemo(
     () => groupCoursesBySession(selectedCourses),
@@ -59,7 +63,7 @@ export default function PlanPanel({
     : 'space-y-0 border-l-2 border-yale-200 pb-3 pl-5 pr-4 pt-1 sm:pl-6'
 
   const showSummary =
-    activePlanName != null || courseCount > 0
+    showHeaderSummary && (activePlanName != null || courseCount > 0)
 
   const summaryEl = showSummary ? (
     <span className="shrink-0 font-normal text-yale-800">
@@ -68,15 +72,18 @@ export default function PlanPanel({
     </span>
   ) : null
 
+  if (part === 'body' && !expanded) return null
+
   return (
     <section
       className={`flex flex-col border-b ${className} ${planTone.section} ${
+        part === 'header' ? 'shrink-0' :
         expanded && collapsible
           ? 'min-h-0 flex-1 overflow-hidden'
           : 'shrink-0'
       }`}
     >
-      {collapsible ? (
+      {part === 'body' ? null : collapsible ? (
         <button
           type="button"
           onClick={onToggle}
@@ -96,7 +103,7 @@ export default function PlanPanel({
         </div>
       )}
 
-      {expanded ? (
+      {expanded && part !== 'header' ? (
         <div
           className={
             collapsible

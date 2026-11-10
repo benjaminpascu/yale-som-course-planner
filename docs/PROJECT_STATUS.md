@@ -109,6 +109,15 @@ Desktop (`lg+`): unchanged — catalog sidebar + planning stack; **Plans** in he
 
 ---
 
+### Compare Plans (Nov 2026)
+
+- **Single plan | Compare plans** switch (navy, like Fall / Spring) on the left of the Plan sub bar (computer only; Compare needs two saved plans). Course list stays left; two plans side by side, each with its own calendar, Requirements and Your plan.
+- Fixed spots in both views: the Plan menu sits at the right of the Weekly calendar bar (one per half when comparing); Fall 1 / Fall 2 and Fall / Spring switches sit at the right of the sub bar (phones keep the half-term tabs on the calendar).
+- The open plan is the side being edited (green "Plan:" button; grey on the other side); "Add to plan", remove and Save apply there. The other side shows its saved courses; clicking anywhere on it opens that plan (usual unsaved-changes warning).
+- One full-width Requirements bar with one Set targets (targets are shared); calendar ↔ Your plan opens on both sides together.
+- Nav tabs renamed: **Plan** (was Planner) and **Rank** (was Compare; Compare Courses code keeps its names).
+- Code: `src/lib/comparePlans.js` (+ tests), `src/components/ComparePlansView.jsx`, `App.jsx`.
+
 ### Compare Courses ✅ (live Nov 2026)
 
 Visual spec: `docs/design/compare/` (screenshots + `.dc.html` mockups).
@@ -168,3 +177,4 @@ After CSV changes: check locally with `npm run dev`, then push to `main` (Vercel
 | Oct 2026 | Removed Supabase (paused project broke live); app reads bundled CSVs only |
 | Oct 2026 | Two-bar header; Compare Courses (Shortlist + Score and rank, per-term saving, Excel export); Vitest added |
 | Nov 2026 | Compare Courses live: review panel for past decisions, shared professor ratings, final review fixes; merged to `main` |
+| Nov 2026 | Compare Plans (two plans side by side); nav tabs renamed Plan / Rank |

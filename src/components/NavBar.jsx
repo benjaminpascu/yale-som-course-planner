@@ -1,18 +1,19 @@
 import ContactMenu from './ContactMenu'
 
 const MODES = [
-  { id: 'planner', label: 'Planner' },
-  { id: 'compare', label: 'Compare' },
+  { id: 'planner', label: 'Plan' },
+  { id: 'compare', label: 'Rank' },
 ]
 
 /**
- * Global navy bar, the same on every page: title, Planner | Compare tabs
+ * Global navy bar, the same on every page: title, Plan | Rank tabs
  * (desktop; phones switch modes in the bottom nav), Help (shows the tips again), contact button.
  */
 export default function NavBar({ mode, onModeChange, onShowTips }) {
   return (
     <header className="shrink-0 bg-yale-900 text-white">
-      <div className="flex min-h-14 flex-wrap items-center gap-x-8 gap-y-2 px-4 sm:px-8">
+      {/* Computer: 1rem edges, lined up with the sub bar and the panels below. */}
+      <div className="flex min-h-14 flex-wrap items-center gap-x-8 gap-y-2 px-4 sm:px-8 lg:px-4">
         <h1 className="py-3 text-base font-bold">Yale SOM Course Planner</h1>
         <nav className="hidden self-stretch lg:flex" aria-label="Mode">
           {MODES.map((m) => {

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { SAVE_BUTTON } from '../lib/sectionTheme'
+import { PLAN_BUTTON_EDITING, SAVE_BUTTON } from '../lib/sectionTheme'
 import SavedPlansPanel from './SavedPlansPanel'
 
 export default function PlansMenu({
@@ -15,6 +15,8 @@ export default function PlansMenu({
   onDuplicatePlan,
   onSavePlan,
   onDeletePlan,
+  // 'right' when the button sits at the right edge (Weekly calendar bar), so the panel opens leftward.
+  align = 'left',
 }) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef(null)
@@ -60,19 +62,16 @@ export default function PlansMenu({
           aria-expanded={open}
           aria-haspopup="dialog"
           aria-controls={open ? menuId : undefined}
-          className="flex h-9 max-w-[22rem] items-center gap-1.5 rounded-md border border-[#c3d2e6] bg-[#e3ebf5] px-3 text-sm text-yale-900 hover:bg-[#d4e1f0]"
+          // Same look as the plan you're editing in Compare plans.
+          className={`flex h-9 min-w-0 items-center gap-1.5 rounded-md border px-3 text-sm ${PLAN_BUTTON_EDITING}`}
         >
           <span className="font-semibold">Plan:</span>
-          <span className="truncate">{label}</span>
-          {isDirty ? (
-            <span className="shrink-0 font-medium text-amber-700" title="Unsaved changes">
-              · unsaved
-            </span>
-          ) : null}
-          <span aria-hidden className="text-yale-800">
-            ▾
-          </span>
+          <span className="max-w-[12rem] truncate">{label}</span>
+          <span aria-hidden>▾</span>
         </button>
+        {isDirty ? (
+          <span className="shrink-0 text-sm font-medium text-amber-700">unsaved</span>
+        ) : null}
         {activePlanId && isDirty ? (
           <button
             type="button"
@@ -89,7 +88,7 @@ export default function PlansMenu({
           id={menuId}
           role="dialog"
           aria-label="Manage plans"
-          className="absolute left-0 top-full z-50 mt-2 max-h-[min(32rem,calc(100dvh-8rem))] w-[min(32rem,calc(100vw-2rem))] overflow-y-auto rounded-lg border border-yale-200 bg-white shadow-xl"
+          className={`absolute ${align === 'right' ? 'right-0' : 'left-0'} top-full z-50 mt-2 max-h-[min(32rem,calc(100dvh-8rem))] w-[min(32rem,calc(100vw-2rem))] overflow-y-auto rounded-lg border border-yale-200 bg-white shadow-xl`}
         >
           <div className="sticky top-0 z-10 flex items-center justify-between border-b border-yale-150 bg-white px-4 py-2.5">
             <p className="text-sm font-semibold text-yale-950">Manage plans</p>

@@ -45,7 +45,7 @@ function CompareIntro({ onStart }) {
       className="absolute inset-x-0 top-10 z-50 mx-auto w-[min(22rem,calc(100%-2rem))] rounded-lg border-[1.5px] border-[#c58a00] bg-[#fff4d6] p-5 text-sm leading-relaxed text-[#4a3200] shadow-xl"
     >
       <p className="font-semibold">Can&apos;t choose between electives? Narrow them down in 2 steps.</p>
-      <p>Compare is separate from Planner, so nothing here changes your plan there.</p>
+      <p>Rank is separate from Plan, so nothing here changes your plan there.</p>
       <button
         type="button"
         onClick={onStart}
@@ -128,7 +128,7 @@ export default function CompareView({
       {recovered ? <RecoveredNotice onDismiss={dismissRecovered} /> : null}
       {outdated ? (
         <div className="flex items-center justify-between gap-3 border-b border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-900 sm:px-8">
-          <span>A newer version of Compare is open in another tab. Reload to keep your changes in sync.</span>
+          <span>A newer version of Rank is open in another tab. Reload to keep your changes in sync.</span>
           <button
             type="button"
             onClick={() => window.location.reload()}

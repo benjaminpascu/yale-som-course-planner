@@ -48,8 +48,10 @@ export default function CourseRow({
     ? normalizeCategory(course.category)
     : null
 
+  // Left bar: green = in your plan, red = clashes with it.
   const rowBg = isSelected
-    ? IN_PLAN_SURFACE
+    ? // A layer on top (not a shadow) so the in-plan ring doesn't cover half the bar.
+      `${IN_PLAN_SURFACE} relative before:absolute before:inset-y-0 before:left-0 before:w-1 before:bg-save-800 before:pointer-events-none`
     : [
         'bg-white even:bg-yale-100',
         hasConflict && !isSelected

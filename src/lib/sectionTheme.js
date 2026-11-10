@@ -52,6 +52,10 @@ export function isInverseSectionTone(tone) {
 export const IN_PLAN_SURFACE =
   'border-save-100 bg-save-50 ring-2 ring-inset ring-save-100/90'
 
+/** "Plan:" button on the Plan tab: green = the plan you're editing; grey = the other plan in Compare plans. */
+export const PLAN_BUTTON_EDITING = 'border-save-800 bg-save-100 text-save-900 hover:bg-save-50'
+export const PLAN_BUTTON_OTHER = 'border-gray-300 bg-gray-100 text-gray-600 hover:bg-gray-200'
+
 /** Primary save action (plans). */
 export const SAVE_BUTTON =
   'bg-save-800 text-white hover:bg-save-900 disabled:cursor-not-allowed disabled:opacity-50'

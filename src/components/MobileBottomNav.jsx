@@ -2,7 +2,7 @@ const TABS = [
   { id: 'calendar', label: 'Calendar' },
   { id: 'catalog', label: 'Courses' },
   { id: 'plans', label: 'Plans' },
-  { id: 'compare', label: 'Compare' },
+  { id: 'compare', label: 'Rank' },
 ]
 
 export default function MobileBottomNav({ activeTab, onChange }) {

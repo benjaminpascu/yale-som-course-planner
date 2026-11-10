@@ -4,7 +4,8 @@ import HintBubble from './HintBubble'
 export function SubBar({ children, className = '' }) {
   return (
     <div
-      className={`shrink-0 border-b border-[#dde3ea] bg-white px-4 sm:px-8 ${className}`}
+      // Computer: same 1rem edges as the nav bar and the panels below, so everything lines up.
+      className={`shrink-0 border-b border-[#dde3ea] bg-white px-4 sm:px-8 lg:px-4 ${className}`}
     >
       <div className="flex min-h-14 flex-wrap items-center justify-between gap-x-6 gap-y-2">
         {children}
@@ -47,7 +48,7 @@ export function CompareStepTabs({ step, onStepChange, leftCount, shortlistCount,
   return (
     <ol
       className="-mx-4 grid w-[calc(100%+2rem)] grid-cols-2 self-stretch sm:mx-0 sm:flex sm:w-auto sm:flex-wrap sm:gap-2"
-      aria-label="Compare steps"
+      aria-label="Rank steps"
     >
       {STEPS.map((s, i) => {
         const active = s.id === step
@@ -128,6 +129,44 @@ export function TermSwitch({ terms, termCode, onTermChange }) {
             }`}
           >
             {term.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+const PLAN_VIEWS = [
+  { id: 'single', label: 'Single plan' },
+  { id: 'compare', label: 'Compare plans' },
+]
+
+/** Single plan / Compare plans switch, styled like the Fall / Spring switch. */
+export function PlanViewSwitch({ comparing, canCompare, onChange }) {
+  return (
+    <div
+      role="group"
+      aria-label="Plan view"
+      className="inline-flex rounded-md border border-[#c5ced9] bg-white p-0.5"
+    >
+      {PLAN_VIEWS.map((v) => {
+        const active = (v.id === 'compare') === comparing
+        const disabled = v.id === 'compare' && !canCompare && !comparing
+        return (
+          <button
+            key={v.id}
+            type="button"
+            aria-pressed={active}
+            disabled={disabled}
+            title={disabled ? 'Save two plans to compare them' : undefined}
+            onClick={() => onChange(v.id === 'compare')}
+            className={`rounded px-3 py-1.5 text-sm font-medium ${
+              active
+                ? 'bg-yale-800 text-white'
+                : 'text-[#1a1f2b] hover:bg-yale-50 disabled:cursor-not-allowed disabled:text-gray-400 disabled:hover:bg-transparent'
+            }`}
+          >
+            {v.label}
           </button>
         )
       })}
