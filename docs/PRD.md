@@ -240,7 +240,8 @@ This project is built in **small increments** with human review between steps.
 - **Start a new agent chat** for each PRD milestone or distinct task (e.g. “Milestone 3 filters”, “fix import script”). Do not continue unrelated milestones in one long thread.
 - The new agent must read **`AGENTS.md`** and **`docs/PROJECT_STATUS.md`** first, then the relevant PRD sections.
 - **New features: spec first.** Brainstorm the full spec with the user (what it does, where it appears, data needed, edge cases, out of scope), save it to `docs/specs/<feature>.md`, link it from the GitHub issue, and wait for approval before writing code. Small bug fixes and polish skip this.
-- After completing a milestone: summarize changes, give exact test commands (e.g. `npm run dev`), and **stop** until the user replies **approve**.
+- **Test, then ship:** when the code is done, the agent runs `npm test`, `npm run build` and checks visible changes in the browser. If anything fails, it doesn't commit and reports what's broken. If all pass: **small fixes** are committed and pushed to `main` (live on Vercel in ~1 minute) without asking; **new features** go to a `feature/` branch + pull request with a Vercel preview link, and are merged only when the user says ship it. A change that breaks the live site is undone with `git revert` + push. Full checklist: `AGENTS.md` Workflow step 5.
+- After completing a milestone: summarize what changed, say whether it's live or waiting on a preview link, give exact steps to try it, and **stop** until the user replies.
 
 ### Maintainer habits
 

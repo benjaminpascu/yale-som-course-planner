@@ -15,8 +15,18 @@ Per `docs/PRD.md` §12:
 2. Read **`docs/PROJECT_STATUS.md`** for what is done and what is next.
 3. Read **`docs/PRD.md`** for product requirements (especially §6 data model and §11 milestones).
 4. **Brainstorm the full spec before any code** for a new feature (e.g. the GitHub issues labeled `roadmap`). Work through it with the user: what it does, where it appears on screen, the data it needs, edge cases, and what's out of scope. Save the agreed spec to `docs/specs/<feature>.md`, link it from the GitHub issue, and start building only after the user approves it. Small bug fixes and polish skip this step.
-5. Work **one milestone at a time**. When finished: summarize changes, give exact test steps, then **stop** and wait for the user to approve before the next milestone.
-6. At decision points (e.g. calendar library), present 2–3 options with tradeoffs; do not choose silently.
+5. **Test, then ship (user-approved Nov 2026).** Pushing to `main` goes live on Vercel in about a minute, so first check it yourself. **All** of these must pass:
+   - `npm test` passes.
+   - `npm run build` succeeds.
+   - For anything visible: run the app (`dev` in `.claude/launch.json`) and check the change in the browser, with no console errors, in both Single plan and Compare plans views where relevant.
+
+   If a check fails and you can't fix it, **don't commit**; tell the user what's broken. When everything passes, how it ships depends on size:
+   - **Small fixes and polish → straight to live.** Commit only the files you changed (clear message in plain words), `git push origin main` without asking, and check that the live site still loads.
+   - **New features (anything that went through the spec in step 4) → test branch first.** Commit to a branch `feature/<short-name>`, push it, and open a pull request. Vercel builds a private preview link for it (posted on the pull request). Send the user that link and wait. Merge to `main` only when the user says to ship it, then check the live site.
+
+   If something breaks after going live, undo it right away with `git revert` + push, then tell the user.
+6. Work **one milestone at a time**. When finished: summarize what changed, say whether it's live or waiting on a preview link, give the user exact steps to try it, then **stop** and wait for the user before the next milestone.
+7. At decision points (e.g. calendar library), present 2–3 options with tradeoffs; do not choose silently.
 
 The user is a non-technical student. Explain clearly; ask explicitly when a product decision is needed.
 
@@ -105,4 +115,4 @@ Vite + React + Tailwind. No backend or database (Supabase removed Oct 2026). Sav
 
 ## Git / deploy
 
-GitHub: `benjaminpascu/yale-som-course-planner`. **Production:** Vercel at `https://somtimes.vercel.app` (renamed SOMtimes Nov 2026; the old `yale-som-course-planner.vercel.app` stays connected to Production, not a Vercel redirect, so `domainMove.js` can carry saved plans over). Storage keys keep the old `yale-som-course-planner-` prefix on purpose. Only create git commits when the user asks.
+GitHub: `benjaminpascu/yale-som-course-planner`. **Production:** Vercel at `https://somtimes.vercel.app` (renamed SOMtimes Nov 2026; the old `yale-som-course-planner.vercel.app` stays connected to Production, not a Vercel redirect, so `domainMove.js` can carry saved plans over). Storage keys keep the old `yale-som-course-planner-` prefix on purpose. Commit and push yourself once the checks in Workflow step 5 pass (small fixes to `main`, new features to a `feature/` branch + pull request until the user says ship it); never push code that fails them. Never force-push or rewrite history on `main`.
