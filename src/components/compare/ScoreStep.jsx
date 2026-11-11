@@ -54,7 +54,7 @@ function AddCriterionRow({ onAdd, onClose }) {
       <button type="button" onClick={onClose} className="h-9 px-2 text-sm text-[#5b6576]">
         Cancel
       </button>
-      {error ? <p className="w-full text-xs text-red-700">{error}</p> : null}
+      {error ? <p className="w-full text-xs text-danger">{error}</p> : null}
     </form>
   )
 }
@@ -141,7 +141,7 @@ function CriteriaHeader({ criteria, needsFix, onRemove, onWeight, onFixWeights, 
           </span>
         ))}
         {needsFix ? (
-          <span className="flex w-16 flex-col items-end text-xs leading-tight font-semibold text-[#9a4a00] sm:w-auto">
+          <span className="flex w-16 flex-col items-end text-xs leading-tight font-semibold text-danger sm:w-auto">
             <span className="tabular-nums">Total {total.toFixed(2)}</span>
             <button type="button" onClick={onFixWeights} className="underline underline-offset-2">
               Rescale<span className="hidden sm:inline"> to 1</span>
@@ -348,7 +348,7 @@ function ExportButton({ groups, term, professors, termLabel }) {
       onClick={handleExport}
       disabled={state === 'busy'}
       className={`h-10 w-full rounded-md border bg-white text-sm font-semibold hover:bg-yale-50 ${
-        state === 'failed' ? 'border-red-400 text-red-700' : 'border-[#c5ced9] text-[#1a1f2b]'
+        state === 'failed' ? 'border-danger text-danger' : 'border-[#c5ced9] text-[#1a1f2b]'
       }`}
     >
       {state === 'busy' ? 'Exporting…' : state === 'failed' ? 'Export failed — try again' : 'Export to Excel'}

@@ -444,7 +444,7 @@ export default function WeeklyCalendar({
       {/* No units here: the semester's units are the Total under Requirements. */}
       {formatCoursesInPeriod(periodCourses.length, periodLabel)}
       {periodUntimedCount > 0 ? (
-        <span className="text-amber-200 lg:text-amber-700">
+        <span className="text-amber-200 lg:text-caution">
           {` · ${periodUntimedCount} without weekly time`}
         </span>
       ) : null}

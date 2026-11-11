@@ -454,7 +454,7 @@ function App() {
 
   if (status === 'error') {
     return (
-      <div className="px-4 py-6 text-red-700">
+      <div className="px-4 py-6 text-danger">
         <p className="font-semibold">Could not load data</p>
         <p className="mt-1 text-sm">{error}</p>
       </div>
@@ -587,7 +587,7 @@ function App() {
           <div className="flex min-w-0 items-center gap-2">
             <p className="min-w-0 truncate text-sm text-[#1a1f2b]">
               <span className="font-semibold">{activePlan?.name ?? 'No plan selected'}</span>
-              {isDirty ? <span className="font-medium text-amber-700"> · unsaved</span> : null}
+              {isDirty ? <span className="font-medium text-caution"> · unsaved</span> : null}
             </p>
             {planStore.activePlanId && isDirty ? (
               <button

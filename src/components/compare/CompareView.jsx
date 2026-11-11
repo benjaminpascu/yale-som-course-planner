@@ -139,7 +139,7 @@ export default function CompareView({
         </div>
       ) : null}
       {saveFailed ? (
-        <p className="px-4 py-2 text-xs font-medium text-red-700 sm:px-8">
+        <p className="px-4 py-2 text-xs font-medium text-danger sm:px-8">
           Couldn&apos;t save — this browser is blocking storage.
         </p>
       ) : null}

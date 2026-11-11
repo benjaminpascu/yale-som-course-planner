@@ -159,7 +159,7 @@ export default function PlanCourseRow({
           >
             <p className="text-gray-500">{formatSchedule(course)}</p>
             {!hasMeetingTime(course) ? (
-              <p className="font-medium text-amber-700">
+              <p className="font-medium text-caution">
                 {NO_MEETING_TIME_MESSAGE}
               </p>
             ) : null}
@@ -168,7 +168,7 @@ export default function PlanCourseRow({
         <button
           type="button"
           onClick={() => onRemoveCourse(course.courseId)}
-          className={`-mr-1 flex shrink-0 items-center justify-center rounded-md leading-none text-gray-400 hover:bg-red-50 hover:text-red-700 ${
+          className={`-mr-1 flex shrink-0 items-center justify-center rounded-md leading-none text-gray-400 hover:bg-danger/5 hover:text-danger ${
             compact ? 'h-6 w-6 text-base' : 'h-7 w-7 text-lg'
           }`}
           aria-label={`Remove ${course.courseNumber} from plan`}

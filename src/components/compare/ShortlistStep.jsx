@@ -111,7 +111,7 @@ function CourseCard({ card, onSwipe }) {
           {card.time ? (
             <span className="text-sm font-semibold tabular-nums">{card.time}</span>
           ) : (
-            <span className="text-sm text-amber-700">No time defined</span>
+            <span className="text-sm text-caution">No time defined</span>
           )}
         </div>
       </div>

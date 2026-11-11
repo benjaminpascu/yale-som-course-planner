@@ -16,6 +16,11 @@
   --color-save-100: #d4e8da;
   --color-save-800: #1a5632;
   --color-save-900: #144428;
+  /* One red for every problem flag (Conflict, errors) and remove/delete buttons;
+     one amber for softer heads-ups ("No time defined", unsaved). Use only these. */
+  --color-danger: #b91c1c;
+  --color-danger-hover: #991b1b;
+  --color-caution: #b45309;
 }
 
 /* App-like mobile: no pinch-zoom; 16px inputs avoid iOS focus auto-zoom */

@@ -75,7 +75,7 @@ export default function ComparePlansView({
     return (
       <div className="flex items-center gap-2">
         {side === editSide && isDirty ? (
-          <span className="shrink-0 text-sm font-medium text-amber-700">unsaved</span>
+          <span className="shrink-0 text-sm font-medium text-caution">unsaved</span>
         ) : null}
         {/* Looks like the "Plan:" button; an invisible menu on top keeps the ▾ right after the name. */}
         <label

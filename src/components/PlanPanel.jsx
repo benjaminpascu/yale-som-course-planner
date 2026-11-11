@@ -68,7 +68,7 @@ export default function PlanPanel({
   const summaryEl = showSummary ? (
     <span className="shrink-0 font-normal text-yale-800">
       {formatPlanHeaderSummary(courseCount, totalUnits)}
-      {isDirty ? <span className="text-red-700"> · unsaved</span> : null}
+      {isDirty ? <span className="text-caution"> · unsaved</span> : null}
     </span>
   ) : null
 

@@ -80,7 +80,7 @@ export default function RatingInput({ value, onCommit, ariaLabel, rowIndex, colI
           : { backgroundColor: tone.bg, color: tone.fg, borderColor: tone.bd }
       }
       className={`h-9 w-16 rounded-md border text-center text-sm font-bold tabular-nums placeholder:font-normal placeholder:text-[#8a95a5] focus:outline-none focus:ring-2 focus:ring-yale-800 disabled:cursor-not-allowed disabled:bg-[#f5f7fa] ${
-        invalid ? 'border-red-400 bg-red-50 text-red-700' : ''
+        invalid ? 'border-danger bg-danger/5 text-danger' : ''
       }`}
     />
   )

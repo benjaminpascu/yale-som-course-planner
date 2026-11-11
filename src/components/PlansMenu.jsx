@@ -125,7 +125,7 @@ export default function PlansMenu({
     <div ref={rootRef} className="relative flex shrink-0">
       <div className="flex flex-wrap items-center gap-2">
         {isDirty ? (
-          <span className="shrink-0 text-sm font-medium text-amber-700">unsaved</span>
+          <span className="shrink-0 text-sm font-medium text-caution">unsaved</span>
         ) : null}
         <button
           type="button"
@@ -214,7 +214,7 @@ export default function PlansMenu({
                     finishImport(importState.choose, 'replace')
                   }
                 }}
-                className="rounded-md border border-red-900 bg-red-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-950"
+                className="rounded-md border border-danger-hover bg-danger px-3 py-1.5 text-xs font-medium text-white hover:bg-danger-hover"
               >
                 Replace my plans
               </button>
@@ -231,12 +231,12 @@ export default function PlansMenu({
             <div className="flex items-start gap-2 border-b border-yale-150 bg-yale-50 px-4 py-2.5 text-sm">
               <div className="min-w-0 flex-1">
                 {importState.error ? (
-                  <p className="text-red-800">{importState.error}</p>
+                  <p className="text-danger">{importState.error}</p>
                 ) : (
                   <p className="text-yale-950">{importState.note}</p>
                 )}
                 {importState.missing?.length ? (
-                  <p className="mt-1 text-amber-800">
+                  <p className="mt-1 text-caution">
                     Left out, no longer in the catalog: {importState.missing.join(', ')}
                   </p>
                 ) : null}

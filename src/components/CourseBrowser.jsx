@@ -300,7 +300,7 @@ export default function CourseBrowser({
           {filtered.length === 0 ? (
             <p
               className={`px-4 py-8 text-center text-sm ${
-                timeRangeError ? 'text-amber-800' : 'text-gray-500'
+                timeRangeError ? 'text-danger' : 'text-gray-500'
               }`}
             >
               {timeRangeError ??
@@ -341,7 +341,7 @@ export default function CourseBrowser({
         {filtered.length === 0 ? (
           <p
             className={`px-4 py-8 text-center text-sm ${
-              timeRangeError ? 'text-amber-800' : 'text-gray-500'
+              timeRangeError ? 'text-danger' : 'text-gray-500'
             }`}
           >
             {timeRangeError ??

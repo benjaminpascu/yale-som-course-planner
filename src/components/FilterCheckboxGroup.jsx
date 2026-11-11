@@ -95,7 +95,7 @@ export default function FilterCheckboxGroup({
         })}
       </ul>
       {footer && (
-        <p className="text-xs leading-snug text-amber-800">{footer}</p>
+        <p className="text-xs leading-snug text-caution">{footer}</p>
       )}
     </fieldset>
   )

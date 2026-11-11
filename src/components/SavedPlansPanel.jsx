@@ -271,7 +271,7 @@ export default function SavedPlansPanel({
                             ) : null}
                             {formatPlanSummary(savedCount, savedUnits)}
                             {showUnsaved ? (
-                              <span className="text-red-700"> · unsaved</span>
+                              <span className="text-caution"> · unsaved</span>
                             ) : null}
                           </p>
                         </div>
@@ -361,7 +361,7 @@ export default function SavedPlansPanel({
                                 setOpenMenuPlanId(null)
                               }
                             }}
-                            className="flex items-center gap-1.5 rounded-md border border-red-900 bg-red-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-950"
+                            className="flex items-center gap-1.5 rounded-md border border-danger-hover bg-danger px-3 py-1.5 text-xs font-medium text-white hover:bg-danger-hover"
                           >
                             <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
                               <path d="M4 7h16" />

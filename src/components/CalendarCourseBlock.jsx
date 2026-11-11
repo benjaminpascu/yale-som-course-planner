@@ -259,7 +259,7 @@ export default function CalendarCourseBlock({
             e.stopPropagation()
             onRemove(course.courseId)
           }}
-          className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full border border-gray-300 bg-white text-xs leading-none text-gray-600 opacity-0 shadow-sm hover:border-red-300 hover:bg-red-50 hover:text-red-700 focus:outline-none focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-yale-400 group-hover:opacity-100 max-md:hidden"
+          className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full border border-gray-300 bg-white text-xs leading-none text-gray-600 opacity-0 shadow-sm hover:border-danger/40 hover:bg-danger/5 hover:text-danger focus:outline-none focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-yale-400 group-hover:opacity-100 max-md:hidden"
           aria-label={`Remove ${course.courseNumber} from plan`}
         >
           <span aria-hidden>×</span>

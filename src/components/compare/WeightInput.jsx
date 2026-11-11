@@ -33,7 +33,7 @@ export default function WeightInput({ weight, onCommit, ariaLabel }) {
       }}
       onBlur={() => setFocused(false)}
       className={`h-8 w-16 rounded-md border text-center text-sm font-semibold tabular-nums text-[#1a1f2b] focus:outline-none focus:ring-2 focus:ring-yale-800 ${
-        invalid ? 'border-red-400 bg-red-50 text-red-700' : 'border-[#dde3ea] bg-[#f5f7fa]'
+        invalid ? 'border-danger bg-danger/5 text-danger' : 'border-[#dde3ea] bg-[#f5f7fa]'
       }`}
     />
   )

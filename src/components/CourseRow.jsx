@@ -55,7 +55,7 @@ export default function CourseRow({
     : [
         'bg-white even:bg-yale-100',
         hasConflict && !isSelected
-          ? 'shadow-[inset_4px_0_0_0_#dc2626]'
+          ? 'shadow-[inset_4px_0_0_0_var(--color-danger)]'
           : '',
       ].join(' ')
 
@@ -94,7 +94,7 @@ export default function CourseRow({
                   <span className="text-gray-500">
                     {formatSessionLabel(course.session)} ·{' '}
                   </span>
-                  <span className="text-amber-700">
+                  <span className="text-caution">
                     {NO_MEETING_TIME_MESSAGE}
                   </span>
                 </>
@@ -127,7 +127,7 @@ export default function CourseRow({
                   </span>
                 ) : null}
                 {hasConflict && !isSelected ? (
-                  <span className="rounded bg-red-700 px-1 py-px text-[10px] font-semibold leading-tight text-white shadow-sm">
+                  <span className="rounded bg-danger px-1 py-px text-[10px] font-semibold leading-tight text-white shadow-sm">
                     Conflict
                   </span>
                 ) : null}
@@ -149,7 +149,7 @@ export default function CourseRow({
                   : NO_MEETING_TIME_MESSAGE
               }
               valueClassName={
-                hasMeetingTime(course) ? '' : 'font-medium text-amber-700'
+                hasMeetingTime(course) ? '' : 'font-medium text-caution'
               }
             />
             <FactItem
@@ -192,7 +192,7 @@ export default function CourseRow({
             onClick={onTogglePlan}
             className={`w-full rounded-md border px-2.5 py-1.5 text-xs font-semibold shadow-sm ${
               isSelected
-                ? 'border-red-800 bg-red-700 text-white hover:bg-red-800'
+                ? 'border-danger-hover bg-danger text-white hover:bg-danger-hover'
                 : 'border-save-900 bg-save-800 text-white hover:bg-save-900'
             }`}
           >
