@@ -164,6 +164,7 @@ function CalendarGrid({
   springYear,
   openDetailKey,
   setOpenDetailKey,
+  onRemoveCourse,
 }) {
   const columnHeight = gridHeight
 
@@ -234,6 +235,7 @@ function CalendarGrid({
                   blockTopPx={top}
                   gridHeight={gridHeight}
                   isDetailOpen={openDetailKey === blockKey}
+                  onRemove={onRemoveCourse}
                   onToggleDetail={(open) =>
                     setOpenDetailKey(open ? blockKey : null)
                   }
@@ -302,6 +304,8 @@ export default function WeeklyCalendar({
   sessionView,
   // Compare Plans: the plan menu, shown at the right of the header.
   headerAction = null,
+  // Shows a × on each block (on hover) that takes the course out of the plan.
+  onRemoveCourse = null,
 }) {
   // The Fall/Spring switch picks the semester; the tabs then split it into its half-terms.
   const semester = termCodeToSemester(termCode)
@@ -430,6 +434,7 @@ export default function WeeklyCalendar({
     springYear,
     openDetailKey,
     setOpenDetailKey,
+    onRemoveCourse,
   }
 
   const showSessionTabs = !sharedSwitch && viewOptions.length > 1

@@ -127,6 +127,7 @@ export default function ComparePlansView({
             expanded={calendarOpen}
             onToggle={togglePane}
             headerAction={planMenu(side)}
+            onRemoveCourse={removeOn(side)}
             className="flex-1"
           />
         ))}

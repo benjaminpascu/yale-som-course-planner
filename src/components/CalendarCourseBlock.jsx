@@ -132,6 +132,7 @@ export default function CalendarCourseBlock({
   gridHeight,
   isDetailOpen,
   onToggleDetail,
+  onRemove = null,
 }) {
   const tooltipId = useId()
   const buttonRef = useRef(null)
@@ -222,8 +223,15 @@ export default function CalendarCourseBlock({
         />
       ) : null}
 
-      <button
+      {/* Hover box: the course block plus a corner × that removes it from the plan. */}
+      <div
         ref={buttonRef}
+        onMouseEnter={openDesktopTooltip}
+        onMouseLeave={scheduleHideDesktopTooltip}
+        className={`group absolute hover:z-[100] focus-within:z-[100] ${isDetailOpen ? 'z-30' : 'z-10'}`}
+        style={positionStyle}
+      >
+      <button
         type="button"
         aria-expanded={isDetailOpen}
         aria-controls={tooltipId}
@@ -233,12 +241,9 @@ export default function CalendarCourseBlock({
             onToggleDetail(!isDetailOpen)
           }
         }}
-        onMouseEnter={openDesktopTooltip}
-        onMouseLeave={scheduleHideDesktopTooltip}
         onFocus={openDesktopTooltip}
         onBlur={scheduleHideDesktopTooltip}
-        className={`absolute text-center text-[10px] leading-tight text-white shadow-sm transition-shadow hover:z-[100] hover:shadow-md focus:outline-none focus-visible:z-[100] focus-visible:ring-2 focus-visible:ring-yale-400 focus-visible:ring-offset-1 ${colorClass} ${isDetailOpen ? 'z-30' : 'z-10'} rounded px-1 py-0.5`}
-        style={positionStyle}
+        className={`absolute inset-0 text-center text-[10px] leading-tight text-white shadow-sm transition-shadow group-hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-yale-400 focus-visible:ring-offset-1 ${colorClass} rounded px-1 py-0.5`}
       >
         <span className="block truncate font-semibold">
           {course.courseNumber}
@@ -247,6 +252,20 @@ export default function CalendarCourseBlock({
           {course.startTime}–{course.endTime}
         </span>
       </button>
+      {onRemove ? (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            onRemove(course.courseId)
+          }}
+          className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full border border-gray-300 bg-white text-xs leading-none text-gray-600 opacity-0 shadow-sm hover:border-red-300 hover:bg-red-50 hover:text-red-700 focus:outline-none focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-yale-400 group-hover:opacity-100 max-md:hidden"
+          aria-label={`Remove ${course.courseNumber} from plan`}
+        >
+          <span aria-hidden>×</span>
+        </button>
+      ) : null}
+      </div>
 
       {desktopTooltipOpen && tooltipStyle
         ? createPortal(

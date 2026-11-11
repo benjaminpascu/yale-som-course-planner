@@ -45,6 +45,7 @@ export default function PlanningPanel({
         springYear={springYear}
         sessionView={sessionView}
         headerAction={headerAction}
+        onRemoveCourse={onRemoveCourse}
         collapsible={!calendarOnly}
         fillViewport={calendarOnly}
         expanded={calendarOnly ? true : expandedPane === 'calendar'}
