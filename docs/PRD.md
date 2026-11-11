@@ -239,6 +239,7 @@ This project is built in **small increments** with human review between steps.
 
 - **Start a new agent chat** for each PRD milestone or distinct task (e.g. “Milestone 3 filters”, “fix import script”). Do not continue unrelated milestones in one long thread.
 - The new agent must read **`AGENTS.md`** and **`docs/PROJECT_STATUS.md`** first, then the relevant PRD sections.
+- **New features: spec first.** Brainstorm the full spec with the user (what it does, where it appears, data needed, edge cases, out of scope), save it to `docs/specs/<feature>.md`, link it from the GitHub issue, and wait for approval before writing code. Small bug fixes and polish skip this.
 - After completing a milestone: summarize changes, give exact test commands (e.g. `npm run dev`), and **stop** until the user replies **approve**.
 
 ### Maintainer habits

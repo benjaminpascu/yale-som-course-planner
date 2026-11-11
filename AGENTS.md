@@ -14,8 +14,9 @@ Per `docs/PRD.md` §12:
 1. **One milestone or focused task = one new agent** (fresh chat). Do not continue unrelated work in a long, stale thread.
 2. Read **`docs/PROJECT_STATUS.md`** for what is done and what is next.
 3. Read **`docs/PRD.md`** for product requirements (especially §6 data model and §11 milestones).
-4. Work **one milestone at a time**. When finished: summarize changes, give exact test steps, then **stop** and wait for the user to approve before the next milestone.
-5. At decision points (e.g. calendar library), present 2–3 options with tradeoffs; do not choose silently.
+4. **Brainstorm the full spec before any code** for a new feature (e.g. the GitHub issues labeled `roadmap`). Work through it with the user: what it does, where it appears on screen, the data it needs, edge cases, and what's out of scope. Save the agreed spec to `docs/specs/<feature>.md`, link it from the GitHub issue, and start building only after the user approves it. Small bug fixes and polish skip this step.
+5. Work **one milestone at a time**. When finished: summarize changes, give exact test steps, then **stop** and wait for the user to approve before the next milestone.
+6. At decision points (e.g. calendar library), present 2–3 options with tradeoffs; do not choose silently.
 
 The user is a non-technical student. Explain clearly; ask explicitly when a product decision is needed.
 
