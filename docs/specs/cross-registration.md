@@ -21,7 +21,6 @@ current automatically like SOM's.
 
 - No credit or unit conversion. Non-SOM courses count **0 units** everywhere, Law included.
 - No mixed list (e.g. SOM + Jackson in one catalog list).
-- No Subject or Department filter (the search box finds "GLBL", "ECON", etc.).
 - No Law Change Log, exam info or bidding data.
 - Non-SOM courses are **not** in Rank / Compare Courses (SOM only).
 - No phone-specific work beyond keeping the phone layout usable (mobile is deprioritized for launch).
@@ -58,8 +57,12 @@ The search box searches only that school.
 
 **Filters panel:**
 - SOM: exactly as today.
-- Any other school: only **Day of week** and **Time range**. Session, Units,
-  Bid or permission, Category and Requirements are hidden.
+- Any other school: **Day of week**, **Time range** and **Department** (a
+  two-column checklist like Category, labels as on Yale's course search, e.g.
+  "Economics (ECON)"; names from Yale's subject list in
+  `docs/data-samples/yale_subjects.json`). Session, Units, Bid or permission,
+  Category and Requirements are hidden. Added after the user saw ~2,000 Yale
+  College courses.
 
 **Course rows, details and calendar blocks for non-SOM courses:**
 - No units shown anywhere (no "(0 units)", no "Units:" line). Approved by the user.

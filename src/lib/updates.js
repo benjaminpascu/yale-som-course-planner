@@ -13,7 +13,7 @@ export const UPDATES = [
     version: '1.1.0',
     date: '2026-11-11',
     changes: [
-      'You can now plan courses from other Yale schools: pick a school (for example Jackson, School of the Environment or Yale College) in the new dropdown above the Course Catalog, then add courses to your plan as usual. They show on your Weekly Calendar and are checked for conflicts with your SOM courses.',
+      'You can now plan courses from other Yale schools: pick a school (for example Jackson, School of the Environment or Yale College) in the new dropdown above the Course Catalog, then add courses to your plan as usual. They show on your Weekly Calendar and are checked for conflicts with your SOM courses. Use Filters → Department (e.g. Economics) to narrow a big school like Yale College.',
       'Courses from other schools count as 0 units in Requirements. A note appears there whenever your plan has one, so check with the registrar how they count toward your SOM units.',
     ],
   },
