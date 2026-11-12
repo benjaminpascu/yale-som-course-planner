@@ -50,6 +50,7 @@ The user is a non-technical student. Explain clearly; ask explicitly when a prod
 | **Rank hidden for launch** | Only links ending in `?rank` show the Rank tab (`RANK_UNLOCKED` in `App.jsx`) |
 | **Automatic course updates** | ✅ Every 6 hours from Yale SOM's feed (Nov 2026); new semesters appear, finished ones hide |
 | **Updates page** (`/updates`, patch notes; version 1.0.1) | ✅ Live (Nov 2026); every change adds an entry (Workflow step 5) |
+| **Courses from across Yale** (School picker; spec `docs/specs/cross-registration.md`; version 1.1.0) | Built on `feature/cross-registration`, waiting on preview + "ship it"; Law reader unfinished |
 | **Wider promo** | When you choose (not a separate dev milestone) |
 
 Full detail: **`docs/PROJECT_STATUS.md`**.
@@ -61,7 +62,7 @@ Full detail: **`docs/PROJECT_STATUS.md`**.
 | Product spec | `docs/PRD.md` |
 | **Courses (one file per term)** | `docs/data-samples/courses_master_<term>.csv`, e.g. `fall2026`, `spring2027` (identical columns; new terms appear automatically) |
 | Tags | Inline `tags` column on those CSVs (semicolon-separated names), set from Yale's attribute codes (`MGMS` → STEM, `MGGE` → GBS Req). Sections of one course share tags at load time (`harmonizeSectionTags`). |
-| **Updating courses** | Automatic: a GitHub job (`.github/workflows/update-courses.yml`) pulls Yale SOM's course feed every 6 hours, adds new semesters and commits changes. Details: `docs/updating-course-data.md` |
+| **Updating courses** | Automatic: a GitHub job (`.github/workflows/update-courses.yml`) pulls Yale SOM's course feed every 6 hours, adds new semesters and commits changes. Other schools: `.github/workflows/update-yale-courses.yml`, once a day, into `yale_courses_<term>.csv` (needs the `YALE_API_KEY` secret). Details: `docs/updating-course-data.md` |
 | Manual data fixes that survive updates | `docs/data-samples/course_overrides.csv` |
 | Vercel deploy steps | `docs/vercel-setup.md` |
 
@@ -103,6 +104,7 @@ No database or environment variables. Course data is the CSVs in `docs/data-samp
 | Session- and term-aware conflicts | `src/lib/scheduleConflicts.js` |
 | Term selector (Fall / Spring) | `TermSwitch` in `src/components/SubBar.jsx` (top right of the sub bar, both modes); term list from `getCatalogTerms` in `academicYear.js` |
 | Load data (every `courses_master_*.csv`, bundled; no code change for a new term) | `src/lib/loadData.js` |
+| Other Yale schools: School picker, school labels/order, background load of `yale_courses_*.csv`, daily import | `src/lib/schools.js`, `src/components/SchoolPicker.jsx`, `loadOtherSchoolCourses` in `loadData.js`; `scripts/update-yale-courses.js`, `scripts/lib/yaleImport.js`, `scripts/lib/lawImport.js`; notes in `docs/updating-course-data.md` |
 | Parse courses + `hasMeetingTime` + inline tags | `src/lib/parseCourses.js` |
 | Category typo aliases only (new CSV values pass through) | `src/lib/categoryDisplay.js` |
 | CSV column validation | `src/lib/csvColumns.js` |

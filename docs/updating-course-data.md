@@ -98,3 +98,53 @@ course is gone, so you can delete that line.
   renumbers a course, students' Compare notes for it start fresh.
 - **Course category typos** in Yale's data (e.g. `MMG GBS`) are merged for
   display in `src/lib/categoryDisplay.js`.
+
+## Courses from the rest of Yale (cross-registration)
+
+Courses from every other Yale school (Jackson, Environment, Public Health,
+Yale College, Graduate School, Architecture, Art, Divinity, Drama, Medicine,
+Music, Nursing, Physician Associate) are in
+`docs/data-samples/yale_courses_<term>.csv`: the SOM columns plus `School`
+(Yale's school code, e.g. `GB` = Jackson) and `Course Page`. The app loads them
+in the background, so SOM-only use stays as fast as before. Spec:
+`docs/specs/cross-registration.md`.
+
+**Updates itself once a day** (`.github/workflows/update-yale-courses.yml`,
+`npm run update-yale-courses`, add `-- --check` to preview). It uses Yale's
+official **Courses Web Service v3** with the API key from the Yale API Portal
+app "SOMtimes course import": GitHub secret `YALE_API_KEY` (and `.env.local`
+on a computer, never committed). Only the open semesters that SOM has files for
+are updated.
+
+How it stays gentle and safe:
+
+- Yale answers one school + subject at a time, and only **one of its three
+  servers has data**: answers cycle empty, empty, data. So each question is
+  asked up to 3 times in a row before "no courses" is believed.
+- `docs/data-samples/yale_subject_pairs.json` remembers which school/subject
+  pairs have courses. Those are re-asked every 2 days (half each day); all
+  other pairs are re-checked once every 28 days (a slice each day). Roughly
+  2,000 requests a day. `--full` asks every pair (first run: ~15,000 requests,
+  about an hour).
+- A pair that comes back empty keeps its old courses until it has been empty
+  7 days in a row. A semester that would shrink by more than half, or Yale
+  errors on most questions, keeps the old file and fails the job (GitHub
+  emails the repo owner).
+- Cancelled sections are left out. A course listed under several subjects
+  with one CRN appears once, under its main listing. Course IDs are
+  `<termCode>-<crn>`, so saved plans survive updates.
+- Times: Yale writes `MW 2.35-3.50` (no am/pm: 8–11 morning, 12 noon, 1–6
+  afternoon) and `Th 7.00-8.55p` (evening). Several meeting patterns with the
+  same time are combined; otherwise the first timed one is used.
+- Units are always 0 (no SOM units for other schools).
+
+**Law School** isn't in Yale's API (only 2–3 Law courses per term). Its courses
+would come from Law's public course list at courses.law.yale.edu
+(`scripts/lib/lawImport.js`), read-only, the list anyone sees without logging
+in. That reader isn't finished: it needs the exact request the Law page sends
+for its course list (copy it from a browser's developer tools → Network →
+`DataActionGetCoursesPerTerm` → Payload). Until then Law doesn't appear in the
+School picker.
+
+Code: `scripts/update-yale-courses.js`, `scripts/lib/yaleImport.js` (tests next
+to it), `src/lib/schools.js`, `src/components/SchoolPicker.jsx`.
