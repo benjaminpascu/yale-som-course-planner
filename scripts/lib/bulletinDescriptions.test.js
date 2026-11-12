@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { bulletinUrl, parseBulletinDescription } from './bulletinDescriptions.js'
+import { describe, expect, it, vi } from 'vitest'
+import { bulletinUrl, fillMissingDescriptions, parseBulletinDescription } from './bulletinDescriptions.js'
 
 const answer = `<?xml version="1.0"?>
 <courseinfo>
@@ -28,4 +28,18 @@ describe('Bulletin descriptions', () => {
   it('looks a course up by its number', () => {
     expect(bulletinUrl('EP&E 4301')).toContain('code=EP%26E%204301')
   })
+})
+
+it('keeps existing descriptions and looks up Bulletin text only for remaining blanks', async () => {
+  const current = { 'Course Number': 'GLBL 7077', 'Course Description': 'Course Search text' }
+  const published = { 'Course Number': 'GLBL 6574', 'Course Description': '' }
+  const blank = { 'Course Number': 'GLBL 5805', 'Cross Listings': 'FILM 5805', 'Course Description': '' }
+  const lookup = vi.fn().mockResolvedValueOnce('').mockResolvedValueOnce('Cross-listed Bulletin text')
+
+  await fillMissingDescriptions([current, published, blank], lookup, row => row === published ? 'Published text' : '')
+
+  expect(current['Course Description']).toBe('Course Search text')
+  expect(published['Course Description']).toBe('Published text')
+  expect(blank['Course Description']).toBe('Cross-listed Bulletin text')
+  expect(lookup.mock.calls).toEqual([['GLBL 5805'], ['FILM 5805']])
 })

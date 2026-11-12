@@ -142,13 +142,22 @@ How it works and stays safe:
   ("Also listed as" in the app; search and the Department filter use them).
   Course IDs are `<termCode>-<main number>-<section>` (e.g.
   `202603-AFST3360-01`), so saved plans survive updates.
-- **Descriptions:** Yale's API has none for some schools (Jackson, Architecture,
-  Music, Medicine…). Those are filled from Yale's Bulletin (catalog.yale.edu)
-  through its public per-course lookup, cached in
-  `docs/data-samples/yale_bulletin_descriptions.json` and re-checked monthly.
-  The Bulletin is the yearly catalog, so a few may be older than
-  courses.yale.edu. (courses.yale.edu itself is behind a bot check, so it isn't
-  used.)
+- **Descriptions:** When the Courses Web Service leaves a description blank,
+  the importer looks up Yale Course Search by term and CRN. Each daily run
+  checks up to 80 sections per open term, starting with sections that have
+  never been checked and giving visible gaps priority. A successful Course
+  Search description is preferred and refreshed every 30 days. It stays in
+  `docs/data-samples/yale_course_search_descriptions.json` if a request fails.
+  For remaining blanks, the importer keeps the last published text or looks
+  up the course number and cross-listings in Yale's Bulletin. Bulletin
+  lookups use the existing monthly cache.
+- **Course Search health check:** Each run rechecks a known description when
+  available, reports valid detail responses and counts fresh descriptions.
+  A valid blank is counted separately from a failed request. GitHub Actions
+  warns about partial failures or descriptions that disappeared from the
+  source. If none of the attempted sections get a valid detail response,
+  the job reports a failure after saving and testing any valid catalog
+  updates. Open the `Fetch courses from Yale` step for details.
 - Department names for the Department filter: `docs/data-samples/yale_subjects.json`.
 - Times: Yale writes `MW 2.35-3.50` (no am/pm: 8–11 morning, 12 noon, 1–6
   afternoon) and `Th 7.00-8.55p` (evening). Several meeting patterns with the

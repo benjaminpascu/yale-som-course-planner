@@ -143,7 +143,7 @@ function text(value) {
  *
  * @param {Record<string, unknown>[]} sections — Courses Web Service v3 items
  * @param {string} termCode
- * @returns {{ rows: Record<string, string>[], problems: string[] }}
+ * @returns {{ rows: Record<string, string>[], crnsByCourseId: Map<string, string>, problems: string[] }}
  */
 export function buildYaleRows(sections, termCode) {
   const problems = []
@@ -213,7 +213,7 @@ export function buildYaleRows(sections, termCode) {
   }
 
   const rows = []
-  const usedIds = new Set()
+  const crnsByCourseId = new Map()
   for (const listings of classes) {
     listings.sort((a, b) => Number(text(a.crn)) - Number(text(b.crn)))
     const main = mainNumber(listings)
@@ -223,8 +223,8 @@ export function buildYaleRows(sections, termCode) {
       .flatMap((s) => list(s.meetingPatternLocation))
       .filter((room) => !/HTBA/i.test(room))
     let id = yaleCourseId(termCode, main, text(rep.sectionNumber))
-    if (usedIds.has(id)) id = `${id}-${text(rep.crn)}`
-    usedIds.add(id)
+    if (crnsByCourseId.has(id)) id = `${id}-${text(rep.crn)}`
+    crnsByCourseId.set(id, text(rep.crn))
     const allNumbers = [...new Set(listings.flatMap(listingNumbers))].sort()
 
     rows.push({
@@ -257,7 +257,7 @@ export function buildYaleRows(sections, termCode) {
   }
 
   rows.sort((a, b) => a['Course Number'].localeCompare(b['Course Number']) || a.Section.localeCompare(b.Section))
-  return { rows, problems }
+  return { rows, crnsByCourseId, problems }
 }
 
 function list(value) {

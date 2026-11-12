@@ -33,8 +33,8 @@ jobs:
 
       - run: npm ci
 
-      # Exits with an error if any semester couldn't be updated; the ones that
-      # worked are still saved, and the job is marked failed at the end.
+      # Save safe updates even if a term or the Course Search health check fails.
+      # Report the failure after testing and publishing any valid changes.
       - name: Fetch courses from Yale
         id: fetch
         continue-on-error: true
@@ -75,8 +75,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/update-yale-courses.yml/enable"
 
-      - name: Report failed semesters
+      - name: Report update or source failures
         if: steps.fetch.outcome == 'failure'
         run: |
-          echo "::error::Some semesters could not be updated from Yale. Open the 'Fetch courses from Yale' step above for details."
+          echo "::error::The Yale update found a data source problem. Open the 'Fetch courses from Yale' step above for details."
           exit 1

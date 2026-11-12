@@ -43,7 +43,8 @@ import {
   yaleFileName,
 } from './lib/yaleImport.js'
 import { fetchLawSections, LAW_SCHOOL } from './lib/lawImport.js'
-import { bulletinUrl, parseBulletinDescription } from './lib/bulletinDescriptions.js'
+import { createBulletinLookup, fillMissingDescriptions } from './lib/bulletinDescriptions.js'
+import { refreshCourseSearchDescriptions } from './lib/courseSearchDescriptions.js'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const DATA_DIR = path.join(ROOT, 'docs/data-samples')
@@ -52,8 +53,7 @@ const STATE_FILE = path.join(DATA_DIR, 'yale_subject_pairs.json')
 const SUBJECT_NAMES_FILE = path.join(DATA_DIR, 'yale_subjects.json')
 // Bulletin descriptions for courses Yale's API leaves without one (looked up once a month each).
 const BULLETIN_FILE = path.join(DATA_DIR, 'yale_bulletin_descriptions.json')
-const BULLETIN_REFRESH_DAYS = 30
-const BULLETIN_MAX_LOOKUPS = 1500
+const COURSE_SEARCH_FILE = path.join(DATA_DIR, 'yale_course_search_descriptions.json')
 
 const SWEEP_DAYS = 7
 const CHECK_EVERY = 100
@@ -176,44 +176,11 @@ const terms = termsToUpdate(somTerms, today)
 
 const state = fs.existsSync(STATE_FILE) ? JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')) : {}
 const bulletin = fs.existsSync(BULLETIN_FILE) ? JSON.parse(fs.readFileSync(BULLETIN_FILE, 'utf8')) : {}
-let bulletinLookups = 0
+const courseSearchCache = new Map(fs.existsSync(COURSE_SEARCH_FILE)
+  ? Object.entries(JSON.parse(fs.readFileSync(COURSE_SEARCH_FILE, 'utf8')))
+  : [])
+const bulletinLookup = createBulletinLookup(bulletin, today)
 
-/** Description from Yale's Bulletin for a course number ('' if none), cached in BULLETIN_FILE. */
-async function bulletinDescription(courseNumber) {
-  const cached = bulletin[courseNumber]
-  const fresh = cached && (today - new Date(cached.checked)) / 86_400_000 < BULLETIN_REFRESH_DAYS
-  if (fresh || (cached && bulletinLookups >= BULLETIN_MAX_LOOKUPS)) return cached.text
-  if (bulletinLookups >= BULLETIN_MAX_LOOKUPS) return ''
-  bulletinLookups++
-  try {
-    const response = await fetch(bulletinUrl(courseNumber), {
-      headers: { 'User-Agent': 'SOMtimes course planner (somtimes.vercel.app)' },
-      signal: AbortSignal.timeout(20_000),
-    })
-    if (!response.ok) throw new Error(`catalog answered ${response.status}`)
-    const text = parseBulletinDescription(await response.text())
-    bulletin[courseNumber] = { text, checked: todayStamp }
-    await sleep(PAUSE_MS)
-    return text
-  } catch {
-    return cached?.text ?? ''
-  }
-}
-
-/** Fills empty descriptions from the Bulletin (main number first, then cross-listings). */
-async function fillFromBulletin(rows) {
-  for (const row of rows) {
-    if (row['Course Description'] || row.School === LAW_SCHOOL) continue
-    const numbers = [row['Course Number'], ...(row['Cross Listings'] || '').split(';').map((n) => n.trim()).filter(Boolean)]
-    for (const number of numbers) {
-      const text = await bulletinDescription(number)
-      if (text) {
-        row['Course Description'] = text
-        break
-      }
-    }
-  }
-}
 // A school/subject pair with courses in one semester probably has some in the other too.
 const knownAnywhere = new Set(Object.values(state).flatMap((term) => Object.keys(term.pairs ?? {})))
 const failures = []
@@ -313,7 +280,25 @@ for (const termCode of terms) {
   }
   if (!server) continue
   // Whole term at once, so cross-listed listings from different subjects merge into one class.
+  const previousDescriptions = new Map(oldRows.map(row => [row['Course ID'], row['Course Description']]))
   const built = buildYaleRows(raw, termCode)
+  const courseSearch = await refreshCourseSearchDescriptions(built, courseSearchCache, {
+    checkedOn: todayStamp,
+    previousDescriptions,
+  })
+  if (courseSearch.attempted > 0) {
+    const coverage = `Yale Course Search: ${courseSearch.received}/${courseSearch.attempted} valid responses, ${courseSearch.updated} fresh descriptions.`
+    console.log(`  ${coverage}`)
+    for (const problem of courseSearch.problems.slice(0, 5)) console.warn(`  ${problem}`)
+    if (courseSearch.problems.length > 5) {
+      console.warn(`  … and ${courseSearch.problems.length - 5} more Course Search problems.`)
+    }
+    if (courseSearch.received === 0) {
+      failures.push(`${name}: ${coverage} The importer used saved text and other sources.`)
+    } else if (courseSearch.problems.length > 0 && process.env.GITHUB_ACTIONS === 'true') {
+      console.warn(`::warning::${coverage} Check the fetch log for Course Search problems.`)
+    }
+  }
   problems.push(...built.problems)
   rows.push(...built.rows)
   if (rawDir) {
@@ -343,7 +328,11 @@ for (const termCode of terms) {
   const unique = [...new Map(rows.map((row) => [row['Course ID'], row])).values()].sort(
     (a, b) => a.School.localeCompare(b.School) || a['Course Number'].localeCompare(b['Course Number']) || a.Section.localeCompare(b.Section),
   )
-  await fillFromBulletin(unique)
+  await fillMissingDescriptions(
+    unique.filter(row => row.School !== LAW_SCHOOL),
+    bulletinLookup.description,
+    row => previousDescriptions.get(row['Course ID']),
+  )
 
   const { added, removed, changed } = diffCourses(oldRows, unique)
   console.log(`  ${unique.length} course sections (was ${oldRows.length}); ${added.length} new, ${removed.length} removed, ${changed.length} changed`)
@@ -380,15 +369,22 @@ if (!checkOnly) {
   fs.writeFileSync(SUBJECT_NAMES_FILE, `${JSON.stringify(sortedNames, null, 1)}\n`)
   const sortedBulletin = Object.fromEntries(Object.entries(bulletin).sort(([a], [b]) => a.localeCompare(b)))
   fs.writeFileSync(BULLETIN_FILE, `${JSON.stringify(sortedBulletin, null, 1)}\n`)
+  for (const key of courseSearchCache.keys()) {
+    if (!terms.includes(key.split(':')[0])) courseSearchCache.delete(key)
+  }
+  if (courseSearchCache.size > 0 || fs.existsSync(COURSE_SEARCH_FILE)) {
+    const sortedCourseSearch = Object.fromEntries([...courseSearchCache].sort(([a], [b]) => a.localeCompare(b)))
+    fs.writeFileSync(COURSE_SEARCH_FILE, `${JSON.stringify(sortedCourseSearch, null, 1)}\n`)
+  }
 }
-if (bulletinLookups > 0) console.log(`${bulletinLookups} Bulletin description lookups.`)
+if (bulletinLookup.lookups > 0) console.log(`${bulletinLookup.lookups} Bulletin description lookups.`)
 
 console.log(`\n${requestCount} requests to Yale.`)
 if (checkOnly) console.log('--check: nothing was written.')
 if (summaryFile && summary.length > 0) fs.writeFileSync(summaryFile, `${summary.join('; ')}\n`)
 
 if (failures.length > 0) {
-  console.error('\n✖ Some terms were not updated:')
+  console.error('\n✖ Yale course update reported problems:')
   for (const failure of failures) console.error(`  • ${failure}`)
   process.exit(1)
 }
