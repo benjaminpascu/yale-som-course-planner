@@ -1,0 +1,36 @@
+name: Probe Jackson FOSE
+
+on:
+  push:
+    branches: [codex/probe-jackson-fose]
+    paths: [.github/workflows/probe-jackson-fose.yml]
+
+permissions: {}
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Try the public Spring 2027 search and sample details
+        shell: bash
+        run: |
+          probe() {
+            curl -sS --max-time 20 -D "$RUNNER_TEMP/$1.headers" -o "$RUNNER_TEMP/$1.json" \
+              "https://courses.yale.edu/api/?page=fose&route=$1" \
+              -A 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36' \
+              -H 'Content-Type: application/json' \
+              -H 'Accept: application/json, text/javascript, */*; q=0.01' \
+              -H 'X-Requested-With: XMLHttpRequest' \
+              -H 'Origin: https://courses.yale.edu' \
+              -H 'Referer: https://courses.yale.edu/' \
+              --data-raw "$2"
+            awk 'NR==1 || tolower($0) ~ /^(content-type|x-amzn-waf-action):/' "$RUNNER_TEMP/$1.headers"
+            if jq -e 'type == "object"' "$RUNNER_TEMP/$1.json" > /dev/null && test -s "$RUNNER_TEMP/$1.json"; then
+              jq 'if has("fatal") then {fatal: true} else {resultCount: (.results | length), srcdb, crn, descriptionLength: (.description | length)} end' "$RUNNER_TEMP/$1.json"
+            else
+              wc -c "$RUNNER_TEMP/$1.json"
+            fi
+          }
+          probe search '{"other":{"srcdb":"202701"},"criteria":[{"field":"col","value":"GB"}],"_pers":{}}'
+          probe details '{"group":"code:GLBL 7077","key":"crn:20466","srcdb":"202701","matched":"crn:20466","_pers":{}}'
