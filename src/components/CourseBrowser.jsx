@@ -216,8 +216,9 @@ export default function CourseBrowser({
   }, [filters])
 
   const conflictingIds = useMemo(
-    () => getConflictingCourseIds(courses, selectedIds),
-    [courses, selectedIds],
+    // The plan can hold other schools' courses, so check against all of them.
+    () => getConflictingCourseIds(courses, selectedIds, selectedCourses),
+    [courses, selectedIds, selectedCourses],
   )
 
   function getCourseRowProps(course) {

@@ -100,11 +100,14 @@ export function coursesConflict(a, b) {
 
 /**
  * Course IDs that would time-conflict with at least one selected timed course.
+ * Pass `selectedCourses` when the plan can hold courses that aren't in
+ * `courses` (e.g. the catalog shows one school, the plan mixes schools).
  * @param {import('./parseCourses').Course[]} courses
  * @param {Set<string>} selectedIds
+ * @param {import('./parseCourses').Course[]} [selectedCourses]
  */
-export function getConflictingCourseIds(courses, selectedIds) {
-  const selected = courses.filter((c) => selectedIds.has(c.courseId))
+export function getConflictingCourseIds(courses, selectedIds, selectedCourses) {
+  const selected = selectedCourses ?? courses.filter((c) => selectedIds.has(c.courseId))
   const timedSelected = selected.filter(hasMeetingTime)
   if (timedSelected.length === 0) return new Set()
 

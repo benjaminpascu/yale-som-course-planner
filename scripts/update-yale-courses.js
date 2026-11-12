@@ -9,9 +9,10 @@
  * Needs the Yale API key in YALE_API_KEY (GitHub secret, or .env.local on a
  * computer). Full notes: docs/updating-course-data.md.
  *
- * Yale's Courses Web Service answers one school + subject at a time, and only
- * one of its three servers has data (every third answer), so each question is
- * asked up to 3 times in a row before "no courses" is believed. To stay gentle:
+ * Yale's Courses Web Service answers one school + subject at a time, and often
+ * answers "no courses" for a while before the real list comes back (sometimes
+ * every third answer, sometimes after 4–5 empty ones), so each question is
+ * asked up to TRIES times in a row before "no courses" is believed. To stay gentle:
  * school/subject pairs known to have courses are asked every REFRESH_DAYS days;
  * every other pair is re-checked once every SWEEP_DAYS days (a slice per day). A pair that
  * comes back empty keeps its previous courses until it has been empty for
@@ -21,6 +22,7 @@
  *   --check               write nothing
  *   --force               write even when a term shrinks by more than half
  *   --full                ask every school/subject pair today (first run)
+ *   --known               ask every pair known in any semester today (catch-up)
  *   --summary-file PATH   write a one-line summary (used for the commit message)
  */
 import fs from 'node:fs'
@@ -44,13 +46,14 @@ const STATE_FILE = path.join(DATA_DIR, 'yale_subject_pairs.json')
 const SWEEP_DAYS = 28
 const REFRESH_DAYS = 2
 const DROP_AFTER_EMPTY_DAYS = 7
-const TRIES = 3
-const PAUSE_MS = 120
+const TRIES = 6
+const PAUSE_MS = 250
 
 const args = process.argv.slice(2)
 const checkOnly = args.includes('--check')
 const force = args.includes('--force')
 const full = args.includes('--full')
+const knownOnly = args.includes('--known')
 const summaryIndex = args.indexOf('--summary-file')
 const summaryFile = summaryIndex >= 0 ? args[summaryIndex + 1] : null
 
@@ -129,6 +132,8 @@ const terms = termsToUpdate(somTerms, today)
   .map(({ termCode }) => termCode)
 
 const state = fs.existsSync(STATE_FILE) ? JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')) : {}
+// A school/subject pair with courses in one semester probably has some in the other too.
+const knownAnywhere = new Set(Object.values(state).flatMap((term) => Object.keys(term.pairs ?? {})))
 const failures = []
 const summary = []
 
@@ -164,7 +169,9 @@ for (const termCode of terms) {
   const pairs = YALE_API_SCHOOLS.flatMap((school) => subjects.map((subject) => ({ school, subject, key: `${school}|${subject}` })))
   const toAsk = pairs.filter(({ key }) => {
     if (full || firstRun) return true
-    if (termState.pairs[key]) return sweepSlot(key) % REFRESH_DAYS === dayNumber % REFRESH_DAYS
+    const known = termState.pairs[key] || knownAnywhere.has(key)
+    if (knownOnly) return known
+    if (known) return sweepSlot(key) % REFRESH_DAYS === dayNumber % REFRESH_DAYS
     return sweepSlot(key) === dayNumber % SWEEP_DAYS
   })
   console.log(`\n${name}: asking Yale about ${toAsk.length} of ${pairs.length} school/subject pairs…`)
