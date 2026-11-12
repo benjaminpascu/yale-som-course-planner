@@ -98,3 +98,70 @@ course is gone, so you can delete that line.
   renumbers a course, students' Compare notes for it start fresh.
 - **Course category typos** in Yale's data (e.g. `MMG GBS`) are merged for
   display in `src/lib/categoryDisplay.js`.
+
+## Courses from the rest of Yale (cross-registration)
+
+Courses from every other Yale school (Jackson, Environment, Public Health,
+Yale College, Graduate School, Architecture, Art, Divinity, Drama, Medicine,
+Music, Nursing, Physician Associate) are in
+`docs/data-samples/yale_courses_<term>.csv`: the SOM columns plus `School`
+(Yale's school code, e.g. `GB` = Jackson) and `Course Page`. The app loads them
+in the background, so SOM-only use stays as fast as before. Spec:
+`docs/specs/cross-registration.md`.
+
+**Updates itself once a day** (`.github/workflows/update-yale-courses.yml`,
+`npm run update-yale-courses`, add `-- --check` to preview). It uses Yale's
+official **Courses Web Service v3** with the API key from the Yale API Portal
+app "SOMtimes course import": GitHub secret `YALE_API_KEY` (and `.env.local`
+on a computer, never committed). Only the open semesters that SOM has files for
+are updated.
+
+How it works and stays safe:
+
+- **Only one of Yale's servers has data.** Yale's gateway spreads requests over
+  several servers; in Nov 2026 two of three always answered "no courses". Each
+  answer sets a cookie (`_212f6`) naming its server, so each run first finds a
+  server that answers a question known to have courses (ECON in Yale College),
+  then sends that cookie with every request. Every 100 questions it re-checks
+  that server; if it stops answering, the run finds another and re-asks that
+  batch. So an empty answer can be trusted, and each question is asked once.
+  (Issue #8: tell Yale's API team.)
+- `docs/data-samples/yale_subject_pairs.json` remembers which school/department
+  pairs have courses. Those are asked every day; all others once a week (a
+  slice each day). About 1,000–1,500 requests a day. `--known` asks every known
+  pair now; `--full` asks every pair (about 5,000 requests, 20 minutes);
+  `--raw DIR` also saves Yale's raw answers for checking.
+- A semester that would shrink by more than half, or Yale errors on most
+  questions, keeps the old file and fails the job (GitHub emails the repo
+  owner). Cancelled, not-offered and moved sections are left out.
+- **Cross-listings:** Yale gives every listing of a shared class its own CRN
+  (sometimes with different section numbers, sometimes naming only some of its
+  sister listings). Listings are one class when they share the school, meeting
+  times, instructors and a course number (directly or through a chain). Each
+  class appears once under its main number; the others go in `Cross Listings`
+  ("Also listed as" in the app; search and the Department filter use them).
+  Course IDs are `<termCode>-<main number>-<section>` (e.g.
+  `202603-AFST3360-01`), so saved plans survive updates.
+- **Descriptions:** Yale's API has none for some schools (Jackson, Architecture,
+  Music, Medicine…). Those are filled from Yale's Bulletin (catalog.yale.edu)
+  through its public per-course lookup, cached in
+  `docs/data-samples/yale_bulletin_descriptions.json` and re-checked monthly.
+  The Bulletin is the yearly catalog, so a few may be older than
+  courses.yale.edu. (courses.yale.edu itself is behind a bot check, so it isn't
+  used.)
+- Department names for the Department filter: `docs/data-samples/yale_subjects.json`.
+- Times: Yale writes `MW 2.35-3.50` (no am/pm: 8–11 morning, 12 noon, 1–6
+  afternoon) and `Th 7.00-8.55p` (evening). Several meeting patterns with the
+  same time are combined; otherwise the first timed one is used.
+- Units are always 0 (no SOM units for other schools).
+
+**Law School** isn't in Yale's API (only 2–3 Law courses per term). Its courses
+would come from Law's public course list at courses.law.yale.edu
+(`scripts/lib/lawImport.js`), read-only, the list anyone sees without logging
+in. That reader isn't finished: it needs the exact request the Law page sends
+for its course list (copy it from a browser's developer tools → Network →
+`DataActionGetCoursesPerTerm` → Payload). Until then Law doesn't appear in the
+School picker.
+
+Code: `scripts/update-yale-courses.js`, `scripts/lib/yaleImport.js` (tests next
+to it), `src/lib/schools.js`, `src/components/SchoolPicker.jsx`.

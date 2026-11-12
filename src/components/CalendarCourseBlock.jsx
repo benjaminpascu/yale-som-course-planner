@@ -6,6 +6,7 @@ import {
   formatCourseUnits,
   formatTimeLabel,
 } from '../lib/courseDisplay'
+import { isSomCourse } from '../lib/schools'
 import { formatSessionLabel } from '../lib/sessionDisplay'
 import {
   CALENDAR_DESCRIPTION_LINE_COUNT,
@@ -46,10 +47,12 @@ export function CalendarCourseDetail({
               <dt className="font-medium text-gray-500">Faculty</dt>
               <dd>{course.faculty || 'Faculty TBA'}</dd>
             </div>
-            <div>
-              <dt className="font-medium text-gray-500">Units</dt>
-              <dd>{formatCourseUnits(course.units)}</dd>
-            </div>
+            {isSomCourse(course) ? (
+              <div>
+                <dt className="font-medium text-gray-500">Units</dt>
+                <dd>{formatCourseUnits(course.units)}</dd>
+              </div>
+            ) : null}
             <div>
               <dt className="font-medium text-gray-500">When</dt>
               <dd className="space-y-0.5">
@@ -73,6 +76,12 @@ export function CalendarCourseDetail({
                 <dd>{course.room}</dd>
               </div>
             ) : null}
+            {course.crossListings?.length ? (
+              <div>
+                <dt className="font-medium text-gray-500">Also listed as</dt>
+                <dd>{course.crossListings.join(', ')}</dd>
+              </div>
+            ) : null}
             {course.category ? (
               <div>
                 <dt className="font-medium text-gray-500">Category</dt>
@@ -89,6 +98,17 @@ export function CalendarCourseDetail({
               onClick={(e) => e.stopPropagation()}
             >
               Syllabus
+            </a>
+          ) : null}
+          {course.coursePageUrl ? (
+            <a
+              href={course.coursePageUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-3 inline-block text-xs font-medium text-yale-800 underline decoration-yale-800/30 hover:decoration-yale-800"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Course page
             </a>
           ) : null}
         </div>

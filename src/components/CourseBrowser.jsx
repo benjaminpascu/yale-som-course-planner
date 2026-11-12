@@ -6,6 +6,7 @@ import {
   hasActiveFilters,
   uniqueBidOrPermission,
   uniqueCategories,
+  uniqueSubjects,
   uniqueSessions,
   uniqueUnits,
 } from '../lib/filterCourses'
@@ -119,6 +120,7 @@ export default function CourseBrowser({
   springYear = null,
   termCode = null,
   fullHeight = false,
+  somFilters = true,
 }) {
   const [filters, setFilters] = useState(createEmptyFilters)
   const [page, setPage] = useState(1)
@@ -145,6 +147,11 @@ export default function CourseBrowser({
     () => uniqueRequirementTags(termCourses),
     [termCourses],
   )
+  // Other schools: filter by department (subject code), like Yale's course search.
+  const departments = useMemo(
+    () => (somFilters ? [] : uniqueSubjects(termCourses)),
+    [somFilters, termCourses],
+  )
 
   // Switching terms: drop selected filter values the new term doesn't offer
   // (e.g. a Fall 1 session filter), so no hidden filter empties the list.
@@ -160,11 +167,12 @@ export default function CourseBrowser({
           new Set(bidValues.map((b) => b.id)),
         ),
         tagCodes: keepAvailable(prev.tagCodes, new Set(requirementTags)),
+        subjects: keepAvailable(prev.subjects, new Set(departments)),
       }
       const changed = Object.keys(next).some((key) => next[key] !== prev[key])
       return changed ? next : prev
     })
-  }, [sessions, categories, unitValues, bidValues, requirementTags])
+  }, [sessions, categories, unitValues, bidValues, requirementTags, departments])
 
   const timeRangeError = useMemo(() => getTimeRangeError(filters), [filters])
 
@@ -211,12 +219,14 @@ export default function CourseBrowser({
     count += filters.bidTypes.size
     count += filters.categories.size
     count += filters.tagCodes.size
+    count += filters.subjects.size
     return count
   }, [filters])
 
   const conflictingIds = useMemo(
-    () => getConflictingCourseIds(courses, selectedIds),
-    [courses, selectedIds],
+    // The plan can hold other schools' courses, so check against all of them.
+    () => getConflictingCourseIds(courses, selectedIds, selectedCourses),
+    [courses, selectedIds, selectedCourses],
   )
 
   function getCourseRowProps(course) {
@@ -246,11 +256,13 @@ export default function CourseBrowser({
   }
 
   const filterProps = {
+    somFilters,
     sessions,
     categories,
     unitValues,
     bidValues,
     requirementTags,
+    departments,
     filters,
     fallYear,
     springYear,

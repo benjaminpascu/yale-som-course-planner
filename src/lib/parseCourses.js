@@ -91,6 +91,11 @@ function rowToCourse(row) {
     endTime: optionalTime(row.end_24h),
     visible: row.Visible === '1',
     tags: parseTagsField(row.tags),
+    // Other Yale schools' files add these two columns; SOM rows have neither.
+    school: row.School?.trim() || 'SOM',
+    coursePageUrl: row['Course Page']?.trim() || null,
+    crossListings: (row['Cross Listings'] ?? '').split(';').map((n) => n.trim()).filter(Boolean),
+    prerequisites: row.Prerequisites?.trim() ?? '',
   }
 }
 

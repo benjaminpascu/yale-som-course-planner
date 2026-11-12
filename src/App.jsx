@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import CourseBrowser from './components/CourseBrowser'
+import SchoolPicker from './components/SchoolPicker'
 import CompareView from './components/compare/CompareView'
 import ComparePlansView from './components/ComparePlansView'
 import ComputerNotice, { shouldShowComputerNotice } from './components/ComputerNotice'
@@ -33,7 +34,8 @@ import {
 } from './lib/comparePlans'
 import { decisionCounts, orderGroups } from './lib/compareShortlist'
 import { ensureShuffledOrder, getTermData } from './lib/compareStorage'
-import { loadAppData } from './lib/loadData'
+import { loadAppData, loadOtherSchoolCourses } from './lib/loadData'
+import { SOM_SCHOOL, isOtherSchoolCourseId, isSomCourse, pickerSchools } from './lib/schools'
 import { getConflictingCourseIds } from './lib/scheduleConflicts'
 import {
   loadSeenHints,
@@ -63,7 +65,13 @@ const RANK_UNLOCKED =
   typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('rank')
 
 function App() {
-  const [courses, setCourses] = useState([])
+  const [somCourses, setSomCourses] = useState([])
+  // Courses from the rest of Yale load in the background after SOM's.
+  const [otherCourses, setOtherCourses] = useState([])
+  const [otherStatus, setOtherStatus] = useState('loading')
+  const courses = useMemo(() => [...somCourses, ...otherCourses], [somCourses, otherCourses])
+  // Which school's courses the catalog shows (one at a time); the plan mixes schools.
+  const [schoolId, setSchoolId] = useState(SOM_SCHOOL)
   const [status, setStatus] = useState('loading')
   const [error, setError] = useState(null)
   const [planStore, setPlanStore] = useState(() => loadPlanStore())
@@ -102,10 +110,16 @@ function App() {
     setSeenHints(next)
   }, [])
 
-  const validCourseIds = useMemo(
-    () => new Set(courses.map((c) => c.courseId)),
-    [courses],
-  )
+  // While other schools' courses are still loading, keep their IDs in saved plans.
+  const validCourseIds = useMemo(() => {
+    const ids = courses.map((c) => c.courseId)
+    if (otherStatus !== 'loading') return new Set(ids)
+    return new (class extends Set {
+      has(id) {
+        return super.has(id) || isOtherSchoolCourseId(id)
+      }
+    })(ids)
+  }, [courses, otherStatus])
 
   // Browser Back / Forward between the planner and /updates.
   useEffect(() => {
@@ -117,7 +131,7 @@ function App() {
   useEffect(() => {
     loadAppData()
       .then(({ courses: loadedCourses }) => {
-        setCourses(loadedCourses)
+        setSomCourses(loadedCourses)
         setStatus('ready')
       })
       .catch((err) => {
@@ -127,9 +141,25 @@ function App() {
   }, [])
 
   useEffect(() => {
+    if (status !== 'ready') return
+    loadOtherSchoolCourses()
+      .then((loaded) => {
+        setOtherCourses(loaded)
+        setOtherStatus('ready')
+      })
+      .catch((err) => {
+        console.warn("Couldn't load other Yale schools' courses:", err)
+        setOtherStatus('error')
+      })
+  }, [status])
+
+  useEffect(() => {
     if (status !== 'ready' || courses.length === 0 || planHydratedRef.current) {
       return
     }
+    // A saved plan with other-school courses waits for those courses to arrive.
+    const waiting = getPlanById(planStore, planStore.activePlanId)?.courseIds.some(isOtherSchoolCourseId)
+    if (waiting && otherStatus === 'loading') return
     planHydratedRef.current = true
 
     const active = planStore.activePlanId
@@ -139,7 +169,7 @@ function App() {
       const ids = sanitizeCourseIds(active.courseIds, validCourseIds)
       setSelectedIds(new Set(ids))
     }
-  }, [status, courses.length, planStore, validCourseIds])
+  }, [status, courses.length, planStore, validCourseIds, otherStatus])
 
   const persist = useCallback((nextStore) => {
     setPlanStore(nextStore)
@@ -169,7 +199,7 @@ function App() {
     [courses, selectedIds],
   )
 
-  const catalogTerms = useMemo(() => getCatalogTerms(courses), [courses])
+  const catalogTerms = useMemo(() => getCatalogTerms(somCourses), [somCourses])
 
   /** Term shown in the course browser; defaults to the earliest term still running. */
   const activeTermCode = catalogTerms.some((t) => t.id === catalogTermCode)
@@ -178,8 +208,17 @@ function App() {
 
   const { fallYear, springYear } = getAcademicYears(activeTermCode)
 
+  const schools = useMemo(() => pickerSchools(courses, activeTermCode), [courses, activeTermCode])
+  // A school with no courses this term falls back to SOM.
+  const activeSchoolId = schools.some((school) => school.id === schoolId) ? schoolId : SOM_SCHOOL
+  const catalogCourses = useMemo(
+    () => courses.filter((c) => (c.school || SOM_SCHOOL) === activeSchoolId),
+    [courses, activeSchoolId],
+  )
+  const schoolPickerProps = { schools, schoolId: activeSchoolId, onSchoolChange: setSchoolId }
+
   const compareCatalog = useMemo(
-    () => buildCourseGroups(courses.filter((c) => c.termCode === activeTermCode)),
+    () => buildCourseGroups(courses.filter((c) => c.termCode === activeTermCode && isSomCourse(c))),
     [courses, activeTermCode],
   )
   const compareTerm = getTermData(compare.store, activeTermCode)
@@ -559,6 +598,16 @@ function App() {
       {/* Sub bar: Single plan / Compare plans (Plan) or steps (Rank) on the left; half-term and term switches on the right. */}
       <SubBar className="hidden lg:block">
         {view === 'planner' ? (
+          // Over the Course Catalog: right edge lines up with the Filters button below.
+          <div className="w-[20rem] shrink-0">
+            <SchoolPicker {...schoolPickerProps} className="w-[322px]" />
+          </div>
+        ) : null}
+        {/* Over the calendar: plan switches start at the calendar's left edge. */}
+        <div
+          className={`flex min-w-0 flex-1 items-center justify-between gap-x-6 ${view === 'planner' ? 'pl-2' : ''}`}
+        >
+        {view === 'planner' ? (
           // Wrapper only anchors the Compare Plans tip below the switch; it adds no space.
           <div className={desktopTip === 'compare-plans' ? SPOTLIGHT : 'relative'}>
             <PlanViewSwitch
@@ -615,12 +664,15 @@ function App() {
           ) : null}
           <TermSwitch {...termSwitchProps} />
         </div>
+        </div>
       </SubBar>
 
       {/* Phones follow the bottom-nav tab; plans are managed in the Plans tab. */}
       <SubBar className="lg:hidden">
         {mobileTab === 'compare' ? (
           <CompareStepTabs {...compareStepTabsProps} />
+        ) : mobileTab === 'catalog' ? (
+          <SchoolPicker {...schoolPickerProps} className="min-w-0 flex-1" />
         ) : (
           <div className="flex min-w-0 items-center gap-2">
             <p className="min-w-0 truncate text-sm text-[#1a1f2b]">
@@ -652,7 +704,8 @@ function App() {
           }`}
         >
           <CourseBrowser
-            courses={courses}
+            courses={catalogCourses}
+            somFilters={activeSchoolId === SOM_SCHOOL}
             selectedIds={selectedIds}
             selectedCourses={selectedCourses}
             onToggleCourse={toggleCourse}
@@ -761,7 +814,8 @@ function App() {
         ) : null}
         {mobileTab === 'catalog' ? (
           <CourseBrowser
-            courses={courses}
+            courses={catalogCourses}
+            somFilters={activeSchoolId === SOM_SCHOOL}
             selectedIds={selectedIds}
             selectedCourses={selectedCourses}
             onToggleCourse={toggleCourse}

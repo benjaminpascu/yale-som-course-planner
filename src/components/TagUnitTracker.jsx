@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useSta
 import { createPortal } from 'react-dom'
 import { sectionTone } from '../lib/sectionTheme'
 import { formatTermLabel, termCodeToSemester } from '../lib/academicYear'
+import { isSomCourse } from '../lib/schools'
 import { formatCourseHeading } from '../lib/courseDisplay'
 import { formatSessionLabel } from '../lib/sessionDisplay'
 import {
@@ -27,6 +28,28 @@ const EMPTY_HINT = 'Nothing selected'
 /** Desktop: fixed body height so tag rows never push the calendar layout. Mobile: auto height. */
 const REQUIREMENTS_BODY_CLASS =
   'flex px-4 py-2 lg:h-[4.75rem] lg:items-center lg:overflow-x-hidden lg:overflow-y-auto lg:py-0'
+
+const OTHER_SCHOOL_UNITS_HOVER =
+  'Courses from other schools count as 0 units here. Check with the registrar how they count toward your SOM units.'
+
+/** Caution note left of Select Requirements when the plan has a non-SOM course. */
+function OtherSchoolUnitsNote() {
+  return (
+    <span
+      title={OTHER_SCHOOL_UNITS_HOVER}
+      className="inline-flex cursor-help items-center gap-1 text-xs font-medium text-caution"
+    >
+      <svg aria-hidden viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5 shrink-0">
+        <path
+          fillRule="evenodd"
+          d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z"
+          clipRule="evenodd"
+        />
+      </svg>
+      Non-SOM courses count as 0 units
+    </span>
+  )
+}
 
 function AddRequirementsButton({ onClick, inverse = false }) {
   const handleClick = (event) => {
@@ -292,6 +315,10 @@ export default function TagUnitTracker({
   }
 
   const reqTone = sectionTone('requirements')
+  // Other schools' courses add 0 units; say so whenever one is in the plan this semester.
+  const hasOtherSchoolCourse = selectedCourses.some(
+    (c) => !isSomCourse(c) && (!termCode || c.termCode === termCode),
+  )
 
   return (
     <>
@@ -305,7 +332,10 @@ export default function TagUnitTracker({
             tone="requirements"
             title={termCode ? `Requirements · ${formatTermLabel(termCode)}` : 'Requirements'}
           >
-            <AddRequirementsButton onClick={() => setModalOpen(true)} />
+            <div className="flex items-center gap-3">
+              {hasOtherSchoolCourse ? <OtherSchoolUnitsNote /> : null}
+              <AddRequirementsButton onClick={() => setModalOpen(true)} />
+            </div>
           </SectionHeader>
         )}
         {part === 'header' ? null : (

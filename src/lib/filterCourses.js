@@ -37,6 +37,7 @@ function matchesSearch(query, course) {
   if (!query) return true
   const haystack = [
     course.courseNumber,
+    ...(course.crossListings ?? []),
     course.title,
     course.faculty,
     course.description,
@@ -63,6 +64,10 @@ function matchesSearch(query, course) {
 export function courseMatchesFilters(course, filters) {
   const search = filters.search.trim().toLowerCase()
   if (!matchesSearch(search, course)) return false
+
+  if (filters.subjects?.size > 0 && !courseSubjects(course).some((s) => filters.subjects.has(s))) {
+    return false
+  }
 
   if (filters.sessions.size > 0 && !filters.sessions.has(course.session)) {
     return false
@@ -133,8 +138,23 @@ export function uniqueSessions(courses) {
   )
 }
 
+/** Subject code from the course number, e.g. "ECON 3365" → "ECON". */
+export function courseSubject(course) {
+  return course.courseNumber.split(' ')[0]
+}
+
 /** @param {import('./parseCourses').Course[]} courses */
+export function uniqueSubjects(courses) {
+  return [...new Set(courses.flatMap(courseSubjects).filter(Boolean))].sort()
+}
+
+/** Every department a course is listed under (its own and its cross-listings). */
+export function courseSubjects(course) {
+  return [course.courseNumber, ...(course.crossListings ?? [])].map((n) => n.split(' ')[0])
+}
+
 /** Distinct categories from loaded courses (dynamic; not a fixed taxonomy). */
+/** @param {import('./parseCourses').Course[]} courses */
 export function uniqueCategories(courses) {
   return [
     ...new Set(
@@ -235,6 +255,7 @@ export function createEmptyFilters() {
     bidTypes: new Set(),
     categories: new Set(),
     tagCodes: new Set(),
+    subjects: new Set(),
   }
 }
 
@@ -249,6 +270,7 @@ export function hasActiveFilters(filters) {
     filters.units.size > 0 ||
     filters.bidTypes.size > 0 ||
     filters.categories.size > 0 ||
-    filters.tagCodes.size > 0
+    filters.tagCodes.size > 0 ||
+    (filters.subjects?.size ?? 0) > 0
   )
 }

@@ -1,14 +1,15 @@
 {
   "name": "yale-som-course-planner",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "update-courses": "node scripts/update-courses.js"
+    "update-courses": "node scripts/update-courses.js",
+    "update-yale-courses": "node scripts/update-yale-courses.js"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

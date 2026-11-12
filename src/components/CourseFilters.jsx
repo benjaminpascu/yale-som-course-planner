@@ -5,6 +5,7 @@ import {
   hasSelectedFullTermSession,
   isFullTermSession,
 } from '../lib/sessionDisplay'
+import { departmentLabel } from '../lib/departments'
 import FilterCheckboxGroup from './FilterCheckboxGroup'
 import RequirementTag from './RequirementTag'
 import TimeRangeSelect from './TimeRangeSelect'
@@ -19,11 +20,13 @@ const FILTER_CARD =
   'rounded-lg border border-yale-200/90 bg-white p-3 shadow-sm space-y-4'
 
 export default function CourseFilters({
+  somFilters = true,
   sessions,
   categories,
   unitValues,
   bidValues,
   requirementTags = [],
+  departments = [],
   filters,
   fallYear = null,
   springYear = null,
@@ -58,7 +61,8 @@ export default function CourseFilters({
   return (
     <aside className="mx-auto w-full max-w-5xl p-4">
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className={FILTER_CARD}>
+        <div className={`${FILTER_CARD} ${somFilters ? '' : 'sm:col-span-2'}`}>
+          {somFilters ? (
           <FilterCheckboxGroup
             legend="Session"
             layout="wrap"
@@ -69,6 +73,7 @@ export default function CourseFilters({
             selected={filters.sessions}
             onToggle={(id) => onToggle('sessions', id)}
           />
+          ) : null}
           <FilterCheckboxGroup
             legend="Day of week"
             hint="Timed courses only"
@@ -85,6 +90,22 @@ export default function CourseFilters({
           />
         </div>
 
+        {somFilters ? null : (
+          <div className={`${FILTER_CARD} sm:col-span-2`}>
+            <FilterCheckboxGroup
+              legend="Department"
+              layout="columns"
+              options={departments
+                .map((code) => ({ id: code, label: departmentLabel(code) }))
+                .sort((a, b) => a.label.localeCompare(b.label))}
+              selected={filters.subjects}
+              onToggle={(id) => onToggle('subjects', id)}
+            />
+          </div>
+        )}
+
+        {somFilters ? (
+        <>
         <div className={FILTER_CARD}>
           <FilterCheckboxGroup
             legend="Units"
@@ -118,6 +139,8 @@ export default function CourseFilters({
             onToggle={(id) => onToggle('tagCodes', id)}
           />
         </div>
+        </>
+        ) : null}
 
         {hasFilters ? (
           <button

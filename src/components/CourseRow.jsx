@@ -10,6 +10,7 @@ import {
   hasMeetingTime,
   NO_MEETING_TIME_MESSAGE,
 } from '../lib/parseCourses'
+import { isSomCourse } from '../lib/schools'
 import { formatSessionLabel } from '../lib/sessionDisplay'
 import CollapseChevron from './CollapseChevron'
 import RegistrationTag from './RegistrationTag'
@@ -157,8 +158,9 @@ export default function CourseRow({
               value={formatSessionLabel(course.session)}
             />
             <FactItem label="Category" value={categoryLabel} />
-            <FactItem label="Units" value={formatCourseUnits(course.units)} />
+            <FactItem label="Units" value={isSomCourse(course) ? formatCourseUnits(course.units) : null} />
             <FactItem label="Room" value={course.room} />
+            <FactItem label="Also listed as" value={course.crossListings?.join(', ')} />
           </div>
 
           {showRegistrationTag ? (
@@ -166,6 +168,10 @@ export default function CourseRow({
               bidOrPermission={course.bidOrPermission}
               className="!px-1 !py-px !text-[10px]"
             />
+          ) : null}
+
+          {course.prerequisites ? (
+            <p className="border-t border-gray-200/60 pt-2 text-gray-600">{course.prerequisites}</p>
           ) : null}
 
           {course.description ? (
@@ -184,6 +190,16 @@ export default function CourseRow({
               className="inline-block text-[10px] font-medium text-yale-800 underline decoration-yale-800/30 hover:decoration-yale-800"
             >
               Syllabus
+            </a>
+          ) : null}
+          {course.coursePageUrl ? (
+            <a
+              href={course.coursePageUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-3 inline-block text-[10px] font-medium text-yale-800 underline decoration-yale-800/30 hover:decoration-yale-800"
+            >
+              Course page
             </a>
           ) : null}
 
