@@ -12,12 +12,16 @@ the 1.0.0 launch.
 
 - An **Updates** button in the navy top bar, right after **Help**, same style
   (icon only on phones, like Help).
-- An orange dot on the button when this browser hasn't opened Updates since
-  the newest version. Opening Updates clears it; the next version brings it back.
+- An orange dot on the button when this browser hasn't seen the newest version.
+  Visiting the Updates page clears it; the next version brings it back.
   Remembered in `localStorage` (`yale-som-course-planner-updates-seen`).
-- Clicking opens a small pop-up below the button (closes on outside click or Esc):
-  title "Updates", current version on the right (e.g. "v1.0.1"), then versions
-  newest first. Each version shows its number and date, then one bullet per change.
+- Clicking opens its own page at **`/updates`** (e.g. `somtimes.vercel.app/updates`),
+  in the same tab. The top bar stays; the planner is hidden underneath (not reset),
+  and **← Back** or the browser's Back button returns to it. The address can be
+  shared or opened directly (`vercel.json` serves the app there).
+- The page: "← Back", the title "Updates" with the current version on the right
+  (e.g. "v1.0.1"), then one card per version, newest first: number and date,
+  then one bullet per change.
 - 1.0.0 shows as "1.0.0 · Launch" with no bullets.
 
 ## Wording

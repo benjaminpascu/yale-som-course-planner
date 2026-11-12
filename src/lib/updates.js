@@ -1,5 +1,5 @@
 /**
- * Updates (patch notes) shown from the Updates button in the top bar.
+ * Updates (patch notes), shown on the /updates page (Updates button in the top bar).
  * Newest first. The first entry's version is the site's version — keep
  * `package.json` "version" the same (a test checks it).
  *
@@ -21,6 +21,13 @@ export const UPDATES = [
 ]
 
 export const APP_VERSION = UPDATES[0].version
+
+/** Address of the Updates page (somtimes.vercel.app/updates). */
+export const UPDATES_PATH = '/updates'
+
+export function isUpdatesPath(pathname) {
+  return pathname.replace(/\/+$/, '') === UPDATES_PATH
+}
 
 export const UPDATES_SEEN_KEY = 'yale-som-course-planner-updates-seen'
 

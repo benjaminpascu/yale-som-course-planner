@@ -8,6 +8,7 @@ import { useCompareStore } from './components/compare/useCompareStore'
 import MobileBottomNav from './components/MobileBottomNav'
 import MobilePlansPanel from './components/MobilePlansPanel'
 import NavBar from './components/NavBar'
+import UpdatesPage from './components/UpdatesPage'
 import PlansMenu from './components/PlansMenu'
 import PlanningPanel from './components/PlanningPanel'
 import { CalendarSessionTabs, SessionTabHint } from './components/WeeklyCalendar'
@@ -55,6 +56,7 @@ import {
   upsertPlan,
 } from './lib/planStorage'
 import { importPlansIntoStore } from './lib/planTransfer'
+import { UPDATES_PATH, isUpdatesPath } from './lib/updates'
 
 // Rank is hidden for launch; only links ending in ?rank show it (the owner's private link).
 const RANK_UNLOCKED =
@@ -68,6 +70,8 @@ function App() {
   const [selectedIds, setSelectedIds] = useState(() => new Set())
   const [mobileTab, setMobileTab] = useState('calendar')
   const [view, setView] = useState('planner')
+  // /updates is its own page; the planner stays loaded (hidden) underneath so nothing resets.
+  const [onUpdatesPage, setOnUpdatesPage] = useState(() => isUpdatesPath(window.location.pathname))
   const [compareStep, setCompareStep] = useState('shortlist')
   // One compare store for both layouts, so desktop and mobile never diverge.
   const compare = useCompareStore()
@@ -102,6 +106,13 @@ function App() {
     () => new Set(courses.map((c) => c.courseId)),
     [courses],
   )
+
+  // Browser Back / Forward between the planner and /updates.
+  useEffect(() => {
+    const syncPage = () => setOnUpdatesPage(isUpdatesPath(window.location.pathname))
+    window.addEventListener('popstate', syncPage)
+    return () => window.removeEventListener('popstate', syncPage)
+  }, [])
 
   useEffect(() => {
     loadAppData()
@@ -444,6 +455,21 @@ function App() {
     setCompareSlots(setSlotPlan(planSlots, side, planId))
   }
 
+  function openUpdates() {
+    if (onUpdatesPage) return
+    window.history.pushState({ somtimes: 'updates' }, '', UPDATES_PATH + window.location.search)
+    setOnUpdatesPage(true)
+  }
+
+  function closeUpdates() {
+    // Came from inside the app: step back so the browser's Back button stays in sync.
+    if (window.history.state?.somtimes === 'updates') window.history.back()
+    else {
+      window.history.pushState(null, '', '/' + window.location.search)
+      setOnUpdatesPage(false)
+    }
+  }
+
   if (status === 'loading') {
     return (
       <div className="px-4 py-6 text-gray-600">
@@ -516,7 +542,19 @@ function App() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-gray-50 lg:h-dvh lg:overflow-hidden">
-      <NavBar mode={view} onModeChange={setView} onShowTips={resetHints} showRank={RANK_UNLOCKED} />
+      <NavBar
+        mode={view}
+        onModeChange={setView}
+        onShowTips={resetHints}
+        showRank={RANK_UNLOCKED}
+        onUpdatesPage={onUpdatesPage}
+        onOpenUpdates={openUpdates}
+      />
+
+      {onUpdatesPage ? <UpdatesPage onBack={closeUpdates} /> : null}
+
+      {/* The planner, hidden (not unmounted) while the Updates page is open. */}
+      <div className={onUpdatesPage ? 'hidden' : 'contents'}>
 
       {/* Sub bar: Single plan / Compare plans (Plan) or steps (Rank) on the left; half-term and term switches on the right. */}
       <SubBar className="hidden lg:block">
@@ -803,6 +841,7 @@ function App() {
       ) : null}
 
       <MobileBottomNav activeTab={mobileTab} onChange={setMobileTab} showRank={RANK_UNLOCKED} />
+      </div>
 
       {computerNoticeOpen ? <ComputerNotice onContinue={() => setComputerNoticeOpen(false)} /> : null}
     </div>

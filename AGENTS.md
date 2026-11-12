@@ -109,7 +109,7 @@ No database or environment variables. Course data is the CSVs in `docs/data-samp
 | Compare Courses UI | `src/components/compare/` (`CompareView`, `ShortlistStep`, `ScoreStep`, `RatingInput`, `WeightInput`) — visual spec in `docs/design/compare/` |
 | Compare Plans (two plans side by side) | `src/lib/comparePlans.js`, `src/components/ComparePlansView.jsx`; state in `App.jsx` |
 | Header (nav bar + mode sub bar) | `src/components/NavBar.jsx`, `src/components/SubBar.jsx` |
-| Updates (patch notes + site version; new-update dot) | `src/lib/updates.js`, `src/components/UpdatesMenu.jsx` |
+| Updates page at `/updates` (patch notes + site version; new-update dot) | `src/lib/updates.js`, `src/components/UpdatesPage.jsx`, `UpdatesButton.jsx`; routing in `App.jsx`; `/updates` served by `vercel.json` |
 | Old address → new address move (forwards with saved data; keep while old links are around) | `src/lib/domainMove.js`, called from `src/main.jsx` |
 
 ## Tech stack

@@ -5,6 +5,7 @@ import {
   UPDATES,
   UPDATES_SEEN_KEY,
   formatUpdateDate,
+  isUpdatesPath,
   hasUnseenUpdate,
   markUpdatesSeen,
 } from './updates'
@@ -46,6 +47,15 @@ describe('UPDATES list', () => {
   test('package.json version matches the newest update', () => {
     const pkg = JSON.parse(readFileSync(new URL('../../package.json', import.meta.url), 'utf8'))
     expect(pkg.version).toBe(APP_VERSION)
+  })
+})
+
+describe('isUpdatesPath', () => {
+  test('matches /updates, with or without a trailing slash', () => {
+    expect(isUpdatesPath('/updates')).toBe(true)
+    expect(isUpdatesPath('/updates/')).toBe(true)
+    expect(isUpdatesPath('/')).toBe(false)
+    expect(isUpdatesPath('/updates-old')).toBe(false)
   })
 })
 

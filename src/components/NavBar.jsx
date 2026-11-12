@@ -1,5 +1,5 @@
 import ContactMenu from './ContactMenu'
-import UpdatesMenu from './UpdatesMenu'
+import UpdatesButton from './UpdatesButton'
 
 const MODES = [
   { id: 'planner', label: 'Plan' },
@@ -9,9 +9,16 @@ const MODES = [
 /**
  * Global navy bar, the same on every page: title, Plan | Rank tabs
  * (desktop; phones switch modes in the bottom nav), Help (shows the tips again), Updates
- * (patch notes), contact button.
+ * (opens the /updates page), contact button.
  */
-export default function NavBar({ mode, onModeChange, onShowTips, showRank = true }) {
+export default function NavBar({
+  mode,
+  onModeChange,
+  onShowTips,
+  showRank = true,
+  onUpdatesPage = false,
+  onOpenUpdates,
+}) {
   return (
     <header className="shrink-0 bg-yale-900 text-white">
       {/* Computer: 1rem edges, lined up with the sub bar and the panels below. */}
@@ -64,7 +71,7 @@ export default function NavBar({ mode, onModeChange, onShowTips, showRank = true
           <span className="hidden sm:inline">Help</span>
           <span className="sr-only sm:hidden">Help</span>
         </button>
-        <UpdatesMenu />
+        <UpdatesButton active={onUpdatesPage} onClick={onOpenUpdates} />
         <div className="ml-auto">
           <ContactMenu />
         </div>
