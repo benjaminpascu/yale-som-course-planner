@@ -42,6 +42,8 @@ import { fetchLawSections, LAW_SCHOOL } from './lib/lawImport.js'
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const DATA_DIR = path.join(ROOT, 'docs/data-samples')
 const STATE_FILE = path.join(DATA_DIR, 'yale_subject_pairs.json')
+// Subject code → name, for the Department filter ("Economics (ECON)").
+const SUBJECT_NAMES_FILE = path.join(DATA_DIR, 'yale_subjects.json')
 
 const SWEEP_DAYS = 28
 const REFRESH_DAYS = 2
@@ -136,6 +138,7 @@ const state = fs.existsSync(STATE_FILE) ? JSON.parse(fs.readFileSync(STATE_FILE,
 const knownAnywhere = new Set(Object.values(state).flatMap((term) => Object.keys(term.pairs ?? {})))
 const failures = []
 const summary = []
+const subjectNames = fs.existsSync(SUBJECT_NAMES_FILE) ? JSON.parse(fs.readFileSync(SUBJECT_NAMES_FILE, 'utf8')) : {}
 
 for (const termCode of terms) {
   const name = termLabel(termCode)
@@ -147,7 +150,9 @@ for (const termCode of terms) {
 
   let subjects
   try {
-    subjects = (await askUntilFound(SUBJECTS_URL, { termCode })).map((s) => s.code).filter(Boolean)
+    const subjectList = await askUntilFound(SUBJECTS_URL, { termCode })
+    for (const { code, description } of subjectList) if (code && description) subjectNames[code] = description.trim()
+    subjects = subjectList.map((s) => s.code).filter(Boolean)
   } catch (error) {
     failures.push(`${name}: couldn't get Yale's subject list (${error.message}). Kept the current file.`)
     continue
@@ -258,7 +263,11 @@ for (const termCode of terms) {
 
 // Drop state for terms that no longer have a file being updated.
 for (const termCode of Object.keys(state)) if (!terms.includes(termCode)) delete state[termCode]
-if (!checkOnly) fs.writeFileSync(STATE_FILE, `${JSON.stringify(state, null, 1)}\n`)
+if (!checkOnly) {
+  fs.writeFileSync(STATE_FILE, `${JSON.stringify(state, null, 1)}\n`)
+  const sortedNames = Object.fromEntries(Object.entries(subjectNames).sort(([a], [b]) => a.localeCompare(b)))
+  fs.writeFileSync(SUBJECT_NAMES_FILE, `${JSON.stringify(sortedNames, null, 1)}\n`)
+}
 
 console.log(`\n${requestCount} requests to Yale.`)
 if (checkOnly) console.log('--check: nothing was written.')

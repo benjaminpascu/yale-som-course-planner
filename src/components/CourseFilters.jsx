@@ -5,6 +5,7 @@ import {
   hasSelectedFullTermSession,
   isFullTermSession,
 } from '../lib/sessionDisplay'
+import { departmentLabel } from '../lib/departments'
 import FilterCheckboxGroup from './FilterCheckboxGroup'
 import RequirementTag from './RequirementTag'
 import TimeRangeSelect from './TimeRangeSelect'
@@ -25,6 +26,7 @@ export default function CourseFilters({
   unitValues,
   bidValues,
   requirementTags = [],
+  departments = [],
   filters,
   fallYear = null,
   springYear = null,
@@ -87,6 +89,20 @@ export default function CourseFilters({
             onTimeToChange={onTimeToChange}
           />
         </div>
+
+        {somFilters ? null : (
+          <div className={`${FILTER_CARD} sm:col-span-2`}>
+            <FilterCheckboxGroup
+              legend="Department"
+              layout="columns"
+              options={departments
+                .map((code) => ({ id: code, label: departmentLabel(code) }))
+                .sort((a, b) => a.label.localeCompare(b.label))}
+              selected={filters.subjects}
+              onToggle={(id) => onToggle('subjects', id)}
+            />
+          </div>
+        )}
 
         {somFilters ? (
         <>
