@@ -10,6 +10,7 @@ import {
   hasMeetingTime,
   NO_MEETING_TIME_MESSAGE,
 } from '../lib/parseCourses'
+import { isSomCourse } from '../lib/schools'
 import { formatSessionLabel } from '../lib/sessionDisplay'
 import CollapseChevron from './CollapseChevron'
 import RegistrationTag from './RegistrationTag'
@@ -157,7 +158,7 @@ export default function CourseRow({
               value={formatSessionLabel(course.session)}
             />
             <FactItem label="Category" value={categoryLabel} />
-            <FactItem label="Units" value={formatCourseUnits(course.units)} />
+            <FactItem label="Units" value={isSomCourse(course) ? formatCourseUnits(course.units) : null} />
             <FactItem label="Room" value={course.room} />
           </div>
 
@@ -184,6 +185,16 @@ export default function CourseRow({
               className="inline-block text-[10px] font-medium text-yale-800 underline decoration-yale-800/30 hover:decoration-yale-800"
             >
               Syllabus
+            </a>
+          ) : null}
+          {course.coursePageUrl ? (
+            <a
+              href={course.coursePageUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-3 inline-block text-[10px] font-medium text-yale-800 underline decoration-yale-800/30 hover:decoration-yale-800"
+            >
+              Course page
             </a>
           ) : null}
 

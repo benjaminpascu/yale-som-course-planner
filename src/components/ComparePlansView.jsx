@@ -134,7 +134,7 @@ export default function ComparePlansView({
       </div>
 
       {/* One Requirements bar (title + Select Requirements) for both plans; choices are shared. */}
-      <TagUnitTracker part="header" selectedCourses={[]} termCode={termCode} courses={courses} />
+      <TagUnitTracker part="header" selectedCourses={[...(sideCourses[0] ?? []), ...(sideCourses[1] ?? [])]} termCode={termCode} courses={courses} />
       <div className="grid shrink-0 grid-cols-2">
         {cells((side) => (
           <TagUnitTracker

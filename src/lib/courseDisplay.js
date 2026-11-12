@@ -64,6 +64,8 @@ export function formatCourseUnits(units) {
  * @param {{ courseNumber: string, title: string, units: number }} course
  */
 export function formatCourseHeading(course) {
+  // Other schools' courses have no SOM units, so none are shown.
+  if (course.school && course.school !== 'SOM') return `${course.courseNumber} — ${course.title}`
   return `${course.courseNumber} — ${course.title} (${formatCourseUnits(course.units)})`
 }
 

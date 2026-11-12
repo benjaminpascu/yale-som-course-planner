@@ -119,6 +119,7 @@ export default function CourseBrowser({
   springYear = null,
   termCode = null,
   fullHeight = false,
+  somFilters = true,
 }) {
   const [filters, setFilters] = useState(createEmptyFilters)
   const [page, setPage] = useState(1)
@@ -246,6 +247,7 @@ export default function CourseBrowser({
   }
 
   const filterProps = {
+    somFilters,
     sessions,
     categories,
     unitValues,
