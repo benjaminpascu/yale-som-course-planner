@@ -118,14 +118,15 @@ are updated.
 
 How it stays gentle and safe:
 
-- Yale answers one school + subject at a time, and only **one of its three
-  servers has data**: answers cycle empty, empty, data. So each question is
-  asked up to 3 times in a row before "no courses" is believed.
+- Yale answers one school + subject at a time, and often answers **"no
+  courses" for a while before the real list** (sometimes every third answer,
+  sometimes after 4–5 empty ones). So each question is asked up to 6 times in
+  a row before "no courses" is believed.
 - `docs/data-samples/yale_subject_pairs.json` remembers which school/subject
-  pairs have courses. Those are re-asked every 2 days (half each day); all
-  other pairs are re-checked once every 28 days (a slice each day). Roughly
-  2,000 requests a day. `--full` asks every pair (first run: ~15,000 requests,
-  about an hour).
+  pairs have courses (in either semester). Those are re-asked every 2 days
+  (half each day); all other pairs are re-checked once every 28 days (a slice
+  each day). Roughly 2,000 requests a day. `--known` asks every known pair now
+  (catch-up); `--full` asks every pair (~2,500 per semester, over an hour).
 - A pair that comes back empty keeps its old courses until it has been empty
   7 days in a row. A semester that would shrink by more than half, or Yale
   errors on most questions, keeps the old file and fails the job (GitHub

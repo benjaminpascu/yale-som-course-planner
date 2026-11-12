@@ -120,8 +120,9 @@ when either plan has one.
 - Yale's terms of use: no rule against storing data; Yale may block "excessive use".
   Keep daily request volume modest and spaced out. The portal showed no per-app
   limit for this app. As built: known school/subject pairs every 2 days, all
-  others every 28 days, about 2,000 requests a day (Yale's 3-server rotation
-  means up to 3 requests per question; see docs/updating-course-data.md).
+  others every 28 days, about 2,000 requests a day (Yale often answers "no courses"
+  several times before the real list, so up to 6 requests per question; see
+  docs/updating-course-data.md).
 - **Why not use this API for Law:** it only has 2–3 Law courses per term (the
   same 2–3 that courses.yale.edu shows). Law's real catalog lives on Law's own site.
 - **Network (unverified):** all tests ran from the user's computer. First build
