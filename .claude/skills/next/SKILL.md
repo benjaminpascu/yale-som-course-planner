@@ -41,4 +41,6 @@ Follow the `AGENTS.md` workflow for the chosen item:
 - **New feature / roadmap item**: brainstorm the full spec with the user first (step 4), save it to `docs/specs/<feature>.md`, comment the link on the issue, and wait for approval before writing code. Then build, test, and ship on a `feature/` branch with a pull request and a preview link (step 5), and wait for "ship it".
 - **Bug / small fix**: fix it, run the checks (step 5), and push straight to `main`.
 
+Either way, right before committing, bump the version and add an Updates entry (`src/lib/updates.js` + `package.json`; rules in `AGENTS.md` step 5).
+
 Write `Closes #<number>` in the commit message or pull request so the issue closes when it goes live. After it's live, update `docs/PROJECT_STATUS.md` (and the Current focus table in `AGENTS.md` for features).

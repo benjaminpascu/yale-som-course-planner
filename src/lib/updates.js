@@ -1,0 +1,53 @@
+/**
+ * Updates (patch notes) shown from the Updates button in the top bar.
+ * Newest first. The first entry's version is the site's version — keep
+ * `package.json` "version" the same (a test checks it).
+ *
+ * Version rules: small fixes pushed straight to main bump the last number
+ * (1.0.1 → 1.0.2); new features that went through a spec bump the middle
+ * number (1.0.x → 1.1). Each change is one or two explicit sentences for
+ * students: what changed, where it is, and how to use it.
+ */
+export const UPDATES = [
+  {
+    version: '1.0.1',
+    date: '2026-11-11',
+    changes: [
+      'You can now remove a course right from the Weekly Calendar: hover over its block and click the × in the top-right corner. Works in both Single plan and Compare plans.',
+      'Every warning and every remove or delete button now uses the same dark red as the Conflict badge, so problems are easy to spot. Softer heads-ups, like "No time defined" or "unsaved", use one amber color.',
+    ],
+  },
+  { version: '1.0.0', label: 'Launch', changes: [] },
+]
+
+export const APP_VERSION = UPDATES[0].version
+
+export const UPDATES_SEEN_KEY = 'yale-som-course-planner-updates-seen'
+
+/** "2026-11-11" → "Nov 11, 2026" (read as a calendar date, not shifted by time zone). */
+export function formatUpdateDate(isoDate) {
+  const [year, month, day] = isoDate.split('-').map(Number)
+  return new Date(year, month - 1, day).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+}
+
+/** True when this browser hasn't opened Updates since the newest one came out. */
+export function hasUnseenUpdate(storage = globalThis.localStorage) {
+  try {
+    return storage.getItem(UPDATES_SEEN_KEY) !== APP_VERSION
+  } catch {
+    // Storage blocked: no dot, rather than one that never goes away.
+    return false
+  }
+}
+
+export function markUpdatesSeen(storage = globalThis.localStorage) {
+  try {
+    storage.setItem(UPDATES_SEEN_KEY, APP_VERSION)
+  } catch {
+    // Storage blocked: nothing to remember.
+  }
+}
