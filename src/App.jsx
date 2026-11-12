@@ -588,6 +588,7 @@ function App() {
         showRank={RANK_UNLOCKED}
         onUpdatesPage={onUpdatesPage}
         onOpenUpdates={openUpdates}
+        onGoHome={closeUpdates}
       />
 
       {onUpdatesPage ? <UpdatesPage onBack={closeUpdates} /> : null}

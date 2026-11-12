@@ -18,13 +18,22 @@ export default function NavBar({
   showRank = true,
   onUpdatesPage = false,
   onOpenUpdates,
+  onGoHome,
 }) {
+  const wordmark = <img src="/somtimes-wordmark.svg" alt="SOMtimes" className="block h-[22px] w-auto" />
   return (
     <header className="shrink-0 bg-yale-900 text-white">
       {/* Computer: 1rem edges, lined up with the sub bar and the panels below. */}
       <div className="flex min-h-14 flex-wrap items-center gap-x-8 gap-y-2 px-4 sm:px-8 lg:px-4">
         <h1 className="py-3">
-          <img src="/somtimes-wordmark.svg" alt="SOMtimes" className="block h-[22px] w-auto" />
+          {/* On the Updates page the logo leads back to the planner. */}
+          {onUpdatesPage && onGoHome ? (
+            <button type="button" onClick={onGoHome} aria-label="SOMtimes, back to planner" className="block">
+              {wordmark}
+            </button>
+          ) : (
+            wordmark
+          )}
         </h1>
         {/* With Rank hidden there is only Plan, so the tabs are left out. */}
         {showRank ? (
