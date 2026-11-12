@@ -26,9 +26,69 @@ jobs:
       - run: npm run build
 
       - name: Fetch courses from Yale in dry-run mode
+        id: yale-check
         env:
           YALE_API_KEY: ${{ secrets.YALE_API_KEY }}
         run: npm run update-yale-courses -- --check
+
+      - name: Diagnose registrar server selection
+        if: failure() && steps.yale-check.outcome == 'failure'
+        env:
+          YALE_API_KEY: ${{ secrets.YALE_API_KEY }}
+        run: |
+          node --input-type=module <<'JS'
+          import { COURSES_URL } from './scripts/lib/yaleImport.js'
+          for (const termCode of ['202603', '202701']) {
+            for (const close of [false, true]) {
+              const attempts = []
+              for (let i = 0; i < 8; i++) {
+                try {
+                  const query = new URLSearchParams({
+                    apikey: process.env.YALE_API_KEY.trim(), mode: 'json', termCode,
+                    school: 'YC', subjectCode: 'ECON',
+                  })
+                  const response = await fetch(COURSES_URL + '?' + query, {
+                    headers: {
+                      Accept: 'application/json',
+                      'User-Agent': 'SOMtimes course planner (somtimes.vercel.app)',
+                      ...(close ? { Connection: 'close' } : {}),
+                    },
+                    signal: AbortSignal.timeout(8000),
+                  })
+                  const result = await response.json()
+                  const count = Array.isArray(result) ? result.length : 'not a list'
+                  const pin = response.headers.getSetCookie().some(cookie => cookie.startsWith('_212f6='))
+                  attempts.push({ status: response.status, count, pin })
+                  if (count > 0 && pin) break
+                } catch {
+                  attempts.push({ error: 'request or response parse failed' })
+                }
+              }
+              console.log(termCode, close ? 'fresh connection' : 'default connection', JSON.stringify(attempts))
+            }
+          }
+          JS
+
+      - name: Verify Course Search independently
+        if: failure() && steps.yale-check.outcome == 'failure'
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict'
+          import { buildYaleRows } from './scripts/lib/yaleImport.js'
+          import { refreshCourseSearchDescriptions } from './scripts/lib/courseSearchDescriptions.js'
+          const termCode = '202701'
+          const rows = [
+            { schoolCode: 'GB', crn: '24514', subjectNumber: 'GLBL5805' },
+            { schoolCode: 'MU', crn: '25114', subjectNumber: 'MUS502' },
+          ].map(section => ({ ...section, termCode, sectionNumber: '01' }))
+          const catalog = buildYaleRows(rows, termCode)
+          const result = await refreshCourseSearchDescriptions(catalog, new Map(), {
+            checkedOn: new Date().toISOString().slice(0, 10),
+            previousDescriptions: new Map(),
+          })
+          console.log('Independent Course Search check', JSON.stringify(result))
+          assert.equal(result.updated, 2)
+          JS
 
       - name: Verify catalog files stayed untouched
         if: always()
