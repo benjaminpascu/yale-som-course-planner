@@ -50,7 +50,7 @@ The user is a non-technical student. Explain clearly; ask explicitly when a prod
 | **Rank hidden for launch** | Only links ending in `?rank` show the Rank tab (`RANK_UNLOCKED` in `App.jsx`) |
 | **Automatic course updates** | ✅ Every 6 hours from Yale SOM's feed (Nov 2026); new semesters appear, finished ones hide |
 | **Updates page** (`/updates`, patch notes; version 1.0.1) | ✅ Live (Nov 2026); every change adds an entry (Workflow step 5) |
-| **Courses from across Yale** (School picker; spec `docs/specs/cross-registration.md`; version 1.1.0) | Built on `feature/cross-registration`, waiting on preview + "ship it"; Law reader unfinished |
+| **Courses from across Yale** (School picker; spec `docs/specs/cross-registration.md`; version 1.1.0) | ✅ Live (Nov 2026); daily Yale job; Law reader unfinished |
 | **Wider promo** | When you choose (not a separate dev milestone) |
 
 Full detail: **`docs/PROJECT_STATUS.md`**.
