@@ -20,6 +20,8 @@ Per `docs/PRD.md` §12:
    - `npm run build` succeeds.
    - For anything visible: run the app (`dev` in `.claude/launch.json`) and check the change in the browser, with no console errors, in both Single plan and Compare plans views where relevant.
 
+   **Right before every commit and push, update the version and Updates** (the patch notes students see from the **Updates** button in the top bar): add an entry at the top of `UPDATES` in `src/lib/updates.js` and set the same version in `package.json` with `npm version <x.y.z> --no-git-tag-version` (`npm test` fails if they differ). Small fixes going straight to `main` bump the last number (1.0.1 → 1.0.2); new features through the spec bump the middle number (1.0.x → 1.1, then fixes are 1.1.1, 1.1.2). Each change is one or two explicit, plain sentences for students: what changed, where it is, and how to use it. Behind-the-scenes changes (course data refreshes, docs, workflow) get no entry and no new version.
+
    If a check fails and you can't fix it, **don't commit**; tell the user what's broken. When everything passes, how it ships depends on size:
    - **Small fixes and polish → straight to live.** Commit only the files you changed (clear message in plain words), `git push origin main` without asking, and check that the live site still loads.
    - **New features (anything that went through the spec in step 4) → test branch first.** Commit to a branch `feature/<short-name>`, push it, and open a pull request. Vercel builds a private preview link for it (posted on the pull request). Send the user that link and wait. Merge to `main` only when the user says to ship it, then check the live site.
@@ -107,6 +109,7 @@ No database or environment variables. Course data is the CSVs in `docs/data-samp
 | Compare Courses UI | `src/components/compare/` (`CompareView`, `ShortlistStep`, `ScoreStep`, `RatingInput`, `WeightInput`) — visual spec in `docs/design/compare/` |
 | Compare Plans (two plans side by side) | `src/lib/comparePlans.js`, `src/components/ComparePlansView.jsx`; state in `App.jsx` |
 | Header (nav bar + mode sub bar) | `src/components/NavBar.jsx`, `src/components/SubBar.jsx` |
+| Updates page at `/updates` (patch notes + site version; new-update dot) | `src/lib/updates.js`, `src/components/UpdatesPage.jsx`, `UpdatesButton.jsx`; routing in `App.jsx`; `/updates` served by `vercel.json` |
 | Old address → new address move (forwards with saved data; keep while old links are around) | `src/lib/domainMove.js`, called from `src/main.jsx` |
 
 ## Tech stack
