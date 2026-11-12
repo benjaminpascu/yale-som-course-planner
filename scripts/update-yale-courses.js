@@ -9,20 +9,25 @@
  * Needs the Yale API key in YALE_API_KEY (GitHub secret, or .env.local on a
  * computer). Full notes: docs/updating-course-data.md.
  *
- * Yale's Courses Web Service answers one school + subject at a time, and often
- * answers "no courses" for a while before the real list comes back (sometimes
- * every third answer, sometimes after 4–5 empty ones), so each question is
- * asked up to TRIES times in a row before "no courses" is believed. To stay gentle:
- * school/subject pairs known to have courses are asked every REFRESH_DAYS days;
- * every other pair is re-checked once every SWEEP_DAYS days (a slice per day). A pair that
- * comes back empty keeps its previous courses until it has been empty for
- * DROP_AFTER_EMPTY_DAYS days in a row.
+ * Yale's Courses Web Service answers one school + subject at a time. Its
+ * gateway spreads requests over several servers and (Nov 2026) only one of
+ * them has data; the others answer "no courses". Every answer sets a cookie
+ * (`_212f6`) naming the server, so each run first finds a server that answers
+ * a question known to have courses (the CANARY), then sends its cookie with
+ * every request so all of them go there. The canary is re-asked every
+ * CHECK_EVERY questions; if it ever comes back empty, the run finds a working
+ * server again and re-asks that batch. So an empty answer can be trusted.
+ *
+ * To stay gentle: school/subject pairs known to have courses are asked every
+ * day; every other pair is re-checked once every SWEEP_DAYS days (a slice per
+ * day). Roughly 1,000–1,500 requests a day.
  *
  * Options:
  *   --check               write nothing
  *   --force               write even when a term shrinks by more than half
  *   --full                ask every school/subject pair today (first run)
  *   --known               ask every pair known in any semester today (catch-up)
+ *   --raw DIR             also save Yale's raw answers there (for checking)
  *   --summary-file PATH   write a one-line summary (used for the commit message)
  */
 import fs from 'node:fs'
@@ -38,24 +43,32 @@ import {
   yaleFileName,
 } from './lib/yaleImport.js'
 import { fetchLawSections, LAW_SCHOOL } from './lib/lawImport.js'
+import { bulletinUrl, parseBulletinDescription } from './lib/bulletinDescriptions.js'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const DATA_DIR = path.join(ROOT, 'docs/data-samples')
 const STATE_FILE = path.join(DATA_DIR, 'yale_subject_pairs.json')
 // Subject code → name, for the Department filter ("Economics (ECON)").
 const SUBJECT_NAMES_FILE = path.join(DATA_DIR, 'yale_subjects.json')
+// Bulletin descriptions for courses Yale's API leaves without one (looked up once a month each).
+const BULLETIN_FILE = path.join(DATA_DIR, 'yale_bulletin_descriptions.json')
+const BULLETIN_REFRESH_DAYS = 30
+const BULLETIN_MAX_LOOKUPS = 1500
 
-const SWEEP_DAYS = 28
-const REFRESH_DAYS = 2
-const DROP_AFTER_EMPTY_DAYS = 7
-const TRIES = 6
-const PAUSE_MS = 250
+const SWEEP_DAYS = 7
+const CHECK_EVERY = 100
+const FIND_SERVER_TRIES = 12
+const PAUSE_MS = 150
+// A question that always has courses while a term is open.
+const CANARY = { subjectCode: 'ECON', school: 'YC' }
 
 const args = process.argv.slice(2)
 const checkOnly = args.includes('--check')
 const force = args.includes('--force')
 const full = args.includes('--full')
 const knownOnly = args.includes('--known')
+const rawIndex = args.indexOf('--raw')
+const rawDir = rawIndex >= 0 ? args[rawIndex + 1] : null
 const summaryIndex = args.indexOf('--summary-file')
 const summaryFile = summaryIndex >= 0 ? args[summaryIndex + 1] : null
 
@@ -78,34 +91,62 @@ if (!KEY) {
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 let requestCount = 0
 
-/** One GET to Yale; a non-list answer or HTTP error throws (the key never appears in messages). */
-async function getList(url, params) {
+/**
+ * One GET to Yale, with a pinned server cookie if given. Returns the list and
+ * the server cookie Yale set. A non-list answer or HTTP error is retried twice,
+ * then throws (the key never appears in messages).
+ */
+async function getList(url, params, cookie = null) {
   const query = new URLSearchParams({ apikey: KEY, mode: 'json', ...params })
-  requestCount++
-  const response = await fetch(`${url}?${query}`, {
-    headers: { Accept: 'application/json', 'User-Agent': 'SOMtimes course planner (somtimes.vercel.app)' },
-    signal: AbortSignal.timeout(30_000),
-  })
-  if (!response.ok) throw new Error(`Yale answered ${response.status}`)
-  const body = await response.json()
-  if (!Array.isArray(body)) throw new Error("Yale's answer is not a list")
-  await sleep(PAUSE_MS)
-  return body
-}
-
-/** Asks up to TRIES times in a row; [] only when every answer was empty. */
-async function askUntilFound(url, params) {
   let lastError
-  for (let attempt = 0; attempt < TRIES; attempt++) {
+  for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      const list = await getList(url, params)
-      if (list.length > 0) return list
+      requestCount++
+      const response = await fetch(`${url}?${query}`, {
+        headers: {
+          Accept: 'application/json',
+          'User-Agent': 'SOMtimes course planner (somtimes.vercel.app)',
+          ...(cookie ? { Cookie: cookie } : {}),
+        },
+        signal: AbortSignal.timeout(30_000),
+      })
+      if (!response.ok) throw new Error(`Yale answered ${response.status}`)
+      const body = await response.json()
+      if (!Array.isArray(body)) throw new Error("Yale's answer is not a list")
+      const server = (response.headers.getSetCookie?.() ?? [])
+        .map((c) => /^(_212f6=[^;]+)/.exec(c)?.[1])
+        .find(Boolean)
+      await sleep(PAUSE_MS)
+      return { list: body, server: server ?? null }
     } catch (error) {
       lastError = error
+      await sleep(2_000)
     }
   }
-  if (lastError) throw lastError
+  throw lastError
+}
+
+/** Asks without a pinned server until a non-empty answer (the subject list has no pinning). */
+async function askUntilFound(url, params, tries = FIND_SERVER_TRIES) {
+  for (let attempt = 0; attempt < tries; attempt++) {
+    const { list } = await getList(url, params)
+    if (list.length > 0) return list
+  }
   return []
+}
+
+/** Cookie for a Yale server that answers the canary for this term, or null. */
+async function findWorkingServer(termCode) {
+  for (let attempt = 0; attempt < FIND_SERVER_TRIES; attempt++) {
+    const { list, server } = await getList(COURSES_URL, { ...CANARY, termCode })
+    if (list.length > 0 && server) return server
+  }
+  return null
+}
+
+async function serverStillWorks(cookie, termCode) {
+  const { list } = await getList(COURSES_URL, { ...CANARY, termCode }, cookie)
+  return list.length > 0
 }
 
 const termLabel = (termCode) => `${termCode.endsWith('03') ? 'Fall' : 'Spring'} ${termCode.slice(0, 4)}`
@@ -134,6 +175,45 @@ const terms = termsToUpdate(somTerms, today)
   .map(({ termCode }) => termCode)
 
 const state = fs.existsSync(STATE_FILE) ? JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')) : {}
+const bulletin = fs.existsSync(BULLETIN_FILE) ? JSON.parse(fs.readFileSync(BULLETIN_FILE, 'utf8')) : {}
+let bulletinLookups = 0
+
+/** Description from Yale's Bulletin for a course number ('' if none), cached in BULLETIN_FILE. */
+async function bulletinDescription(courseNumber) {
+  const cached = bulletin[courseNumber]
+  const fresh = cached && (today - new Date(cached.checked)) / 86_400_000 < BULLETIN_REFRESH_DAYS
+  if (fresh || (cached && bulletinLookups >= BULLETIN_MAX_LOOKUPS)) return cached.text
+  if (bulletinLookups >= BULLETIN_MAX_LOOKUPS) return ''
+  bulletinLookups++
+  try {
+    const response = await fetch(bulletinUrl(courseNumber), {
+      headers: { 'User-Agent': 'SOMtimes course planner (somtimes.vercel.app)' },
+      signal: AbortSignal.timeout(20_000),
+    })
+    if (!response.ok) throw new Error(`catalog answered ${response.status}`)
+    const text = parseBulletinDescription(await response.text())
+    bulletin[courseNumber] = { text, checked: todayStamp }
+    await sleep(PAUSE_MS)
+    return text
+  } catch {
+    return cached?.text ?? ''
+  }
+}
+
+/** Fills empty descriptions from the Bulletin (main number first, then cross-listings). */
+async function fillFromBulletin(rows) {
+  for (const row of rows) {
+    if (row['Course Description'] || row.School === LAW_SCHOOL) continue
+    const numbers = [row['Course Number'], ...(row['Cross Listings'] || '').split(';').map((n) => n.trim()).filter(Boolean)]
+    for (const number of numbers) {
+      const text = await bulletinDescription(number)
+      if (text) {
+        row['Course Description'] = text
+        break
+      }
+    }
+  }
+}
 // A school/subject pair with courses in one semester probably has some in the other too.
 const knownAnywhere = new Set(Object.values(state).flatMap((term) => Object.keys(term.pairs ?? {})))
 const failures = []
@@ -176,42 +256,72 @@ for (const termCode of terms) {
     if (full || firstRun) return true
     const known = termState.pairs[key] || knownAnywhere.has(key)
     if (knownOnly) return known
-    if (known) return sweepSlot(key) % REFRESH_DAYS === dayNumber % REFRESH_DAYS
-    return sweepSlot(key) === dayNumber % SWEEP_DAYS
+    return known || sweepSlot(key) === dayNumber % SWEEP_DAYS
   })
   console.log(`\n${name}: asking Yale about ${toAsk.length} of ${pairs.length} school/subject pairs…`)
 
+  let server = await findWorkingServer(termCode)
+  if (!server) {
+    failures.push(`${name}: no Yale server answered with courses. Kept the current file.`)
+    continue
+  }
+
   const rows = []
   const problems = []
+  const raw = []
   let errors = 0
   const asked = new Set()
-  for (const { school, subject, key } of toAsk) {
-    asked.add(key)
-    let sections
-    try {
-      sections = await askUntilFound(COURSES_URL, { subjectCode: subject, termCode, school })
-    } catch (error) {
-      errors++
-      problems.push(`${key}: ${error.message}`)
-      rows.push(...(oldByPair.get(key) ?? []))
-      continue
-    }
-    const known = termState.pairs[key]
-    if (sections.length === 0) {
-      if (known) {
-        known.emptyDays = (known.emptyDays ?? 0) + 1
-        if (known.emptyDays >= DROP_AFTER_EMPTY_DAYS) delete termState.pairs[key]
-        else rows.push(...(oldByPair.get(key) ?? []))
+  // Batches of CHECK_EVERY questions; after each, make sure the server still answers.
+  for (let start = 0; start < toAsk.length; start += CHECK_EVERY) {
+    const batch = toAsk.slice(start, start + CHECK_EVERY)
+    let answers
+    for (let attempt = 0; attempt < 2; attempt++) {
+      answers = []
+      for (const pair of batch) {
+        try {
+          const { list } = await getList(COURSES_URL, { subjectCode: pair.subject, termCode, school: pair.school }, server)
+          answers.push({ pair, sections: list })
+        } catch (error) {
+          answers.push({ pair, error })
+        }
       }
-      continue
+      if (await serverStillWorks(server, termCode)) break
+      console.log('  The Yale server stopped answering; finding another and re-asking this batch…')
+      server = await findWorkingServer(termCode)
+      if (!server) break
     }
-    const built = buildYaleRows(sections, termCode)
-    problems.push(...built.problems.map((p) => `${key}: ${p}`))
-    rows.push(...built.rows.filter((row) => row.School === school))
-    termState.pairs[key] = { lastSeen: todayStamp, emptyDays: 0 }
+    if (!server) {
+      failures.push(`${name}: lost Yale's working server mid-run. Kept the current file.`)
+      break
+    }
+    for (const { pair, sections, error } of answers) {
+      const { school, key } = pair
+      asked.add(key)
+      if (error) {
+        errors++
+        problems.push(`${key}: ${error.message}`)
+        rows.push(...(oldByPair.get(key) ?? []))
+        continue
+      }
+      if (sections.length === 0) {
+        delete termState.pairs[key]
+        continue
+      }
+      raw.push(...sections.filter((s) => s.schoolCode === school))
+      termState.pairs[key] = { lastSeen: todayStamp }
+    }
   }
-  // Pairs not asked today keep their courses.
-  for (const [key, kept] of oldByPair) if (!asked.has(key)) rows.push(...kept)
+  if (!server) continue
+  // Whole term at once, so cross-listed listings from different subjects merge into one class.
+  const built = buildYaleRows(raw, termCode)
+  problems.push(...built.problems)
+  rows.push(...built.rows)
+  if (rawDir) {
+    fs.mkdirSync(rawDir, { recursive: true })
+    fs.writeFileSync(path.join(rawDir, `${termCode}.json`), JSON.stringify(raw))
+  }
+  // Pairs not asked today keep their courses (listed first, so fresh rows win on the same ID).
+  for (const [key, kept] of oldByPair) if (!asked.has(key)) rows.unshift(...kept)
 
   if (errors > toAsk.length / 2) {
     failures.push(`${name}: Yale gave errors for ${errors} of ${toAsk.length} questions. Kept the current file.`)
@@ -233,6 +343,7 @@ for (const termCode of terms) {
   const unique = [...new Map(rows.map((row) => [row['Course ID'], row])).values()].sort(
     (a, b) => a.School.localeCompare(b.School) || a['Course Number'].localeCompare(b['Course Number']) || a.Section.localeCompare(b.Section),
   )
+  await fillFromBulletin(unique)
 
   const { added, removed, changed } = diffCourses(oldRows, unique)
   console.log(`  ${unique.length} course sections (was ${oldRows.length}); ${added.length} new, ${removed.length} removed, ${changed.length} changed`)
@@ -267,7 +378,10 @@ if (!checkOnly) {
   fs.writeFileSync(STATE_FILE, `${JSON.stringify(state, null, 1)}\n`)
   const sortedNames = Object.fromEntries(Object.entries(subjectNames).sort(([a], [b]) => a.localeCompare(b)))
   fs.writeFileSync(SUBJECT_NAMES_FILE, `${JSON.stringify(sortedNames, null, 1)}\n`)
+  const sortedBulletin = Object.fromEntries(Object.entries(bulletin).sort(([a], [b]) => a.localeCompare(b)))
+  fs.writeFileSync(BULLETIN_FILE, `${JSON.stringify(sortedBulletin, null, 1)}\n`)
 }
+if (bulletinLookups > 0) console.log(`${bulletinLookups} Bulletin description lookups.`)
 
 console.log(`\n${requestCount} requests to Yale.`)
 if (checkOnly) console.log('--check: nothing was written.')

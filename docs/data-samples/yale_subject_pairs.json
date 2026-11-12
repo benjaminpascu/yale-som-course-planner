@@ -2,2076 +2,1562 @@
  "202603": {
   "pairs": {
    "AC|ARCH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "AT|ART": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GB|GLBL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|AFAM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|AFST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|AKKD": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|AMST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|AMTH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ANTH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|APHY": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ARBC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ARCG": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ARCH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ASTR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|B&BS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|BENG": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|BLST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|BM&M": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|C&MP": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|CAND": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|CB&B": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|CBIO": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|CENG": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|CHEM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|CHNS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|CLSS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|COSM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|CPLT": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|CPSC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|DISR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|E&RS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|EALL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|EAST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ECE": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ECON": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|EEB": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|EGYP": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ELP": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|EMST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ENAS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ENGL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ENVE": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|EPS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ER&M": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|EXCH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|FILM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|FREN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|GENE": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|GMAN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|GREK": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|GSAS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|HEBR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|HIST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|HNDI": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|HSAR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|HSHM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|IBIO": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|IMED": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|INP": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ITAL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|JAPN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|JDST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|LATN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|LING": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MATH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MB&B": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MBIO": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MCDB": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MDVL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MEDC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MEDR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MENG": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MESO": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MGMT": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MHHR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MRES": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MSCI": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MUSI": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|NELC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|NURS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|OTTM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|PATH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|PCAN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|PERS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|PHAR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|PHUM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|PHYS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|PLSC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|PMAE": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|PORT": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|PSYC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|PTB": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|QUAL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|RLST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|RSEE": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|RUSS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|S&DS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|SAST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|SKRT": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|SLAV": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|SMTC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|SOCY": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|SPAN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|SWAH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|TKSH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|TLGU": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|VAIR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|WGSS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|YORU": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ZULU": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "MD|HSCI": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "MD|MD": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "MU|MUS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "NR|NURS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "PA|PA": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "PH|BIS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "PH|CDE": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "PH|EHS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "PH|EMD": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "PH|EMPH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "PH|PUBH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|AKKD": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|AMST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ANTH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|APHY": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ARCH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ART": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ASL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ASTR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|BENG": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|BIOL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|BLST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|BNGL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|BURM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CENG": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CGSC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CHEM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CHLD": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CHNS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CLCV": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CLSS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|COSM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CPLT": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CPSC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSBF": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSBK": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSBR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSDC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSEC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSES": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSGH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSJE": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSMC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSMY": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSPC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSSM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSSY": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSTC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSTD": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CTLN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CZEC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|DEVN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|DRST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|DUTC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|EALL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|EAST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ECE": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ECON": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|EDST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|EEB": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|EGYP": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ENAS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ENGL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ENVE": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|EP&E": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ER&M": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|EVST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|FLPN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|FNSH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|GMAN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|GREK": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|HEBR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|HELN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|HIST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|HLTH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|HUMS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|INDN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ITAL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|JAPN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|KHMR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|KREN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|LATN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|LING": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|MATH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|MENG": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|MMES": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|MTBT": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|MUSI": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|NAVY": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|NELC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|NPLI": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|PLSC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|PLSH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|PNJB": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|PORT": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|PSYC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|RLST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|RUSS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|S&DS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|SBCR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|SCIE": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|SKRT": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|SOCY": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|SPAN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|SWED": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|TAML": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|TDPS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|TKSH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|UKRN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|URBN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|WGSS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|WLOF": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|YDSH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|YORU": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "DI|REL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "DR|DRAM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "FS|ENV": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|PHIL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "PH|HPM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "PH|SBS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ACCT": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|AFST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|AMTH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ARBC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ARCG": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|EPS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|FILM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|FREN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|GLBL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|HGRN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|HNDI": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|HSAR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|HSHM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|JDST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|LAST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|MB&B": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|MCDB": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|NSCI": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|OTTM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|PERS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|PHIL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|PHYS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|PRAC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|RSEE": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|SAST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|SLAV": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|SNHL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|SWAH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|TBTN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|TLGU": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|USAF": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|VIET": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ZULU": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    }
   }
  },
  "202701": {
   "pairs": {
    "AC|ARCH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "AT|ART": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "DI|REL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "DR|DRAM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "FS|ENV": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GB|GLBL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|AFAM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|AFST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|AKKD": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|AMST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|AMTH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ANTH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|APHY": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ARBC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ARCG": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ARCH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ASTR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|B&BS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|BENG": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|BLST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|C&MP": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|CAND": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|CB&B": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|CBIO": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|CENG": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|CHEM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|CHNS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|CLSS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|COSM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|CPLT": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|CPSC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|DISA": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|DISR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|E&RS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|EALL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|EAST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ECE": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ECON": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|EEB": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|EGYP": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|EMST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ENAS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ENGL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ENVE": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|EPS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ER&M": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|EXCH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|FILM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|FREN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|GENE": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|GMAN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|GREK": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|GSAS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|HEBR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|HIST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|HNDI": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|HSAR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|HSHM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|IBIO": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|IMED": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|INP": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ITAL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|JDST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|LATN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|LING": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MATH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MB&B": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MBIO": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MCDB": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MDVL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MEDC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MEDR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MENG": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MESO": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MGMT": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MHHR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MRES": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MSCI": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|MUSI": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|NELC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|OTTM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|PATH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|PERS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|PHAR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|PHIL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|PHUM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|PHYS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|PLSC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|PMAE": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|PORT": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|PSYC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|PTB": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|QUAL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|RLST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|RSEE": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|RUSS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|S&DS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|SAST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|SKRT": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|SLAV": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|SMTC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|SOCY": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|SPAN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|SWAH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|TKSH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|TLGU": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|VAIR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|WGSS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "GS|ZULU": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "MD|HSCI": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "MD|MD": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "MU|MUS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "NR|NURS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "PA|PA": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "PH|BIS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "PH|CDE": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "PH|EHS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "PH|EMD": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "PH|EMPH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "PH|HPM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "PH|PUBH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "PH|SBS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ACCT": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|AFST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|AKKD": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|AMST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|AMTH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ANTH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|APHY": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ARBC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ARCG": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ARCH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ART": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ASL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ASTR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|BENG": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|BIOL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|BLST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|BNGL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|BURM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CENG": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CGSC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CHEM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CHLD": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CHNS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CLCV": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CLSS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|COSM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CPLT": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CPSC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSBF": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSBK": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSBR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSDC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSES": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSGH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSJE": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSMC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSMY": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSPC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSSM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSSY": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSTC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSTD": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CSYC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CTLN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|CZEC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|DRST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|DUTC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|EALL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|EAST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ECE": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ECON": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|EDST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|EEB": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|EGYP": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ENAS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ENGL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ENVE": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|EP&E": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|EPS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ER&M": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|EVST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|FILM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|FLPN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|FREN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|GLBL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|GMAN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|GREK": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|HEBR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|HELN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|HGRN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|HIST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|HLTH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|HNDI": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|HSAR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|HSHM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|HUMS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|INDN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ITAL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|JAPN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|JDST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|KHMR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|KREN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|LAST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|LATN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|LING": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|MATH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|MB&B": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|MCDB": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|MENG": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|MMES": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|MTBT": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|MUSI": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|NAVY": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|NELC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|NPLI": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|NSCI": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|OTTM": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|PERS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|PHIL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|PHYS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|PLSC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|PLSH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|PNJB": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|PORT": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|PRAC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|PSYC": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|RLST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|RSEE": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|RUSS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|S&DS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|SAST": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|SBCR": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|SCIE": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|SKRT": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|SLAV": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|SNHL": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|SOCY": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|SPAN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|SWAH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|TAML": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|TBTN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|TDPS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|TKSH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|TLGU": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|UKRN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|URBN": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|USAF": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|VIET": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|WGSS": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|WLOF": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|YDSH": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
    },
    "YC|ZULU": {
-    "lastSeen": "2026-11-12",
-    "emptyDays": 0
+    "lastSeen": "2026-11-12"
+   },
+   "YC|ENRG": {
+    "lastSeen": "2026-11-12"
    }
   }
  }

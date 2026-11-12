@@ -116,24 +116,40 @@ app "SOMtimes course import": GitHub secret `YALE_API_KEY` (and `.env.local`
 on a computer, never committed). Only the open semesters that SOM has files for
 are updated.
 
-How it stays gentle and safe:
+How it works and stays safe:
 
-- Yale answers one school + subject at a time, and often answers **"no
-  courses" for a while before the real list** (sometimes every third answer,
-  sometimes after 4–5 empty ones). So each question is asked up to 6 times in
-  a row before "no courses" is believed.
-- `docs/data-samples/yale_subject_pairs.json` remembers which school/subject
-  pairs have courses (in either semester). Those are re-asked every 2 days
-  (half each day); all other pairs are re-checked once every 28 days (a slice
-  each day). Roughly 2,000 requests a day. `--known` asks every known pair now
-  (catch-up); `--full` asks every pair (~2,500 per semester, over an hour).
-- A pair that comes back empty keeps its old courses until it has been empty
-  7 days in a row. A semester that would shrink by more than half, or Yale
-  errors on most questions, keeps the old file and fails the job (GitHub
-  emails the repo owner).
-- Cancelled sections are left out. A course listed under several subjects
-  with one CRN appears once, under its main listing. Course IDs are
-  `<termCode>-<crn>`, so saved plans survive updates.
+- **Only one of Yale's servers has data.** Yale's gateway spreads requests over
+  several servers; in Nov 2026 two of three always answered "no courses". Each
+  answer sets a cookie (`_212f6`) naming its server, so each run first finds a
+  server that answers a question known to have courses (ECON in Yale College),
+  then sends that cookie with every request. Every 100 questions it re-checks
+  that server; if it stops answering, the run finds another and re-asks that
+  batch. So an empty answer can be trusted, and each question is asked once.
+  (Issue #8: tell Yale's API team.)
+- `docs/data-samples/yale_subject_pairs.json` remembers which school/department
+  pairs have courses. Those are asked every day; all others once a week (a
+  slice each day). About 1,000–1,500 requests a day. `--known` asks every known
+  pair now; `--full` asks every pair (about 5,000 requests, 20 minutes);
+  `--raw DIR` also saves Yale's raw answers for checking.
+- A semester that would shrink by more than half, or Yale errors on most
+  questions, keeps the old file and fails the job (GitHub emails the repo
+  owner). Cancelled, not-offered and moved sections are left out.
+- **Cross-listings:** Yale gives every listing of a shared class its own CRN
+  (sometimes with different section numbers, sometimes naming only some of its
+  sister listings). Listings are one class when they share the school, meeting
+  times, instructors and a course number (directly or through a chain). Each
+  class appears once under its main number; the others go in `Cross Listings`
+  ("Also listed as" in the app; search and the Department filter use them).
+  Course IDs are `<termCode>-<main number>-<section>` (e.g.
+  `202603-AFST3360-01`), so saved plans survive updates.
+- **Descriptions:** Yale's API has none for some schools (Jackson, Architecture,
+  Music, Medicine…). Those are filled from Yale's Bulletin (catalog.yale.edu)
+  through its public per-course lookup, cached in
+  `docs/data-samples/yale_bulletin_descriptions.json` and re-checked monthly.
+  The Bulletin is the yearly catalog, so a few may be older than
+  courses.yale.edu. (courses.yale.edu itself is behind a bot check, so it isn't
+  used.)
+- Department names for the Department filter: `docs/data-samples/yale_subjects.json`.
 - Times: Yale writes `MW 2.35-3.50` (no am/pm: 8–11 morning, 12 noon, 1–6
   afternoon) and `Th 7.00-8.55p` (evening). Several meeting patterns with the
   same time are combined; otherwise the first timed one is used.

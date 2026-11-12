@@ -68,7 +68,7 @@ describe('buildYaleRows', () => {
     expect(problems).toEqual([])
     expect(rows).toHaveLength(1)
     expect(rows[0]).toMatchObject({
-      'Course ID': '202701-23456',
+      'Course ID': '202701-GLBL5010-01',
       'Course Number': 'GLBL 5010',
       'Course Title': 'Economics for Global Affairs',
       'Course Description': 'Intro.',
@@ -105,6 +105,21 @@ describe('buildYaleRows', () => {
     expect(rows[0]['Cross Listings']).toBe('ECON 4465; EP&E 4224; MGT 696')
   })
 
+  it('merges listings of one class that Yale gives different CRNs', () => {
+    const listings = { primXLst: 'AFST3360', scndXLst: ['ANTH3860', 'ER&M1614'] }
+    const { rows } = buildYaleRows(
+      [
+        section({ ...listings, subjectNumber: 'AFST3360', crn: '10758' }),
+        section({ ...listings, subjectNumber: 'ANTH3860', crn: '10759' }),
+        section({ ...listings, subjectNumber: 'ER&M1614', crn: '10760' }),
+      ],
+      '202701',
+    )
+    expect(rows).toHaveLength(1)
+    expect(rows[0]['Course ID']).toBe('202701-AFST3360-01')
+    expect(rows[0]['Cross Listings']).toBe('ANTH 3860; ER&M 1614')
+  })
+
   it('has no cross listings for a course with one number, and keeps prerequisites as text', () => {
     const { rows } = buildYaleRows(
       [section({ prerequisites: '<p class="prerequisites">Prerequisite: ECON 1111.</p>' })],
@@ -112,6 +127,28 @@ describe('buildYaleRows', () => {
     )
     expect(rows[0]['Cross Listings']).toBe('')
     expect(rows[0].Prerequisites).toBe('Prerequisite: ECON 1111.')
+  })
+
+  it('merges listings that only name each other, under the first number', () => {
+    const { rows } = buildYaleRows(
+      [
+        section({ subjectNumber: 'ER&M7340', scndXLst: ['AMST6634'], crn: '16021' }),
+        section({ subjectNumber: 'AMST6634', scndXLst: ['ER&M7340'], crn: '16022' }),
+      ],
+      '202701',
+    )
+    expect(rows).toHaveLength(1)
+    expect(rows[0]['Course Number']).toBe('AMST 6634')
+    expect(rows[0]['Cross Listings']).toBe('ER&M 7340')
+  })
+
+  it('keeps separate sections of one number apart', () => {
+    const lesson = { subjectNumber: 'MUS5290', meetingPattern: ['1 HTBA'], instructorList: [] }
+    const { rows } = buildYaleRows(
+      [section({ ...lesson, crn: '1', sectionNumber: '01' }), section({ ...lesson, crn: '2', sectionNumber: '02' })],
+      '202701',
+    )
+    expect(rows.map((r) => r['Course ID'])).toEqual(['202701-MUS5290-01', '202701-MUS5290-02'])
   })
 
   it('uses fall for fall terms and spaces subject codes with &', () => {

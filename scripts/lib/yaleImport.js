@@ -20,11 +20,22 @@ export const SUBJECTS_URL = 'https://gw.its.yale.edu/soa-gateway/course/webservi
  */
 export const YALE_API_SCHOOLS = ['AC', 'AT', 'DI', 'DR', 'FS', 'GB', 'GS', 'MD', 'MU', 'NR', 'PA', 'PH', 'YC']
 
-/** Courses with this status are left out: C cancelled, B/D moved to another term. */
-const SKIPPED_STATUSES = new Set(['C', 'B', 'D'])
+/**
+ * Courses with this status are left out: C cancelled, X not offered, B/D moved
+ * to another term, N number changed (the course lives on under its new number).
+ */
+const SKIPPED_STATUSES = new Set(['C', 'X', 'B', 'D', 'N'])
 
 const DAY_CODES = { M: 'Mo', T: 'Tu', W: 'We', Th: 'Th', F: 'Fr', Sa: 'Sa', Su: 'Su' }
 const DAY_ORDER = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
+
+/**
+ * Stable course ID: "<termCode>-<main number>-<section>", e.g. "202603-AFST3360-01".
+ * (SOM course IDs are plain numbers, so the two never collide.)
+ */
+export function yaleCourseId(termCode, mainNumber, sectionNumber) {
+  return `${termCode}-${String(mainNumber).replace(/\s+/g, '')}-${sectionNumber || '01'}`
+}
 
 /** File name for a term, e.g. 202701 → yale_courses_spring2027.csv. */
 export function yaleFileName(termCode) {
@@ -118,9 +129,17 @@ function text(value) {
 }
 
 /**
- * Yale sections for one school → CSV rows. Cancelled sections are left out.
- * A course listed under several subjects with the same CRN appears once, under
- * its main listing (Yale's `primXLst`); the other numbers go in `Cross Listings`.
+ * All of a term's Yale sections → CSV rows, one per class. Cancelled, not
+ * offered and moved sections are left out.
+ *
+ * Yale gives each listing of a cross-listed class its own CRN (AFST 3360,
+ * ANTH 3860 and ER&M 1614 can be one class with three CRNs, sometimes with
+ * different section numbers). Listings are the same class when they share the
+ * school, the full set of course numbers, the meeting times and the
+ * instructors. Each class appears once, under its main number (Yale's
+ * `primXLst`); the other numbers go in `Cross Listings`. Its ID is built from
+ * the main number and the section of the main listing (or the lowest-CRN
+ * listing when the main one isn't there), so it stays the same day to day.
  *
  * @param {Record<string, unknown>[]} sections — Courses Web Service v3 items
  * @param {string} termCode
@@ -129,8 +148,8 @@ function text(value) {
 export function buildYaleRows(sections, termCode) {
   const problems = []
   const session = termCode.endsWith('03') ? 'fall' : 'spring'
-  const byId = new Map()
 
+  const byCrn = new Map()
   for (const section of sections) {
     const status = text(section.cSectionStatus || section.sectionStatus)
     if (SKIPPED_STATUSES.has(status)) continue
@@ -143,52 +162,126 @@ export function buildYaleRows(sections, termCode) {
       problems.push(`${text(section.subjectNumber)} ${text(section.courseTitle)}: no CRN, left out`)
       continue
     }
-    const id = `${termCode}-${crn}`
-    // Every listing of a cross-listed class carries the main number (primXLst)
-    // and the others (scndXLst), so any of them gives the full picture.
-    const main = text(section.primXLst) || text(section.subjectNumber)
-    const others = [text(section.subjectNumber), ...(Array.isArray(section.scndXLst) ? section.scndXLst : [section.scndXLst])]
-      .map((number) => text(number))
-      .filter((number) => number && number !== main)
+    byCrn.set(crn, section)
+  }
 
-    const instructors = Array.isArray(section.instructorList) ? section.instructorList.filter(Boolean) : []
-    const rooms = (Array.isArray(section.meetingPatternLocation) ? section.meetingPatternLocation : [])
-      .map((room) => text(room))
-      .filter((room) => room && !/HTBA/i.test(room))
+  // Same school, meeting times and instructors, and linked by a shared course
+  // number (directly or through a chain, since Yale's listings don't always
+  // name every sibling): candidates for one class.
+  const slots = new Map()
+  for (const section of byCrn.values()) {
+    // Sorted: Yale lists the same meetings/instructors in different orders on different listings.
+    const key = [text(section.schoolCode), list(section.meetingPattern).sort().join(';'), list(section.instructorList).sort().join(';')].join('|')
+    if (!slots.has(key)) slots.set(key, [])
+    slots.get(key).push(section)
+  }
+  const buckets = new Map()
+  for (const slot of slots.values()) {
+    const parent = slot.map((_, i) => i)
+    const find = (i) => (parent[i] === i ? i : (parent[i] = find(parent[i])))
+    const owner = new Map()
+    slot.forEach((section, i) => {
+      for (const number of listingNumbers(section)) {
+        if (owner.has(number)) parent[find(i)] = find(owner.get(number))
+        else owner.set(number, i)
+      }
+    })
+    const groups = new Map()
+    slot.forEach((section, i) => {
+      const root = find(i)
+      if (!groups.has(root)) groups.set(root, [])
+      groups.get(root).push(section)
+    })
+    for (const group of groups.values()) buckets.set(buckets.size, group)
+  }
+  // Within a bucket, sections with the same number are different classes (e.g.
+  // several lesson sections); each class takes at most one listing per number,
+  // paired up in section order.
+  const classes = []
+  for (const bucket of buckets.values()) {
+    const byNumber = new Map()
+    for (const section of bucket) {
+      const number = text(section.subjectNumber)
+      if (!byNumber.has(number)) byNumber.set(number, [])
+      byNumber.get(number).push(section)
+    }
+    const lists = [...byNumber.values()].map((l) =>
+      l.sort((a, b) => text(a.sectionNumber).localeCompare(text(b.sectionNumber)) || Number(text(a.crn)) - Number(text(b.crn))),
+    )
+    const count = Math.max(...lists.map((l) => l.length))
+    for (let i = 0; i < count; i++) classes.push(lists.map((l) => l[i]).filter(Boolean))
+  }
 
-    byId.set(id, {
-      row: {
-        'Bid Or Permission': '',
-        'Course Category': '',
-        'Course Description': htmlToText(section.description),
-        'Course ID': id,
-        'Course Number': spacedNumber(main),
-        'Course Session': session,
-        'Course Session End Date': '',
-        'Course Session Start date': '',
-        'Course Title': text(section.courseTitle),
-        'Course Type': '',
-        'Faculty 1': instructors.join(', '),
-        'Faculty 1 Email': '',
-        'Old Syllabus': '',
-        Room: [...new Set(rooms)].join(', '),
-        Section: text(section.sectionNumber),
-        Syllabus: text(section.syllabusLink),
-        TermCode: termCode,
-        Units: '0',
-        Visible: '1',
-        ...parseMeetingPatterns(section.meetingPattern),
-        tags: '',
-        School: text(section.schoolCode),
-        'Course Page': '',
-        'Cross Listings': [...new Set(others)].map(spacedNumber).join('; '),
-        Prerequisites: htmlToText(section.prerequisites),
-      },
+  const rows = []
+  const usedIds = new Set()
+  for (const listings of classes) {
+    listings.sort((a, b) => Number(text(a.crn)) - Number(text(b.crn)))
+    const main = mainNumber(listings)
+    const rep = listings.find((s) => text(s.subjectNumber) === main) ?? listings[0]
+    const firstText = (field) => listings.map((s) => htmlToText(s[field])).find(Boolean) ?? ''
+    const rooms = listings
+      .flatMap((s) => list(s.meetingPatternLocation))
+      .filter((room) => !/HTBA/i.test(room))
+    let id = yaleCourseId(termCode, main, text(rep.sectionNumber))
+    if (usedIds.has(id)) id = `${id}-${text(rep.crn)}`
+    usedIds.add(id)
+    const allNumbers = [...new Set(listings.flatMap(listingNumbers))].sort()
+
+    rows.push({
+      'Bid Or Permission': '',
+      'Course Category': '',
+      'Course Description': firstText('description'),
+      'Course ID': id,
+      'Course Number': spacedNumber(main),
+      'Course Session': session,
+      'Course Session End Date': '',
+      'Course Session Start date': '',
+      'Course Title': text(rep.courseTitle),
+      'Course Type': '',
+      'Faculty 1': list(rep.instructorList).join(', '),
+      'Faculty 1 Email': '',
+      'Old Syllabus': '',
+      Room: [...new Set(rooms)].join(', '),
+      Section: text(rep.sectionNumber),
+      Syllabus: listings.map((s) => text(s.syllabusLink)).find(Boolean) ?? '',
+      TermCode: termCode,
+      Units: '0',
+      Visible: '1',
+      ...parseMeetingPatterns(rep.meetingPattern),
+      tags: '',
+      School: text(rep.schoolCode),
+      'Course Page': '',
+      'Cross Listings': allNumbers.filter((n) => n !== main).map(spacedNumber).join('; '),
+      Prerequisites: firstText('prerequisites'),
     })
   }
 
-  const rows = [...byId.values()]
-    .map(({ row }) => row)
-    .sort((a, b) => a['Course Number'].localeCompare(b['Course Number']) || a.Section.localeCompare(b.Section))
+  rows.sort((a, b) => a['Course Number'].localeCompare(b['Course Number']) || a.Section.localeCompare(b.Section))
   return { rows, problems }
+}
+
+function list(value) {
+  return (Array.isArray(value) ? value : [value]).map((v) => text(v)).filter(Boolean)
+}
+
+/**
+ * A class's main number: the `primXLst` its listings name most often (ties:
+ * alphabetically first); when no listing names one (listings only name each
+ * other), the alphabetically first listing number.
+ */
+function mainNumber(listings) {
+  const counts = new Map()
+  for (const s of listings) {
+    const named = text(s.primXLst)
+    if (named) counts.set(named, (counts.get(named) ?? 0) + 1)
+  }
+  if (counts.size > 0) {
+    return [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0][0]
+  }
+  return listings.map((s) => text(s.subjectNumber)).sort()[0]
+}
+
+/** Every number a listing is known by (own, main, others), sorted. */
+function listingNumbers(section) {
+  return [...new Set([text(section.subjectNumber), text(section.primXLst), ...list(section.scndXLst)].filter(Boolean))].sort()
 }

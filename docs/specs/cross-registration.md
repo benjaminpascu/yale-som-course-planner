@@ -118,8 +118,9 @@ when either plan has one.
   `termCode`, `sectionStatus` / `cSectionStatus`, `primXLst` / `scndXLst`.
   `meetingStartTimeList` / `meetingEndTimeList` were empty in samples.
 - **No credits field.**
-- **Flaky:** the same request often returns `[]` (about 2 in 3 times in testing).
-  Retry with a short pause; treat a persistent empty answer as "unknown", never as "no courses".
+- **Flaky (solved):** two of Yale's three backend servers return `[]` for
+  everything. The update pins every request to the working server via the
+  `_212f6` cookie Yale sets (see docs/updating-course-data.md).
 - Yale's terms of use: no rule against storing data; Yale may block "excessive use".
   Keep daily request volume modest and spaced out. The portal showed no per-app
   limit for this app. As built: known school/subject pairs every 2 days, all

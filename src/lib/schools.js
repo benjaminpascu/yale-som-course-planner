@@ -35,9 +35,9 @@ export function isSomCourse(course) {
   return !course.school || course.school === SOM_SCHOOL
 }
 
-/** Course IDs from the other-schools files look like "<termCode>-<crn>" (SOM IDs are plain numbers). */
+/** Course IDs from the other-schools files look like "202603-AFST3360-01" (SOM IDs are plain numbers). */
 export function isOtherSchoolCourseId(id) {
-  return /^\d{6}-\d+$/.test(String(id))
+  return /^\d{6}-\S+$/.test(String(id))
 }
 
 /**

@@ -28,7 +28,7 @@ describe('pickerSchools', () => {
 
 describe('course ids and schools', () => {
   it('tells other-school ids from SOM ids', () => {
-    expect(isOtherSchoolCourseId('202701-23456')).toBe(true)
+    expect(isOtherSchoolCourseId('202701-GLBL5010-01')).toBe(true)
     expect(isOtherSchoolCourseId('21637')).toBe(false)
   })
 
