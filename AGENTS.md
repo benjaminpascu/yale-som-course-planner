@@ -49,6 +49,7 @@ The user is a non-technical student. Explain clearly; ask explicitly when a prod
 | **Compare Plans** (two plans side by side; tabs renamed Plan / Rank) | ✅ Built (Nov 2026) |
 | **Rank hidden for launch** | Only links ending in `?rank` show the Rank tab (`RANK_UNLOCKED` in `App.jsx`) |
 | **Automatic course updates** | ✅ Every 6 hours from Yale SOM's feed (Nov 2026); new semesters appear, finished ones hide |
+| **Updates page** (`/updates`, patch notes; version 1.0.1) | ✅ Live (Nov 2026); every change adds an entry (Workflow step 5) |
 | **Wider promo** | When you choose (not a separate dev milestone) |
 
 Full detail: **`docs/PROJECT_STATUS.md`**.

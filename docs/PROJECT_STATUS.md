@@ -115,6 +115,12 @@ Desktop (`lg+`): unchanged — catalog sidebar + planning stack; **Plans** in he
 - Nav tabs renamed: **Plan** (was Planner) and **Rank** (was Compare; Compare Courses code keeps its names).
 - Code: `src/lib/comparePlans.js` (+ tests), `src/components/ComparePlansView.jsx`, `App.jsx`.
 
+### Updates page ✅ (live Nov 2026)
+
+- **Updates** button in the navy top bar (after Help) opens its own page at `/updates`: patch notes since the 1.0.0 launch, newest first, with the site version. Orange dot until the newest version has been seen.
+- Version rules: small fixes to `main` bump the last number (1.0.1 → 1.0.2); spec'd features bump the middle (1.1 is planned for courses from across Yale). Agents add the entry right before every commit (`AGENTS.md` step 5).
+- Spec: `docs/specs/updates.md`. Code: `src/lib/updates.js` (+ tests), `UpdatesPage.jsx`, `UpdatesButton.jsx`, `vercel.json`.
+
 ### Compare Courses ✅ (live Nov 2026)
 
 > **Hidden for launch (Nov 2026).** The Rank tab only shows when the link ends in `?rank` (e.g. `https://<site>/?rank`), the owner's private link. Everyone else sees Plan only (no Plan/Rank tabs; 3 phone tabs). Saved Rank data in a browser is kept. Switch: `RANK_UNLOCKED` in `src/App.jsx`. Why: most students only need Plan, and Rank needs a redesign first (146 courses to sort incl. EMBA/PhD/core, ignores the plan, own visual style, many tips).
@@ -179,3 +185,4 @@ Course CSVs update themselves every 6 hours (`docs/updating-course-data.md`); fo
 | Nov 2026 | Compare Plans (two plans side by side); nav tabs renamed Plan / Rank |
 | Nov 2026 | Rank hidden for launch; only `?rank` links show it |
 | Nov 2026 | Courses update automatically every 6 hours from Yale SOM's course feed (GitHub job); new semesters added, finished ones hidden; Yale-hidden courses left out; legacy cleanup (Cursor rules, Supabase leftovers, manual import) |
+| Nov 2026 | Version 1.0.1; Updates page at `/updates` with patch notes and version rules |
