@@ -8,7 +8,7 @@
 import { OUTPUT_COLUMNS, termFileSlug } from './courseImport.js'
 
 /** Columns of yale_courses_<term>.csv, in file order. */
-export const YALE_COLUMNS = [...OUTPUT_COLUMNS, 'School', 'Course Page']
+export const YALE_COLUMNS = [...OUTPUT_COLUMNS, 'School', 'Course Page', 'Cross Listings', 'Prerequisites']
 
 export const COURSES_URL = 'https://gw.its.yale.edu/soa-gateway/courses/webservice/v3/index'
 export const SUBJECTS_URL = 'https://gw.its.yale.edu/soa-gateway/course/webservice/v2/subjects'
@@ -120,7 +120,7 @@ function text(value) {
 /**
  * Yale sections for one school → CSV rows. Cancelled sections are left out.
  * A course listed under several subjects with the same CRN appears once, under
- * its main listing (Yale's `primXLst`).
+ * its main listing (Yale's `primXLst`); the other numbers go in `Cross Listings`.
  *
  * @param {Record<string, unknown>[]} sections — Courses Web Service v3 items
  * @param {string} termCode
@@ -144,9 +144,12 @@ export function buildYaleRows(sections, termCode) {
       continue
     }
     const id = `${termCode}-${crn}`
-    const isMainListing = !section.primXLst || text(section.primXLst) === text(section.subjectNumber)
-    const existing = byId.get(id)
-    if (existing && !isMainListing) continue
+    // Every listing of a cross-listed class carries the main number (primXLst)
+    // and the others (scndXLst), so any of them gives the full picture.
+    const main = text(section.primXLst) || text(section.subjectNumber)
+    const others = [text(section.subjectNumber), ...(Array.isArray(section.scndXLst) ? section.scndXLst : [section.scndXLst])]
+      .map((number) => text(number))
+      .filter((number) => number && number !== main)
 
     const instructors = Array.isArray(section.instructorList) ? section.instructorList.filter(Boolean) : []
     const rooms = (Array.isArray(section.meetingPatternLocation) ? section.meetingPatternLocation : [])
@@ -159,7 +162,7 @@ export function buildYaleRows(sections, termCode) {
         'Course Category': '',
         'Course Description': htmlToText(section.description),
         'Course ID': id,
-        'Course Number': spacedNumber(section.subjectNumber),
+        'Course Number': spacedNumber(main),
         'Course Session': session,
         'Course Session End Date': '',
         'Course Session Start date': '',
@@ -178,6 +181,8 @@ export function buildYaleRows(sections, termCode) {
         tags: '',
         School: text(section.schoolCode),
         'Course Page': '',
+        'Cross Listings': [...new Set(others)].map(spacedNumber).join('; '),
+        Prerequisites: htmlToText(section.prerequisites),
       },
     })
   }

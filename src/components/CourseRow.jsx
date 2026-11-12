@@ -160,6 +160,7 @@ export default function CourseRow({
             <FactItem label="Category" value={categoryLabel} />
             <FactItem label="Units" value={isSomCourse(course) ? formatCourseUnits(course.units) : null} />
             <FactItem label="Room" value={course.room} />
+            <FactItem label="Also listed as" value={course.crossListings?.join(', ')} />
           </div>
 
           {showRegistrationTag ? (
@@ -167,6 +168,10 @@ export default function CourseRow({
               bidOrPermission={course.bidOrPermission}
               className="!px-1 !py-px !text-[10px]"
             />
+          ) : null}
+
+          {course.prerequisites ? (
+            <p className="border-t border-gray-200/60 pt-2 text-gray-600">{course.prerequisites}</p>
           ) : null}
 
           {course.description ? (

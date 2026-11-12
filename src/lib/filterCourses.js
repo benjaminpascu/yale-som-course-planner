@@ -37,6 +37,7 @@ function matchesSearch(query, course) {
   if (!query) return true
   const haystack = [
     course.courseNumber,
+    ...(course.crossListings ?? []),
     course.title,
     course.faculty,
     course.description,
@@ -64,7 +65,7 @@ export function courseMatchesFilters(course, filters) {
   const search = filters.search.trim().toLowerCase()
   if (!matchesSearch(search, course)) return false
 
-  if (filters.subjects?.size > 0 && !filters.subjects.has(courseSubject(course))) {
+  if (filters.subjects?.size > 0 && !courseSubjects(course).some((s) => filters.subjects.has(s))) {
     return false
   }
 
@@ -144,7 +145,12 @@ export function courseSubject(course) {
 
 /** @param {import('./parseCourses').Course[]} courses */
 export function uniqueSubjects(courses) {
-  return [...new Set(courses.map(courseSubject).filter(Boolean))].sort()
+  return [...new Set(courses.flatMap(courseSubjects).filter(Boolean))].sort()
+}
+
+/** Every department a course is listed under (its own and its cross-listings). */
+export function courseSubjects(course) {
+  return [course.courseNumber, ...(course.crossListings ?? [])].map((n) => n.split(' ')[0])
 }
 
 /** Distinct categories from loaded courses (dynamic; not a fixed taxonomy). */

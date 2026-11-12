@@ -94,6 +94,8 @@ function rowToCourse(row) {
     // Other Yale schools' files add these two columns; SOM rows have neither.
     school: row.School?.trim() || 'SOM',
     coursePageUrl: row['Course Page']?.trim() || null,
+    crossListings: (row['Cross Listings'] ?? '').split(';').map((n) => n.trim()).filter(Boolean),
+    prerequisites: row.Prerequisites?.trim() ?? '',
   }
 }
 

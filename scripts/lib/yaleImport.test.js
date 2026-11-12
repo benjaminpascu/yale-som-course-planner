@@ -95,15 +95,23 @@ describe('buildYaleRows', () => {
     expect(problems).toHaveLength(1)
   })
 
-  it('keeps one row per CRN, preferring the main listing', () => {
+  it('keeps one row per CRN under the main listing, with the other numbers', () => {
     const { rows } = buildYaleRows(
-      [
-        section({ subjectNumber: 'ECON3365', primXLst: 'CPSC3650', crn: '10826' }),
-        section({ subjectNumber: 'CPSC3650', primXLst: 'CPSC3650', crn: '10826' }),
-      ],
+      [section({ subjectNumber: 'ECON4465', primXLst: 'GLBL4830', scndXLst: ['EP&E4224', 'MGT696'], crn: '10826' })],
       '202701',
     )
-    expect(rows.map((r) => r['Course Number'])).toEqual(['CPSC 3650'])
+    expect(rows).toHaveLength(1)
+    expect(rows[0]['Course Number']).toBe('GLBL 4830')
+    expect(rows[0]['Cross Listings']).toBe('ECON 4465; EP&E 4224; MGT 696')
+  })
+
+  it('has no cross listings for a course with one number, and keeps prerequisites as text', () => {
+    const { rows } = buildYaleRows(
+      [section({ prerequisites: '<p class="prerequisites">Prerequisite: ECON 1111.</p>' })],
+      '202701',
+    )
+    expect(rows[0]['Cross Listings']).toBe('')
+    expect(rows[0].Prerequisites).toBe('Prerequisite: ECON 1111.')
   })
 
   it('uses fall for fall terms and spaces subject codes with &', () => {

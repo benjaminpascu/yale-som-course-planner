@@ -32,4 +32,13 @@ describe('Department filter', () => {
     expect(hasActiveFilters(filters)).toBe(true)
     expect(hasActiveFilters(createEmptyFilters())).toBe(false)
   })
+
+  it('counts a cross-listed course under every department and finds it by any number', () => {
+    const algorithms = { ...course('CPSC 3650'), crossListings: ['ECON 3365'] }
+    expect(uniqueSubjects([algorithms])).toEqual(['CPSC', 'ECON'])
+    const econ = { ...createEmptyFilters(), subjects: new Set(['ECON']) }
+    expect(filterCourses([algorithms], econ)).toHaveLength(1)
+    const search = { ...createEmptyFilters(), search: 'econ 3365' }
+    expect(filterCourses([algorithms], search)).toHaveLength(1)
+  })
 })

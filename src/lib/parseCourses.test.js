@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { OUTPUT_COLUMNS } from '../../scripts/lib/courseImport.js'
 import { YALE_COLUMNS } from '../../scripts/lib/yaleImport.js'
 import { parseCoursesCsv } from './parseCourses.js'
 
@@ -14,14 +15,18 @@ describe('parseCoursesCsv with other-school files', () => {
       Visible: '1',
       School: 'LW',
       'Course Page': 'https://courses.law.yale.edu/CourseDetailPage?CRN=22220&TermCode=202701',
+      'Cross Listings': 'GLBL 4310; EP&E 4224',
+      Prerequisites: 'Prerequisite: ECON 1111.',
     })
     const csv = `${YALE_COLUMNS.join(',')}\n${YALE_COLUMNS.map((c) => row[c]).join(',')}\n`
     const [course] = parseCoursesCsv(csv)
     expect(course.school).toBe('LW')
     expect(course.coursePageUrl).toContain('CRN=22220')
     expect(course.units).toBe(0)
+    expect(course.crossListings).toEqual(['GLBL 4310', 'EP&E 4224'])
+    expect(course.prerequisites).toBe('Prerequisite: ECON 1111.')
 
-    const somCsv = `${YALE_COLUMNS.slice(0, -2).join(',')}\n${YALE_COLUMNS.slice(0, -2).map((c) => row[c]).join(',')}\n`
+    const somCsv = `${OUTPUT_COLUMNS.join(',')}\n${OUTPUT_COLUMNS.map((c) => row[c]).join(',')}\n`
     expect(parseCoursesCsv(somCsv)[0].school).toBe('SOM')
   })
 })

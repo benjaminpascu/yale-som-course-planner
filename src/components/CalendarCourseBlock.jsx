@@ -76,6 +76,12 @@ export function CalendarCourseDetail({
                 <dd>{course.room}</dd>
               </div>
             ) : null}
+            {course.crossListings?.length ? (
+              <div>
+                <dt className="font-medium text-gray-500">Also listed as</dt>
+                <dd>{course.crossListings.join(', ')}</dd>
+              </div>
+            ) : null}
             {course.category ? (
               <div>
                 <dt className="font-medium text-gray-500">Category</dt>
