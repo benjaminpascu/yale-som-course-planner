@@ -1,0 +1,35 @@
+name: Yale importer dry run
+
+on:
+  push:
+    branches: [codex/yale-import-dry-run]
+
+permissions:
+  contents: read
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
+      - name: Fetch courses from Yale in dry-run mode
+        env:
+          YALE_API_KEY: ${{ secrets.YALE_API_KEY }}
+        run: npm run update-yale-courses -- --check
+
+      - name: Verify catalog files stayed untouched
+        if: always()
+        run: test -z "$(git status --porcelain -- docs/data-samples)"
