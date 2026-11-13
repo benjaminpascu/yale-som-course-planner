@@ -15,6 +15,14 @@ Per `docs/PRD.md` §12:
 2. Read **`docs/PROJECT_STATUS.md`** for what is done and what is next.
 3. Read **`docs/PRD.md`** for product requirements (especially §6 data model and §11 milestones).
 4. **Brainstorm the full spec before any code** for a new feature (e.g. the GitHub issues labeled `roadmap`). Work through it with the user: what it does, where it appears on screen, the data it needs, edge cases, and what's out of scope. Save the agreed spec to `docs/specs/<feature>.md`, link it from the GitHub issue, and start building only after the user approves it. Small bug fixes and polish skip this step.
+
+   **How the brainstorm goes** (the user liked this; repeat it for every feature, even when they describe it in plain words without a slash command): use the `superpowers:brainstorming` skill, with these project rules winning over it:
+   - Read the relevant code first, then repeat the idea back in plain words with what you found (how it works today, what it would touch).
+   - One question per message, only ones that change what gets built; for each, sketch the options with tradeoffs and say which you'd pick.
+   - Show every screen as a small text sketch; use a visual mockup when the look itself is the user's call (colors, button sizes).
+   - Cover Single plan, Compare plans and phones in every spec.
+   - Small fixes the user spots along the way get fixed and shipped right away (step 5), not folded into the spec.
+   - Spec goes to `docs/specs/<feature>.md` (not `docs/superpowers/specs/`), following `docs/specs/shortlist.md`: Why, Goals, Non-goals, Anti-goals, Approaches considered, What the student sees, Data, Release, Left to the builder. Before handing it over, have a fresh subagent read it as the builder; settle what you can and mark those as your calls, then bring only the user's questions.
 5. **Test, then ship (user-approved Nov 2026).** Pushing to `main` goes live on Vercel in about a minute, so first check it yourself. **All** of these must pass:
    - `npm test` passes.
    - `npm run build` succeeds.
