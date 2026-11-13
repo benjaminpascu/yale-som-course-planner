@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   NO_DATA_COLOR,
+  destinationOf,
   biddingColor,
   formatPoints,
   getBiddingRounds,
@@ -10,10 +11,14 @@ import {
 } from './biddingHistory'
 
 const csv = [
-  'term,course_number,section,round_1,round_2',
+  'term,course_number,section,round_1,round_2,title',
   'Spring 2026,MGT 531,01,258,549',
   'Spring 2026,MGT 531,02,0,',
   'Spring 2025,MGT 531,01,,12',
+  'Spring 2026,MGT 416,02,0,0,International Experience: India',
+  'Spring 2026,MGT 416,03,0,21,International Experience: Mexico',
+  'Spring 2025,MGT 416,02,300,551,International Experience: Spain',
+  'Spring 2025,MGT 416,05,1,11,"International Experience: India, Bangalore"',
 ].join('\n')
 
 const course = (overrides = {}) => ({
@@ -45,6 +50,15 @@ describe('bidding history', () => {
   it('never mixes sections', () => {
     const rounds = getBiddingRounds(course({ section: '02' }), history)
     expect(rounds.map((r) => r.points)).toEqual([0, null, null, null])
+  })
+
+  it('matches trips that share a number by destination, not section', () => {
+    expect(destinationOf('IE: South Korea')).toBe('south korea')
+    expect(destinationOf('International Experience: South Korea')).toBe('south korea')
+    const india = course({ courseNumber: 'MGT 416', section: '02', title: 'IE: India' })
+    expect(getBiddingRounds(india, history).map((r) => r.points)).toEqual([0, 0, null, null])
+    const mexico = course({ courseNumber: 'MGT 416', section: '07', title: 'IE: Mexico' })
+    expect(getBiddingRounds(mexico, history).map((r) => r.points)).toEqual([0, 21, null, null])
   })
 
   it('shows for bid courses and for any SOM course with history', () => {

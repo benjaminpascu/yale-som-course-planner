@@ -14,6 +14,7 @@ describe('parseCourseCell', () => {
     expect(parseCourseCell('MGT 525-01 Competitive Strategy')).toEqual({
       courseNumber: 'MGT 525',
       section: '01',
+      title: 'Competitive Strategy',
     })
   })
   it('skips old codes without a course number', () => {
@@ -45,6 +46,7 @@ describe('parseBiddingSheets', () => {
         ['Elective', 34, 0, 'MGT 531-01 Interpersonal Dynamics', 258, 549, 0],
         ['Elective', 34, 0, 'MGT 531-01 Interpersonal Dynamics (again)', 1, 1, 0],
         ['IE', 32, 1, 'MGT 416-01 International Experience: Costa Rica', 50],
+        ['IE', 32, 0, 'MGT 416-02 International Experience: Spain, Madrid', 300, 551],
       ],
     },
     {
@@ -60,9 +62,24 @@ describe('parseBiddingSheets', () => {
 
   it('reads both header styles, keeps the first row per section, skips codes', () => {
     expect(parseBiddingSheets(sheets)).toEqual([
-      { term: 'Spring 2026', courseNumber: 'MGT 531', section: '01', round1: 258, round2: 549 },
-      { term: 'Spring 2026', courseNumber: 'MGT 416', section: '01', round1: 50, round2: null },
-      { term: 'Fall 2018', courseNumber: 'MGT 525', section: '02', round1: null, round2: 101 },
+      { term: 'Spring 2026', courseNumber: 'MGT 531', section: '01', round1: 258, round2: 549, title: '' },
+      {
+        term: 'Spring 2026',
+        courseNumber: 'MGT 416',
+        section: '01',
+        round1: 50,
+        round2: null,
+        title: 'International Experience: Costa Rica',
+      },
+      {
+        term: 'Spring 2026',
+        courseNumber: 'MGT 416',
+        section: '02',
+        round1: 300,
+        round2: 551,
+        title: 'International Experience: Spain, Madrid',
+      },
+      { term: 'Fall 2018', courseNumber: 'MGT 525', section: '02', round1: null, round2: 101, title: '' },
     ])
   })
 
@@ -70,10 +87,11 @@ describe('parseBiddingSheets', () => {
     const csv = toBiddingCsv(parseBiddingSheets(sheets))
     expect(csv).toBe(
       [
-        'term,course_number,section,round_1,round_2',
-        'Spring 2026,MGT 416,01,50,',
-        'Spring 2026,MGT 531,01,258,549',
-        'Fall 2018,MGT 525,02,,101',
+        'term,course_number,section,round_1,round_2,title',
+        'Spring 2026,MGT 416,01,50,,International Experience: Costa Rica',
+        'Spring 2026,MGT 416,02,300,551,"International Experience: Spain, Madrid"',
+        'Spring 2026,MGT 531,01,258,549,',
+        'Fall 2018,MGT 525,02,,101,',
         '',
       ].join('\n'),
     )

@@ -6,13 +6,18 @@
 
 export const FILE_NAME = 'Auction-Bidding-History.xlsx'
 export const PORTAL_URL = 'https://som.yale.edu/myportal/course-bidding-and-enrollment-history'
-export const CSV_HEADER = ['term', 'course_number', 'section', 'round_1', 'round_2']
+export const CSV_HEADER = ['term', 'course_number', 'section', 'round_1', 'round_2', 'title']
 
-/** "MGT 525-01 Competitive Strategy" → { courseNumber: "MGT 525", section: "01" } */
+/** "MGT 525-01 Competitive Strategy" → { courseNumber: "MGT 525", section: "01", title: "Competitive Strategy" } */
 export function parseCourseCell(value) {
-  const match = String(value ?? '').trim().match(/^([A-Z]{2,5})\s*(\d{3,4}[A-Z]?)-(\d{1,3})\b/)
+  const text = String(value ?? '').trim()
+  const match = text.match(/^([A-Z]{2,5})\s*(\d{3,4}[A-Z]?)-(\d{1,3})\b/)
   if (!match) return null
-  return { courseNumber: `${match[1]} ${match[2]}`, section: match[3].padStart(2, '0') }
+  return {
+    courseNumber: `${match[1]} ${match[2]}`,
+    section: match[3].padStart(2, '0'),
+    title: text.slice(match[0].length).trim(),
+  }
 }
 
 /** Clearing price in points, or null when the round has no result ("N/A", blank, text). */
@@ -31,8 +36,12 @@ export function parseTermName(name) {
 }
 
 /**
+ * The title is kept only where one course number covers different courses in
+ * the same semester (e.g. MGT 416 trips: section 02 is India one year and Spain
+ * the next), so the site can match those by title instead of section.
+ *
  * @param {{ name: string, rows: unknown[][] }[]} sheets — first row is the header
- * @returns {{ term: string, courseNumber: string, section: string, round1: number|null, round2: number|null }[]}
+ * @returns {{ term: string, courseNumber: string, section: string, round1: number|null, round2: number|null, title: string }[]}
  */
 export function parseBiddingSheets(sheets) {
   const out = []
@@ -46,18 +55,28 @@ export function parseBiddingSheets(sheets) {
     if (courseCol < 0 || round1Col < 0) continue
 
     const seen = new Set()
+    const termRows = []
     for (const row of sheet.rows.slice(1)) {
       const course = parseCourseCell(row[courseCol])
       if (!course) continue
       const key = `${course.courseNumber}|${course.section}`
       if (seen.has(key)) continue
       seen.add(key)
-      out.push({
+      termRows.push({
         term: term.label,
         ...course,
         round1: parsePoints(row[round1Col]),
         round2: round2Col >= 0 ? parsePoints(row[round2Col]) : null,
       })
+    }
+
+    const titlesByNumber = new Map()
+    for (const r of termRows) {
+      if (!titlesByNumber.has(r.courseNumber)) titlesByNumber.set(r.courseNumber, new Set())
+      titlesByNumber.get(r.courseNumber).add(r.title)
+    }
+    for (const r of termRows) {
+      out.push({ ...r, title: titlesByNumber.get(r.courseNumber).size > 1 ? r.title : '' })
     }
   }
   return out
@@ -76,8 +95,9 @@ export function toBiddingCsv(rows) {
       a.courseNumber.localeCompare(b.courseNumber, 'en', { numeric: true }) ||
       a.section.localeCompare(b.section),
   )
+  const quote = (text) => (/[",]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text)
   const lines = sorted.map((r) =>
-    [r.term, r.courseNumber, r.section, r.round1 ?? '', r.round2 ?? ''].join(','),
+    [r.term, r.courseNumber, r.section, r.round1 ?? '', r.round2 ?? '', quote(r.title ?? '')].join(','),
   )
   return `${[CSV_HEADER.join(','), ...lines].join('\n')}\n`
 }

@@ -91,7 +91,7 @@ change from year to year, so keep that in mind.
   Yale login, but the file link itself doesn't.
 - Saved link: `docs/data-samples/bidding_history_source.json`.
 - Imported to `docs/data-samples/bidding_history.csv`
-  (`term,course_number,section,round_1,round_2`; all tabs, rounds 1–2), bundled
+  (`term,course_number,section,round_1,round_2,title`; all tabs, rounds 1–2; `title` only for numbers that cover several courses), bundled
   with the site and loaded in the background like other schools' courses.
 - Rows whose `Course` isn't "SUBJ 123-01 …" (e.g. old `GNWAIM` codes) are skipped.
   Tabs are imported as named (two old tabs say "2000"; they're never shown).
@@ -122,12 +122,14 @@ link into `bidding_history_source.json` (or give it to an agent).
 - The update job only starts running once it's on `main` (scheduled jobs run from
   the default branch).
 
-## Open question (found while building the draft)
+### Exception: trips that share a course number (user decision, Nov 13, 2026)
 
-- **MGT 416 International Experience trips** share one course number, and section
-  numbers move between countries each year (Spring 2026 section 02 = India, Spring
-  2025 section 02 = Spain). Matching by section number shows another trip's prices.
-  To decide with the user.
+The **MGT 416 International Experience** trips share one course number, and section
+numbers move between countries each year (Spring 2026 section 02 = India, Spring
+2025 section 02 = Spain). Where one course number covers different titles in a
+past semester, the import keeps those titles (`title` column) and the site matches
+by **destination** (the part after the colon: "IE: India" ↔ "International
+Experience: India") instead of section. A new destination shows gray squares.
 
 ## Left to the builder
 
