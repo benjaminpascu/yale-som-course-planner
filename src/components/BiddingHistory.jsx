@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { isSomCourse } from '../lib/schools'
 import {
   BIDDING_DISCLAIMER,
   biddingColor,
@@ -101,11 +102,21 @@ function RoundsTable({ rounds, compact = false }) {
 
 /**
  * Bidding history inside a course popup (Weekly Calendar, Your Plan), in the
- * narrow facts column. Nothing for courses without squares.
+ * narrow facts column. SOM courses without past results say so; other schools'
+ * courses (not in SOM bidding) show nothing.
  */
 export function BiddingHistoryDetail({ course }) {
-  const rounds = useBiddingRounds(course)
-  if (!rounds) return null
+  const history = useBiddingHistory()
+  if (!history || !isSomCourse(course)) return null
+  const rounds = getBiddingRounds(course, history)
+  if (!showsBiddingHistory(course, rounds)) {
+    return (
+      <div>
+        <p className="font-medium text-gray-500">Bidding history</p>
+        <p className="text-gray-400">No bidding history</p>
+      </div>
+    )
+  }
   return (
     <div>
       <p className="font-medium text-gray-500">Bidding history (points)</p>

@@ -58,8 +58,9 @@ nobody opens it while planning.
   Spring 2026 R1, Spring 2026 R2, Spring 2025 R1, Spring 2025 R2. A Fall 2026 course
   shows Fall 2025 and Fall 2024.
 - No labels, no legend.
-- Shown for SOM courses that need a bid, and for any SOM section that has history.
-  Sections with neither show nothing.
+- Shown only for SOM sections with **at least one past result** (user decision, Nov
+  13, 2026). Blank = no bidding history; a gray square = no result for that round.
+  New bid courses show nothing.
 - Same in Single plan and Compare plans (it's part of the course list). On phones,
   tapping the squares opens and closes the box (same as requirement tags) without
   opening the course.
@@ -96,7 +97,9 @@ change from year to year, so keep that in mind.
 The hover popup for a course on the calendar or in Your Plan shows **Bidding history
 (points)** in its left facts column, under Category: the same table in a compact
 form ("R1" / "R2" headers, numbers without "pts", "–" for no data, colored squares)
-plus the disclaimer in small text. Only for courses that show squares.
+plus the disclaimer in small text. SOM courses without past results show
+"Bidding history: No bidding history" in the same spot (user request); other
+schools' courses show nothing there.
 
 ## Data
 

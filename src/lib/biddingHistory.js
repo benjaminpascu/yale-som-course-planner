@@ -11,7 +11,6 @@
  */
 import Papa from 'papaparse'
 import { termCodeToCalendarYear, termCodeToSemester } from './academicYear'
-import { normalizeBidType } from './courseDisplay'
 import { isSomCourse } from './schools'
 
 const keyOf = (term, courseNumber, section) =>
@@ -82,13 +81,9 @@ export function getBiddingRounds(course, history) {
   })
 }
 
-/** SOM sections that need a bid, plus any SOM section that has history. */
+/** SOM sections with at least one past result. Blank = no history; gray = no result that round. */
 export function showsBiddingHistory(course, rounds) {
-  if (!isSomCourse(course) || rounds.length === 0) return false
-  return (
-    normalizeBidType(course.bidOrPermission) === 'bid' ||
-    rounds.some((round) => round.points != null)
-  )
+  return isSomCourse(course) && rounds.some((round) => round.points != null)
 }
 
 /** Fixed color bands, the same for every course and year (spec: Colors). */

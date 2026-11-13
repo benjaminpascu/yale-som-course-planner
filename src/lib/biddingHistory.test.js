@@ -61,12 +61,9 @@ describe('bidding history', () => {
     expect(getBiddingRounds(mexico, history).map((r) => r.points)).toEqual([0, 21, null, null])
   })
 
-  it('shows for bid courses and for any SOM course with history', () => {
+  it('shows only for SOM sections with at least one past result', () => {
     const noHistory = getBiddingRounds(course({ courseNumber: 'MGT 999' }), history)
-    expect(showsBiddingHistory(course({ courseNumber: 'MGT 999' }), noHistory)).toBe(true)
-    expect(
-      showsBiddingHistory(course({ courseNumber: 'MGT 999', bidOrPermission: 'No' }), noHistory),
-    ).toBe(false)
+    expect(showsBiddingHistory(course({ courseNumber: 'MGT 999' }), noHistory)).toBe(false)
     const withHistory = getBiddingRounds(course({ bidOrPermission: 'No' }), history)
     expect(showsBiddingHistory(course({ bidOrPermission: 'No' }), withHistory)).toBe(true)
     expect(showsBiddingHistory(course({ school: 'Yale College' }), withHistory)).toBe(false)
