@@ -5,6 +5,7 @@ import {
   formatSessionLabel,
   groupCoursesBySession,
 } from '../lib/sessionDisplay'
+import { coursesInSemester } from '../lib/planSemester'
 import CollapseChevron from './CollapseChevron'
 import PlanCourseRow from './PlanCourseRow'
 
@@ -24,7 +25,9 @@ function formatPlanHeaderSummary(courseCount, totalUnits) {
 
 export default function PlanPanel({
   className = '',
-  selectedCourses,
+  selectedCourses: planCourses,
+  // Only this semester's courses are listed and counted (like the calendar).
+  termCode = null,
   activePlanName,
   isDirty,
   fallYear,
@@ -41,6 +44,10 @@ export default function PlanPanel({
   // Computer Plan tab: no count/units on the bar (semester units = Requirements Total).
   showHeaderSummary = true,
 }) {
+  const selectedCourses = useMemo(
+    () => coursesInSemester(planCourses, termCode),
+    [planCourses, termCode],
+  )
   const grouped = useMemo(
     () => groupCoursesBySession(selectedCourses),
     [selectedCourses],

@@ -13,6 +13,7 @@ export default function MobilePlansPanel({
   hasSelection,
   isDirty,
   selectedCourses,
+  termCode = null,
   fallYear,
   springYear,
   onAddPlan,
@@ -53,6 +54,7 @@ export default function MobilePlansPanel({
       <PlanPanel
         compact
         selectedCourses={selectedCourses}
+        termCode={termCode}
         activePlanName={activePlanName}
         isDirty={isDirty}
         fallYear={fallYear}

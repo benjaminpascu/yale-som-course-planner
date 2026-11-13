@@ -152,6 +152,7 @@ export default function ComparePlansView({
       <PlanPanel
         part="header"
         selectedCourses={[]}
+        termCode={termCode}
         activePlanName={null}
         expanded={!calendarOpen}
         onToggle={togglePane}
@@ -163,6 +164,7 @@ export default function ComparePlansView({
               part="body"
               className="flex-1"
               selectedCourses={sideCourses[side]}
+              termCode={termCode}
               activePlanName={planName(side)}
               isDirty={editing && isDirty}
               fallYear={fallYear}

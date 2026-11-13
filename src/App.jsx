@@ -23,6 +23,7 @@ import {
   termCodeToSemester,
 } from './lib/academicYear'
 import { courseSemester } from './lib/tagUnitTracker'
+import { clearSemester } from './lib/planSemester'
 import { getCalendarViewOptions, getDefaultCalendarView } from './lib/calendarSessionView'
 import { buildCourseGroups } from './lib/compareGroups'
 import {
@@ -358,9 +359,11 @@ function App() {
     })
   }, [])
 
+  // Clears only the semester on screen; the other semester's courses stay.
   const clearPlan = useCallback(() => {
-    setSelectedIds(new Set())
-  }, [])
+    const courseById = new Map(courses.map((c) => [c.courseId, c]))
+    setSelectedIds((prev) => clearSemester(prev, courseById, activeTermCode))
+  }, [courses, activeTermCode])
 
   const handleSelectPlan = useCallback(
     (planId) => {
@@ -586,6 +589,7 @@ function App() {
   }
 
   const plansPanelProps = {
+    termCode: activeTermCode,
     plans: planStore.plans,
     courses,
     activePlanId: planStore.activePlanId,
