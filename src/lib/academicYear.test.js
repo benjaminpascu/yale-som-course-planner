@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getAcademicYears, getCatalogTerms } from './academicYear.js'
+import { getAcademicYears, getCatalogTerms, getDefaultTermCode } from './academicYear.js'
 
 const courses = [
   { termCode: '202603', sessionStart: '2026-09-02', sessionEnd: '2026-10-16' },
@@ -23,6 +23,21 @@ describe('getCatalogTerms', () => {
   it('keeps the newest term when every term is over', () => {
     const past = courses.slice(0, 4)
     expect(getCatalogTerms(past, new Date(2027, 6, 1)).map((t) => t.id)).toEqual(['202701'])
+  })
+})
+
+describe('getDefaultTermCode', () => {
+  it('opens on the earliest term that has not started yet', () => {
+    expect(getDefaultTermCode(courses, new Date(2026, 7, 20))).toBe('202603')
+    expect(getDefaultTermCode(courses, new Date(2026, 10, 13))).toBe('202701')
+  })
+
+  it('counts a term without start dates as not started', () => {
+    expect(getDefaultTermCode(courses, new Date(2027, 0, 19))).toBe('202703')
+  })
+
+  it('falls back to the newest term once every term has started', () => {
+    expect(getDefaultTermCode(courses.slice(0, 4), new Date(2027, 1, 1))).toBe('202701')
   })
 })
 

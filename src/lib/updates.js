@@ -10,6 +10,13 @@
  */
 export const UPDATES = [
   {
+    version: '1.1.1',
+    date: '2026-11-13',
+    changes: [
+      'SOMtimes now opens on the semester you are planning (right now Spring 2027) instead of the one already underway. Switch semesters any time with the Fall / Spring buttons in the top right.',
+    ],
+  },
+  {
     version: '1.1.0',
     date: '2026-11-12',
     changes: [

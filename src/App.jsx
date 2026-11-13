@@ -18,6 +18,7 @@ import { SAVE_BUTTON } from './lib/sectionTheme'
 import {
   formatTermLabel,
   getCatalogTerms,
+  getDefaultTermCode,
   getAcademicYears,
   termCodeToSemester,
 } from './lib/academicYear'
@@ -201,10 +202,11 @@ function App() {
 
   const catalogTerms = useMemo(() => getCatalogTerms(somCourses), [somCourses])
 
-  /** Term shown in the course browser; defaults to the earliest term still running. */
+  const defaultTermCode = useMemo(() => getDefaultTermCode(somCourses), [somCourses])
+  /** Term shown in the course browser; opens on the upcoming term (the one students are planning). */
   const activeTermCode = catalogTerms.some((t) => t.id === catalogTermCode)
     ? catalogTermCode
-    : (catalogTerms[0]?.id ?? null)
+    : defaultTermCode
 
   const { fallYear, springYear } = getAcademicYears(activeTermCode)
 

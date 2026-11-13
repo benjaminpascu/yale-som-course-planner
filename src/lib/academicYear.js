@@ -71,6 +71,44 @@ function isoDay(date) {
 }
 
 /**
+ * First and last class day of each term. Start dates outside the term's
+ * calendar year are ignored (Yale typos).
+ */
+function termDates(courses) {
+  /** @type {Map<string, { lastDay: string, firstDay: string }>} */
+  const terms = new Map()
+  for (const { termCode, sessionStart, sessionEnd } of courses) {
+    if (!termCode) continue
+    const term = terms.get(termCode) ?? { lastDay: '', firstDay: '' }
+    if ((sessionEnd ?? '') > term.lastDay) term.lastDay = sessionEnd
+    const inYear = sessionStart?.startsWith(String(termCodeToCalendarYear(termCode)))
+    if (inYear && (!term.firstDay || sessionStart < term.firstDay)) term.firstDay = sessionStart
+    terms.set(termCode, term)
+  }
+  return terms
+}
+
+/**
+ * Term the site opens on: the one students are planning, i.e. the earliest
+ * shown term that hasn't started yet (a term with no start dates counts as not
+ * started). If every shown term has started, the newest.
+ *
+ * @param {{ termCode?: string, sessionStart?: string | null, sessionEnd?: string | null }[]} courses
+ * @param {Date} [today]
+ * @returns {string | null}
+ */
+export function getDefaultTermCode(courses, today = new Date()) {
+  const shown = getCatalogTerms(courses, today)
+  const dates = termDates(courses)
+  const todayIso = isoDay(today)
+  const upcoming = shown.find(({ id }) => {
+    const { firstDay } = dates.get(id)
+    return !firstDay || firstDay > todayIso
+  })
+  return (upcoming ?? shown.at(-1))?.id ?? null
+}
+
+/**
  * Terms students can pick, oldest first (TermCode sorts chronologically).
  * A term is hidden once the next loaded term has started, or the day after
  * its own last class if that comes first. Start dates outside the term's
@@ -83,17 +121,7 @@ function isoDay(date) {
  * @returns {{ id: string, label: string }[]}
  */
 export function getCatalogTerms(courses, today = new Date()) {
-  /** @type {Map<string, { lastDay: string, firstDay: string }>} */
-  const terms = new Map()
-  for (const { termCode, sessionStart, sessionEnd } of courses) {
-    if (!termCode) continue
-    const term = terms.get(termCode) ?? { lastDay: '', firstDay: '' }
-    if ((sessionEnd ?? '') > term.lastDay) term.lastDay = sessionEnd
-    const inYear = sessionStart?.startsWith(String(termCodeToCalendarYear(termCode)))
-    if (inYear && (!term.firstDay || sessionStart < term.firstDay)) term.firstDay = sessionStart
-    terms.set(termCode, term)
-  }
-
+  const terms = termDates(courses)
   const all = [...terms.keys()].sort()
   const todayIso = isoDay(today)
   const open = all.filter((termCode, i) => {
