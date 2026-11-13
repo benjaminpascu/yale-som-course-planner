@@ -72,7 +72,7 @@ export default function SchoolPicker({ schools, schoolId, onSchoolChange, classN
       >
         <span className="truncate">{current?.label}</span>
       </button>
-      <span aria-hidden className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-yale-800">
+      <span aria-hidden className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm text-yale-800">
         ▾
       </span>
       {open ? (
