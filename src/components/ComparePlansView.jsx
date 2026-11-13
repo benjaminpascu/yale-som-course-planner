@@ -169,7 +169,6 @@ export default function ComparePlansView({
               springYear={springYear}
               expanded
               onToggle={togglePane}
-              onSavePlan={() => onSavePlan(slots[side])}
               onRemoveCourse={removeOn(side)}
               onClearPlan={clearOn(side)}
             />

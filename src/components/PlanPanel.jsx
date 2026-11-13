@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { formatCourseUnits } from '../lib/courseDisplay'
-import { SAVE_BUTTON, sectionTone } from '../lib/sectionTheme'
+import { sectionTone } from '../lib/sectionTheme'
 import {
   formatSessionLabel,
   groupCoursesBySession,
@@ -35,7 +35,6 @@ export default function PlanPanel({
   onToggle,
   planEmptyHint = 'Pick or save a plan in the Plan menu',
   catalogSelectHint = 'the catalog on the left',
-  onSavePlan,
   onRemoveCourse,
   onClearPlan,
   // Compare plans: one full-width "Your plan" bar ('header') above each plan's list ('body').
@@ -126,15 +125,6 @@ export default function PlanPanel({
                   </>
                 )}
               </p>
-              {activePlanName && isDirty ? (
-                <button
-                  type="button"
-                  onClick={onSavePlan}
-                  className={`shrink-0 rounded-md px-3 py-1.5 text-xs font-medium ${SAVE_BUTTON}`}
-                >
-                  Save Plan
-                </button>
-              ) : null}
             </div>
           ) : null}
 

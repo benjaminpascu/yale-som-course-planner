@@ -16,10 +16,8 @@ export default function PlanningPanel({
   fallYear,
   springYear,
   courses = [],
-  activePlanId,
   activePlanName,
   isDirty,
-  onSavePlan,
   onRemoveCourse,
   onClearPlan,
   tip = null,
@@ -95,7 +93,6 @@ export default function PlanningPanel({
           onToggle={() =>
             setExpandedPane((pane) => (pane === 'plan' ? 'calendar' : 'plan'))
           }
-          onSavePlan={() => activePlanId && onSavePlan(activePlanId)}
           onRemoveCourse={onRemoveCourse}
           onClearPlan={onClearPlan}
         />

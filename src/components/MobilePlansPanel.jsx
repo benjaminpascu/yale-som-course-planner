@@ -61,7 +61,6 @@ export default function MobilePlansPanel({
         expanded
         planEmptyHint="Name a plan above, then add courses from the Courses tab."
         catalogSelectHint="the Courses tab"
-        onSavePlan={() => activePlanId && onSavePlan(activePlanId)}
         onRemoveCourse={onRemoveCourse}
         onClearPlan={onClearPlan}
       />
