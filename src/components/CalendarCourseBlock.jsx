@@ -279,10 +279,13 @@ export default function CalendarCourseBlock({
             e.stopPropagation()
             onRemove(course.courseId)
           }}
-          className="absolute -right-1 -top-1 z-10 flex h-4 w-4 items-center justify-center rounded-full bg-danger text-xs font-semibold leading-none text-white opacity-0 shadow-sm ring-1 ring-white hover:bg-danger-hover focus:outline-none focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-yale-400 group-hover:opacity-100 max-md:hidden"
+          className="absolute -right-1 -top-1 z-10 flex h-4 w-4 items-center justify-center rounded-full bg-danger text-white opacity-0 shadow-sm ring-1 ring-white hover:bg-danger-hover focus:outline-none focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-yale-400 group-hover:opacity-100 max-md:hidden"
           aria-label={`Remove ${course.courseNumber} from plan`}
         >
-          <span aria-hidden>×</span>
+          {/* Drawn cross (a text × sits off-center in the small circle). */}
+          <svg aria-hidden viewBox="0 0 8 8" className="h-2 w-2" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round">
+            <path d="M1.5 1.5l5 5M6.5 1.5l-5 5" />
+          </svg>
         </button>
       ) : null}
       </div>
