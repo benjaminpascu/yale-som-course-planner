@@ -100,6 +100,16 @@ plus the disclaimer in small text. SOM courses without past results show
 "Bidding history: No bidding history" in the same spot (user request); other
 schools' courses show nothing there.
 
+### Tutorial tip (user request, Nov 13, 2026)
+
+One new tip, `bidding`, right after `add-course` in `PLANNER_HINTS`: it shows once the
+first course is added, pointing at the course list (computer: next to it; phone:
+above the tab bar on the Courses tab). Students who have seen every tip get it once.
+
+> The small squares on a course are its **Bidding History**: points needed in Round
+> 1 and 2 of the last two years. White means basically free; orange, red and dark
+> red mean 50, 100 and 150+ points. Hover over (phone: Tap) them for the exact numbers.
+
 ## Data
 
 - Source: SOM's public file `Auction-Bidding-History.xlsx` (one tab per semester,
