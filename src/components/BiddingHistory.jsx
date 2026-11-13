@@ -4,6 +4,7 @@ import { isSomCourse } from '../lib/schools'
 import {
   BIDDING_DISCLAIMER,
   biddingColor,
+  formatPoints,
   getBiddingRounds,
   parseBiddingCsv,
   showsBiddingHistory,
@@ -40,7 +41,7 @@ export function useBiddingRounds(course) {
 
 const Swatch = ({ points, className = '' }) => (
   <span
-    className={`inline-block shrink-0 rounded-[2px] ring-1 ring-black/10 ring-inset ${className}`}
+    className={`inline-block shrink-0 rounded-[2px] ring-1 ring-black/20 ring-inset ${className}`}
     style={{ backgroundColor: biddingColor(points) }}
   />
 )
@@ -87,7 +88,7 @@ function RoundsTable({ rounds, compact = false }) {
                     <span className="text-gray-400">{compact ? '–' : 'No data'}</span>
                   ) : (
                     <span className="font-medium tabular-nums text-gray-900">
-                      {compact ? cell.points : `${cell.points} pts`}
+                      {compact ? cell.points : formatPoints(cell.points, { short: true })}
                     </span>
                   )}
                 </span>

@@ -69,18 +69,21 @@ describe('bidding history', () => {
     expect(showsBiddingHistory(course({ school: 'Yale College' }), withHistory)).toBe(false)
   })
 
-  it('colors by fixed bands', () => {
+  it('colors by fixed bands: pale under 50, orange from 50, red from 100, dark from 150', () => {
     expect(biddingColor(null)).toBe(NO_DATA_COLOR)
-    const colors = [0, 1, 99, 100, 299, 300, 499, 500, 900].map(biddingColor)
-    expect(new Set(colors).size).toBe(5)
-    expect(colors[1]).toBe(colors[2])
-    expect(colors[7]).toBe(colors[8])
-    expect(colors[0]).not.toBe(colors[1])
+    const [pale, orange, red, dark] = [0, 50, 100, 150].map(biddingColor)
+    expect(new Set([pale, orange, red, dark, NO_DATA_COLOR]).size).toBe(5)
+    expect([1, 49].map(biddingColor)).toEqual([pale, pale])
+    expect(biddingColor(99)).toBe(orange)
+    expect(biddingColor(149)).toBe(red)
+    expect(biddingColor(900)).toBe(dark)
   })
 
   it('formats points', () => {
     expect(formatPoints(null)).toBe('No data')
     expect(formatPoints(1)).toBe('1 point')
     expect(formatPoints(340)).toBe('340 points')
+    expect(formatPoints(1, { short: true })).toBe('1 pt')
+    expect(formatPoints(143, { short: true })).toBe('143 pts')
   })
 })

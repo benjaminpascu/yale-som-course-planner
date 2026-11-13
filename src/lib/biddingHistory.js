@@ -86,13 +86,16 @@ export function showsBiddingHistory(course, rounds) {
   return isSomCourse(course) && rounds.some((round) => round.points != null)
 }
 
-/** Fixed color bands, the same for every course and year (spec: Colors). */
+/**
+ * Fixed color bands, the same for every course and year (user-set Nov 13, 2026):
+ * under 50 points is basically free (white), orange from 50, red from 100, very
+ * dark from 150.
+ */
 export const BIDDING_BANDS = [
-  { min: 500, color: '#c2410c' },
-  { min: 300, color: '#ea7a1f' },
-  { min: 100, color: '#f9a94b' },
-  { min: 1, color: '#fcd28c' },
-  { min: 0, color: '#fde8b6' },
+  { min: 150, color: '#7f1d12' },
+  { min: 100, color: '#d9411e' },
+  { min: 50, color: '#f59a3c' },
+  { min: 0, color: '#ffffff' },
 ]
 export const NO_DATA_COLOR = '#ebebee'
 
@@ -101,8 +104,9 @@ export function biddingColor(points) {
   return BIDDING_BANDS.find((band) => points >= band.min)?.color ?? NO_DATA_COLOR
 }
 
-export function formatPoints(points) {
+export function formatPoints(points, { short = false } = {}) {
   if (points == null) return 'No data'
+  if (short) return `${points} ${points === 1 ? 'pt' : 'pts'}`
   return `${points} ${points === 1 ? 'point' : 'points'}`
 }
 

@@ -65,16 +65,15 @@ nobody opens it while planning.
   tapping the squares opens and closes the box (same as requirement tags) without
   opening the course.
 
-### Colors (fixed bands, same for every course and year)
+### Colors (fixed bands, same for every course and year; user-set Nov 13, 2026)
 
 | Cleared at | Square |
 |---|---|
 | No data | light gray |
-| 0 points | palest yellow-orange |
-| 1–99 | light orange |
-| 100–299 | medium orange |
-| 300–499 | strong orange |
-| 500+ | dark orange |
+| 0–49 points (basically free) | white (thin outline) |
+| 50–99 | orange |
+| 100–149 | red |
+| 150+ | very dark red |
 
 ### Hover box (a small table that mirrors the squares)
 
