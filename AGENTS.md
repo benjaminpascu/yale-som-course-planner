@@ -12,6 +12,7 @@ alwaysApply: true
 Per `docs/PRD.md` §12:
 
 1. **One milestone or focused task = one new agent** (fresh chat). Do not continue unrelated work in a long, stale thread.
+   **Name the chat after its version** (user rule, Nov 2026): as soon as the task is clear, rename this chat (the `set_session_title` tool, session `self`) to `<version> – <Feature>`. A feature takes the release it ships in, e.g. `1.2 – Shortlist`. Small fixes going straight to `main` take the live version with `.x`, e.g. `1.1.x – Logo cursor`. Rename it again if the work changes.
 2. Read **`docs/PROJECT_STATUS.md`** for what is done and what is next.
 3. Read **`docs/PRD.md`** for product requirements (especially §6 data model and §11 milestones).
 4. **Brainstorm the full spec before any code** for a new feature (e.g. the GitHub issues labeled `roadmap`). Work through it with the user: what it does, where it appears on screen, the data it needs, edge cases, and what's out of scope. Save the agreed spec to `docs/specs/<feature>.md`, link it from the GitHub issue, and start building only after the user approves it. Small bug fixes and polish skip this step.
