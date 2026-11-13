@@ -41,14 +41,16 @@ nobody opens it while planning.
 
 ## What the student sees
 
-### Squares (inside an opened course in the course list)
+### Squares (on every course row, bottom right; user change Nov 13, 2026)
 
 ```
-Faculty: …            When: …
-…
-[Bid required]  ■ ■ ■ ■
+› MGT 556 — Big Data & Customer Analytics (4 units)        [STEM]
+  Spring full term · Mo,We · 10:05–11:25                  [In Plan]
+                                                           ■ ■ ■ ■
 ```
 
+- On the course row itself, so students see it without opening the course: bottom
+  right, under the requirement tags (and under In Plan / Conflict when shown).
 - Four small squares, in this order: **Round 1 and Round 2 of the same season last
   year, then Round 1 and Round 2 of the year before.** A Spring 2027 course shows
   Spring 2026 R1, Spring 2026 R2, Spring 2025 R1, Spring 2025 R2. A Fall 2026 course
@@ -57,7 +59,8 @@ Faculty: …            When: …
 - Shown for SOM courses that need a bid, and for any SOM section that has history.
   Sections with neither show nothing.
 - Same in Single plan and Compare plans (it's part of the course list). On phones,
-  tapping the squares opens and closes the box (same as requirement tags).
+  tapping the squares opens and closes the box (same as requirement tags) without
+  opening the course.
 
 ### Colors (fixed bands, same for every course and year)
 
@@ -70,17 +73,21 @@ Faculty: …            When: …
 | 300–499 | strong orange |
 | 500+ | dark orange |
 
-### Hover box (same style as the requirements hover box)
+### Hover box (a small table that mirrors the squares)
 
 ```
 Bidding history
-Round 1, Spring 2026     340 points
-Round 2, Spring 2026     No data
-Round 1, Spring 2025       0 points
-Round 2, Spring 2025     120 points
+               Round 1      Round 2
+─────────────────────────────────────
+Spring 2026    ■ 0 pts      ■ 143 pts
+Spring 2025    ■ 10 pts     ■ No data
+─────────────────────────────────────
 Based on past results for this section. Sections can
 change from year to year, so keep that in mind.
 ```
+
+- One row per semester, one column per round, thin lines between rows, a small
+  color square next to each number.
 
 ## Data
 

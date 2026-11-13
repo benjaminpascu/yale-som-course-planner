@@ -12,7 +12,7 @@ import {
 } from '../lib/parseCourses'
 import { isSomCourse } from '../lib/schools'
 import { formatSessionLabel } from '../lib/sessionDisplay'
-import BiddingHistory from './BiddingHistory'
+import BiddingHistory, { useBiddingRounds } from './BiddingHistory'
 import CollapseChevron from './CollapseChevron'
 import RegistrationTag from './RegistrationTag'
 import NoDescription from './NoDescription'
@@ -41,10 +41,13 @@ export default function CourseRow({
     Boolean(course.bidOrPermission) &&
     normalizeBidType(course.bidOrPermission) !== 'core'
 
+  const biddingRounds = useBiddingRounds(course)
+
   const showRightRail =
     requirementTagCodes.length > 0 ||
     isSelected ||
-    (hasConflict && !isSelected)
+    (hasConflict && !isSelected) ||
+    biddingRounds != null
 
   const categoryLabel = course.category
     ? normalizeCategory(course.category)
@@ -135,6 +138,13 @@ export default function CourseRow({
                 ) : null}
               </span>
             ) : null}
+            {biddingRounds ? (
+              <BiddingHistory
+                rounds={biddingRounds}
+                // Bottom right of the row (In Plan / Conflict, when shown, already sit at the bottom).
+                className={isSelected || hasConflict ? '' : 'mt-auto'}
+              />
+            ) : null}
           </span>
         ) : null}
       </button>
@@ -164,15 +174,12 @@ export default function CourseRow({
             <FactItem label="Also listed as" value={course.crossListings?.join(', ')} />
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 empty:hidden">
-            {showRegistrationTag ? (
-              <RegistrationTag
-                bidOrPermission={course.bidOrPermission}
-                className="!px-1 !py-px !text-[10px]"
-              />
-            ) : null}
-            <BiddingHistory course={course} />
-          </div>
+          {showRegistrationTag ? (
+            <RegistrationTag
+              bidOrPermission={course.bidOrPermission}
+              className="!px-1 !py-px !text-[10px]"
+            />
+          ) : null}
 
           {course.prerequisites ? (
             <p className="border-t border-gray-200/60 pt-2 text-gray-600">{course.prerequisites}</p>
