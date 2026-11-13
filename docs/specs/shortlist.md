@@ -173,8 +173,8 @@ these changes everywhere it appears (Single plan, Compare plans, phone Plans tab
   `src/lib/updates.js`). Example: "**Shortlist**: open a course and click the blue
   ☆ next to Add to Plan to star it. Click ★ next to the search to see only your
   starred courses. Your Plan now shows only the semester you're looking at."
-- Branch `feature/shortlist` → pull request → Vercel preview link → the user
-  approves → merge.
+- Branch `feature/shortlist` → pull request into `release/1.2` → Vercel preview
+  link → the user approves → merge into `release/1.2`. It goes live with the rest of 1.2.
 - Update `AGENTS.md` (Current focus + Key code locations) and `docs/PROJECT_STATUS.md`.
 
 ## Left to the builder

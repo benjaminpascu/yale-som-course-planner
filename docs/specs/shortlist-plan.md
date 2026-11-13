@@ -12,7 +12,7 @@
 
 ## Global Constraints
 
-- Branch `feature/shortlist`; ship by pull request + Vercel preview, merge only when the user says so.
+- Branch `feature/shortlist` (from `release/1.2`); pull request **into `release/1.2`** + Vercel preview; merge only when the user approves. `release/1.2` goes to `main` later, together with the other 1.2 features.
 - Shortlist blue `#2F6FBF` (`--color-short-600`), hover `#275da1` (`--color-short-700`); tints `--color-short-50: #edf3fb`, `--color-short-100: #d3e2f5`.
 - Storage key `yale-som-course-planner-shortlist`, shape `{ version: 1, terms: { [termCode]: courseId[] } }`.
 - One shortlist per semester, shared by all plans; per section (course ID); never pruned.
@@ -169,4 +169,4 @@
 - [ ] **Step 2:** `npm version 1.2.0 --no-git-tag-version`.
 - [ ] **Step 3:** `AGENTS.md`: a Current focus row "Shortlist (spec `docs/specs/shortlist.md`; version 1.2.0) — preview" and a Key code locations row for `shortlistStorage.js`, `planSemester.js`, and the ★ button in `CourseBrowser.jsx`. `docs/PROJECT_STATUS.md`: the same status.
 - [ ] **Step 4:** `npm test` (all pass), `npm run build` (succeeds), and a full browser pass of every spec section in Single plan and Compare plans, no console errors.
-- [ ] **Step 5:** Commit, `git push`, then `gh pr create` titled "Shortlist" whose body says `Closes #11`, summarizes the change and ends with the attribution line. Get the Vercel preview link from the pull request and send it to the user. Don't merge.
+- [ ] **Step 5:** Commit, `git push`, then `gh pr create --base release/1.2` titled "Shortlist" whose body says `Closes #11` (it closes when 1.2 reaches main), summarizes the change and ends with the attribution line. Get the Vercel preview link from the pull request and send it to the user. Don't merge.
