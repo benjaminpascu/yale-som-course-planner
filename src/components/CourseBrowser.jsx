@@ -111,6 +111,8 @@ function CatalogSearchBar({
   )
 }
 
+const NO_IDS = new Set()
+
 export default function CourseBrowser({
   courses,
   selectedIds,
@@ -121,6 +123,8 @@ export default function CourseBrowser({
   termCode = null,
   fullHeight = false,
   somFilters = true,
+  shortlistIds = NO_IDS,
+  onToggleShortlist,
 }) {
   const [filters, setFilters] = useState(createEmptyFilters)
   const [page, setPage] = useState(1)
@@ -241,6 +245,8 @@ export default function CourseBrowser({
           id === course.courseId ? null : course.courseId,
         ),
       onTogglePlan: () => onToggleCourse(course.courseId),
+      isShortlisted: shortlistIds.has(course.courseId),
+      onToggleShortlist: () => onToggleShortlist?.(course.courseId),
     }
   }
 

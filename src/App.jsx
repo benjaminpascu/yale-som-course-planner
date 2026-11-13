@@ -58,6 +58,12 @@ import {
   savePlanCourses,
   upsertPlan,
 } from './lib/planStorage'
+import {
+  getShortlist,
+  loadShortlistStore,
+  persistShortlistStore,
+  toggleShortlisted,
+} from './lib/shortlistStorage'
 import { importPlansIntoStore } from './lib/planTransfer'
 import { UPDATES_PATH, isUpdatesPath } from './lib/updates'
 
@@ -77,6 +83,8 @@ function App() {
   const [error, setError] = useState(null)
   const [planStore, setPlanStore] = useState(() => loadPlanStore())
   const [selectedIds, setSelectedIds] = useState(() => new Set())
+  // Starred course sections, one list per semester, shared by all plans.
+  const [shortlistStore, setShortlistStore] = useState(() => loadShortlistStore())
   const [mobileTab, setMobileTab] = useState('calendar')
   const [view, setView] = useState('planner')
   // /updates is its own page; the planner stays loaded (hidden) underneath so nothing resets.
@@ -209,6 +217,16 @@ function App() {
     : defaultTermCode
 
   const { fallYear, springYear } = getAcademicYears(activeTermCode)
+
+  useEffect(() => persistShortlistStore(shortlistStore), [shortlistStore])
+  const shortlistIds = useMemo(
+    () => new Set(getShortlist(shortlistStore, activeTermCode)),
+    [shortlistStore, activeTermCode],
+  )
+  const toggleShortlist = useCallback(
+    (courseId) => setShortlistStore((store) => toggleShortlisted(store, activeTermCode, courseId)),
+    [activeTermCode],
+  )
 
   const schools = useMemo(() => pickerSchools(courses, activeTermCode), [courses, activeTermCode])
   // A school with no courses this term falls back to SOM.
@@ -712,6 +730,8 @@ function App() {
             selectedIds={selectedIds}
             selectedCourses={selectedCourses}
             onToggleCourse={toggleCourse}
+            shortlistIds={shortlistIds}
+            onToggleShortlist={toggleShortlist}
             fallYear={fallYear}
             springYear={springYear}
             termCode={activeTermCode}
@@ -822,6 +842,8 @@ function App() {
             selectedIds={selectedIds}
             selectedCourses={selectedCourses}
             onToggleCourse={toggleCourse}
+            shortlistIds={shortlistIds}
+            onToggleShortlist={toggleShortlist}
             fallYear={fallYear}
             springYear={springYear}
             termCode={activeTermCode}
