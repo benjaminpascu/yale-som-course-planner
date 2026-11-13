@@ -42,6 +42,12 @@ export default function CourseRow({
     normalizeBidType(course.bidOrPermission) !== 'core'
 
   const biddingRounds = useBiddingRounds(course)
+  // Open bid course with no past results: "No bidding history" where the squares would be.
+  const showNoBiddingHistory =
+    biddingRounds === null &&
+    isExpanded &&
+    isSomCourse(course) &&
+    normalizeBidType(course.bidOrPermission) === 'bid'
 
   const showRightRail =
     requirementTagCodes.length > 0 ||
@@ -124,7 +130,7 @@ export default function CourseRow({
           <span
             className={`flex max-w-[9rem] flex-col items-end gap-1 self-stretch sm:max-w-[11rem] ${
               // Keep In Plan / Conflict above the squares in the corner.
-              biddingRounds && (isSelected || hasConflict) ? 'pb-4' : ''
+              (biddingRounds || showNoBiddingHistory) && (isSelected || hasConflict) ? 'pb-4' : ''
             }`}
           >
             {requirementTagCodes.length > 0 ? (
@@ -162,6 +168,10 @@ export default function CourseRow({
           // Pinned in the bottom-right corner, on the time line, so it doesn't
           // take width from the title.
           <BiddingHistory rounds={biddingRounds} className="absolute right-3 bottom-[11px]" />
+        ) : showNoBiddingHistory ? (
+          <span className="absolute right-3 bottom-[9px] text-[10px] leading-tight text-gray-400">
+            No bidding history
+          </span>
         ) : null}
       </button>
 

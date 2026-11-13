@@ -31,10 +31,13 @@ function useBiddingHistory() {
   return history
 }
 
-/** The four rounds for a course, or null when its squares shouldn't show. */
+/**
+ * The four rounds for a course; null when it has no past results; undefined
+ * while the bidding file is still loading.
+ */
 export function useBiddingRounds(course) {
   const history = useBiddingHistory()
-  if (!history) return null
+  if (!history) return undefined
   const rounds = getBiddingRounds(course, history)
   return showsBiddingHistory(course, rounds) ? rounds : null
 }

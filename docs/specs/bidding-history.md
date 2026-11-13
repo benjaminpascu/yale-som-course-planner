@@ -61,6 +61,11 @@ nobody opens it while planning.
 - Shown only for SOM sections with **at least one past result** (user decision, Nov
   13, 2026). Blank = no bidding history; a gray square = no result for that round.
   New bid courses show nothing.
+- When a course is **open**, **Bid required** moves up under the title (where the
+  time was), across from the squares. An open bid course with no past results says
+  "No bidding history" in small gray text where the squares would be. Collapsed rows
+  stay blank.
+- An open course's details also show **Section** (next to Units).
 - Same in Single plan and Compare plans (it's part of the course list). On phones,
   tapping the squares opens and closes the box (same as requirement tags) without
   opening the course.
