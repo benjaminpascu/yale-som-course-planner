@@ -27,7 +27,7 @@ The user decides the priority; don't pick for them.
 
 Show a short list of what's open, one line each (number + title), grouped:
 
-- **Waiting for "ship it"**: open pull requests from `feature/` branches, with their preview link.
+- **Waiting for "ship it"**: open pull requests from `feature/` branches (into a `release/` branch) and the release branch itself, with their preview links.
 - **Bugs** (label `bug`).
 - **Started**: roadmap items with a spec in `docs/specs/`.
 - **Roadmap**: other open issues.
@@ -38,7 +38,7 @@ Then ask **what they want to prioritize** (AskUserQuestion; the open items as op
 
 Follow the `AGENTS.md` workflow for the chosen item:
 
-- **New feature / roadmap item**: brainstorm the full spec with the user first (step 4), save it to `docs/specs/<feature>.md`, comment the link on the issue, and wait for approval before writing code. Then build, test, and ship on a `feature/` branch with a pull request and a preview link (step 5), and wait for "ship it".
+- **New feature / roadmap item**: brainstorm the full spec with the user first (step 4), save it to `docs/specs/<feature>.md`, comment the link on the issue, and wait for approval before writing code. Then build and test on a `feature/` branch made from the open `release/<x.y>` branch, open a pull request into that release branch, send the preview link (step 5), and wait for the user's OK. The release branch goes to `main` only when the user says ship it.
 - **Bug / small fix**: fix it, run the checks (step 5), and push straight to `main`.
 
 Either way, right before committing, bump the version and add an Updates entry (`src/lib/updates.js` + `package.json`; rules in `AGENTS.md` step 5).
