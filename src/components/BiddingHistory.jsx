@@ -44,8 +44,11 @@ const Swatch = ({ points, className = '' }) => (
   />
 )
 
-/** Rounds come as [R1, R2] per semester; the box shows one row per semester. */
-function RoundsTable({ rounds }) {
+/**
+ * Rounds come as [R1, R2] per semester; one table row per semester.
+ * `compact` (narrow course popups): "R1"/"R2" headers and bare numbers.
+ */
+function RoundsTable({ rounds, compact = false }) {
   const terms = []
   for (let i = 0; i < rounds.length; i += 2) {
     terms.push({ term: rounds[i].label.replace(/^Round 1, /, ''), cells: rounds.slice(i, i + 2) })
@@ -54,25 +57,37 @@ function RoundsTable({ rounds }) {
     <table className="w-full border-collapse text-xs">
       <thead>
         <tr className="border-b border-gray-200 text-[11px] text-gray-500">
-          <th className="py-1 pr-4 text-left font-medium" />
-          <th className="px-2 py-1 text-left font-medium">Round 1</th>
-          <th className="py-1 pl-2 text-left font-medium">Round 2</th>
+          <th className={`py-1 text-left font-medium ${compact ? 'pr-2' : 'pr-4'}`} />
+          <th className={`py-1 text-left font-medium ${compact ? 'px-1' : 'px-2'}`}>
+            {compact ? 'R1' : 'Round 1'}
+          </th>
+          <th className={`py-1 text-left font-medium ${compact ? 'pl-1' : 'pl-2'}`}>
+            {compact ? 'R2' : 'Round 2'}
+          </th>
         </tr>
       </thead>
       <tbody>
         {terms.map(({ term, cells }) => (
           <tr key={term} className="border-b border-gray-100 last:border-b-0">
-            <th scope="row" className="py-1.5 pr-4 text-left font-medium whitespace-nowrap text-gray-900">
+            <th
+              scope="row"
+              className={`py-1.5 text-left font-medium whitespace-nowrap text-gray-900 ${compact ? 'pr-2' : 'pr-4'}`}
+            >
               {term}
             </th>
             {cells.map((cell, i) => (
-              <td key={cell.label} className={`py-1.5 whitespace-nowrap ${i === 0 ? 'px-2' : 'pl-2'}`}>
-                <span className="inline-flex items-center gap-1.5">
+              <td
+                key={cell.label}
+                className={`py-1.5 whitespace-nowrap ${i === 0 ? (compact ? 'px-1' : 'px-2') : compact ? 'pl-1' : 'pl-2'}`}
+              >
+                <span className={`inline-flex items-center ${compact ? 'gap-1' : 'gap-1.5'}`}>
                   <Swatch points={cell.points} className="size-2.5" />
                   {cell.points == null ? (
-                    <span className="text-gray-400">No data</span>
+                    <span className="text-gray-400">{compact ? '–' : 'No data'}</span>
                   ) : (
-                    <span className="font-medium tabular-nums text-gray-900">{cell.points} pts</span>
+                    <span className="font-medium tabular-nums text-gray-900">
+                      {compact ? cell.points : `${cell.points} pts`}
+                    </span>
                   )}
                 </span>
               </td>
@@ -81,6 +96,22 @@ function RoundsTable({ rounds }) {
         ))}
       </tbody>
     </table>
+  )
+}
+
+/**
+ * Bidding history inside a course popup (Weekly Calendar, Your Plan), in the
+ * narrow facts column. Nothing for courses without squares.
+ */
+export function BiddingHistoryDetail({ course }) {
+  const rounds = useBiddingRounds(course)
+  if (!rounds) return null
+  return (
+    <div>
+      <p className="font-medium text-gray-500">Bidding history (points)</p>
+      <RoundsTable rounds={rounds} compact />
+      <p className="mt-1 text-[10px] leading-snug text-gray-500">{BIDDING_DISCLAIMER}</p>
+    </div>
   )
 }
 

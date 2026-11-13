@@ -46,8 +46,7 @@ export default function CourseRow({
   const showRightRail =
     requirementTagCodes.length > 0 ||
     isSelected ||
-    (hasConflict && !isSelected) ||
-    biddingRounds != null
+    (hasConflict && !isSelected)
 
   const categoryLabel = course.category
     ? normalizeCategory(course.category)
@@ -70,7 +69,10 @@ export default function CourseRow({
         type="button"
         onClick={onExpandToggle}
         aria-expanded={isExpanded}
-        className={`grid w-full items-start gap-x-1.5 px-3 py-2 text-left transition-colors ${
+        className={`relative grid w-full items-start gap-x-1.5 px-3 py-2 text-left transition-colors ${
+          // Open course: no time line under the title, so the squares get their own line.
+          biddingRounds && isExpanded ? 'pb-6' : ''
+        } ${
           showRightRail
             ? 'grid-cols-[auto_minmax(0,1fr)_auto]'
             : 'grid-cols-[auto_minmax(0,1fr)]'
@@ -88,7 +90,12 @@ export default function CourseRow({
             {formatCourseHeading(course)}
           </span>
           {!isExpanded ? (
-            <span className="mt-0.5 block truncate text-[11px] leading-snug">
+            <span
+              className={`mt-0.5 block truncate text-[11px] leading-snug ${
+                // Room for the squares pinned at the end of this line.
+                biddingRounds ? (showRightRail ? 'pr-5' : 'pr-14') : ''
+              }`}
+            >
               {hasMeetingTime(course) ? (
                 <span className="text-gray-500">
                   {formatSessionLabel(course.session)} ·{' '}
@@ -108,7 +115,12 @@ export default function CourseRow({
           ) : null}
         </span>
         {showRightRail ? (
-          <span className="flex max-w-[9rem] flex-col items-end gap-1 self-stretch sm:max-w-[11rem]">
+          <span
+            className={`flex max-w-[9rem] flex-col items-end gap-1 self-stretch sm:max-w-[11rem] ${
+              // Keep In Plan / Conflict above the squares in the corner.
+              biddingRounds && (isSelected || hasConflict) ? 'pb-4' : ''
+            }`}
+          >
             {requirementTagCodes.length > 0 ? (
               <span className="flex flex-wrap items-center justify-end gap-1">
                 {requirementTagCodes.map((code) => (
@@ -138,14 +150,12 @@ export default function CourseRow({
                 ) : null}
               </span>
             ) : null}
-            {biddingRounds ? (
-              <BiddingHistory
-                rounds={biddingRounds}
-                // Bottom right of the row (In Plan / Conflict, when shown, already sit at the bottom).
-                className={isSelected || hasConflict ? '' : 'mt-auto'}
-              />
-            ) : null}
           </span>
+        ) : null}
+        {biddingRounds ? (
+          // Pinned in the bottom-right corner, on the time line, so it doesn't
+          // take width from the title.
+          <BiddingHistory rounds={biddingRounds} className="absolute right-3 bottom-[11px]" />
         ) : null}
       </button>
 

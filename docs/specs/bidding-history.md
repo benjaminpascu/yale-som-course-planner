@@ -49,8 +49,10 @@ nobody opens it while planning.
                                                            ■ ■ ■ ■
 ```
 
-- On the course row itself, so students see it without opening the course: bottom
-  right, under the requirement tags (and under In Plan / Conflict when shown).
+- On the course row itself, so students see it without opening the course: pinned
+  in the bottom-right corner, on the time line, under the requirement tags (and under
+  In Plan / Conflict when shown). Pinned rather than in the tag column so titles keep
+  their full width (checked: no row gets taller, nothing overlaps).
 - Four small squares, in this order: **Round 1 and Round 2 of the same season last
   year, then Round 1 and Round 2 of the year before.** A Spring 2027 course shows
   Spring 2026 R1, Spring 2026 R2, Spring 2025 R1, Spring 2025 R2. A Fall 2026 course
@@ -88,6 +90,13 @@ change from year to year, so keep that in mind.
 
 - One row per semester, one column per round, thin lines between rows, a small
   color square next to each number.
+
+### Course popups (Weekly Calendar and Your Plan; user request Nov 13, 2026)
+
+The hover popup for a course on the calendar or in Your Plan shows **Bidding history
+(points)** in its left facts column, under Category: the same table in a compact
+form ("R1" / "R2" headers, numbers without "pts", "–" for no data, colored squares)
+plus the disclaimer in small text. Only for courses that show squares.
 
 ## Data
 

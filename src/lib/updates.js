@@ -13,7 +13,7 @@ export const UPDATES = [
     version: '1.2.0',
     date: '2026-11-13',
     changes: [
-      'Bidding history: courses in the Course Catalog now show four small squares in the bottom right, one for each of the last two years\' Round 1 and Round 2. The darker the orange, the more points that section needed; gray means no data. Hover over the squares to see the exact points.',
+      'Bidding history: courses in the Course Catalog now show four small squares in the bottom right, one for each of the last two years\' Round 1 and Round 2. The darker the orange, the more points that section needed; gray means no data. Hover over the squares to see the exact points; they also show when you hover a course on your Weekly Calendar or in Your Plan.',
     ],
   },
   {

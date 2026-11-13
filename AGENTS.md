@@ -115,7 +115,7 @@ No database or environment variables. Course data is the CSVs in `docs/data-samp
 | Session- and term-aware conflicts | `src/lib/scheduleConflicts.js` |
 | Term selector (Fall / Spring) | `TermSwitch` in `src/components/SubBar.jsx` (top right of the sub bar, both modes); term list from `getCatalogTerms` in `academicYear.js` |
 | Load data (every `courses_master_*.csv`, bundled; no code change for a new term) | `src/lib/loadData.js` |
-| Bidding history squares (course row, bottom right) + hover table | `src/components/BiddingHistory.jsx`, `src/lib/biddingHistory.js`; import in `scripts/update-bidding-history.js`, `scripts/lib/biddingImport.js` |
+| Bidding history squares (pinned bottom right of the course row) + hover table; compact table in the calendar / Your Plan popups (`BiddingHistoryDetail` in `CalendarCourseDetail`) | `src/components/BiddingHistory.jsx`, `src/lib/biddingHistory.js`; import in `scripts/update-bidding-history.js`, `scripts/lib/biddingImport.js` |
 | Other Yale schools: School picker, school labels/order, background load of `yale_courses_*.csv`, daily import | `src/lib/schools.js`, `src/components/SchoolPicker.jsx`, `loadOtherSchoolCourses` in `loadData.js`; `scripts/update-yale-courses.js`, `scripts/lib/yaleImport.js`, `scripts/lib/lawImport.js`; notes in `docs/updating-course-data.md` |
 | Parse courses + `hasMeetingTime` + inline tags | `src/lib/parseCourses.js` |
 | Category typo aliases only (new CSV values pass through) | `src/lib/categoryDisplay.js` |
