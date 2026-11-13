@@ -12,6 +12,7 @@ import {
 } from '../lib/parseCourses'
 import { isSomCourse } from '../lib/schools'
 import { formatSessionLabel } from '../lib/sessionDisplay'
+import BiddingHistory from './BiddingHistory'
 import CollapseChevron from './CollapseChevron'
 import RegistrationTag from './RegistrationTag'
 import NoDescription from './NoDescription'
@@ -163,12 +164,15 @@ export default function CourseRow({
             <FactItem label="Also listed as" value={course.crossListings?.join(', ')} />
           </div>
 
-          {showRegistrationTag ? (
-            <RegistrationTag
-              bidOrPermission={course.bidOrPermission}
-              className="!px-1 !py-px !text-[10px]"
-            />
-          ) : null}
+          <div className="flex flex-wrap items-center gap-2 empty:hidden">
+            {showRegistrationTag ? (
+              <RegistrationTag
+                bidOrPermission={course.bidOrPermission}
+                className="!px-1 !py-px !text-[10px]"
+              />
+            ) : null}
+            <BiddingHistory course={course} />
+          </div>
 
           {course.prerequisites ? (
             <p className="border-t border-gray-200/60 pt-2 text-gray-600">{course.prerequisites}</p>

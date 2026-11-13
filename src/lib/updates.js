@@ -10,6 +10,13 @@
  */
 export const UPDATES = [
   {
+    version: '1.2.0',
+    date: '2026-11-13',
+    changes: [
+      'Bidding history: open a course in the Course Catalog to see four small squares next to "Bid required", one for each of the last two years\' Round 1 and Round 2. The darker the orange, the more points that section needed; gray means no data. Hover over the squares to see the exact points.',
+    ],
+  },
+  {
     version: '1.1.1',
     date: '2026-11-13',
     changes: [

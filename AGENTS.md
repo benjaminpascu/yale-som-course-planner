@@ -72,6 +72,7 @@ Full detail: **`docs/PROJECT_STATUS.md`**.
 | **Courses (one file per term)** | `docs/data-samples/courses_master_<term>.csv`, e.g. `fall2026`, `spring2027` (identical columns; new terms appear automatically) |
 | Tags | Inline `tags` column on those CSVs (semicolon-separated names), set from Yale's attribute codes (`MGMS` → STEM, `MGGE` → GBS Req). Sections of one course share tags at load time (`harmonizeSectionTags`). |
 | **Updating courses** | Automatic: a GitHub job (`.github/workflows/update-courses.yml`) pulls Yale SOM's course feed every 6 hours, adds new semesters and commits changes. Other schools: `.github/workflows/update-yale-courses.yml`, once a day, into `yale_courses_<term>.csv` (needs the `YALE_API_KEY` secret). Details: `docs/updating-course-data.md` |
+| **Bidding history** (past clearing prices) | `docs/data-samples/bidding_history.csv`, imported from SOM's public `Auction-Bidding-History.xlsx` (link in `bidding_history_source.json`) by `.github/workflows/update-bidding-history.yml` once a month; it opens an issue for the owner when the link breaks or a started semester is missing. `npm run update-bidding-history`. Spec: `docs/specs/bidding-history.md` |
 | Manual data fixes that survive updates | `docs/data-samples/course_overrides.csv` |
 | Registrar rules (e.g. Law: one course per semester, unit conversion) | `docs/registrar-rules.md` |
 | Vercel deploy steps | `docs/vercel-setup.md` |
@@ -114,6 +115,7 @@ No database or environment variables. Course data is the CSVs in `docs/data-samp
 | Session- and term-aware conflicts | `src/lib/scheduleConflicts.js` |
 | Term selector (Fall / Spring) | `TermSwitch` in `src/components/SubBar.jsx` (top right of the sub bar, both modes); term list from `getCatalogTerms` in `academicYear.js` |
 | Load data (every `courses_master_*.csv`, bundled; no code change for a new term) | `src/lib/loadData.js` |
+| Bidding history squares + hover box in an opened course | `src/components/BiddingHistory.jsx`, `src/lib/biddingHistory.js`; import in `scripts/update-bidding-history.js`, `scripts/lib/biddingImport.js` |
 | Other Yale schools: School picker, school labels/order, background load of `yale_courses_*.csv`, daily import | `src/lib/schools.js`, `src/components/SchoolPicker.jsx`, `loadOtherSchoolCourses` in `loadData.js`; `scripts/update-yale-courses.js`, `scripts/lib/yaleImport.js`, `scripts/lib/lawImport.js`; notes in `docs/updating-course-data.md` |
 | Parse courses + `hasMeetingTime` + inline tags | `src/lib/parseCourses.js` |
 | Category typo aliases only (new CSV values pass through) | `src/lib/categoryDisplay.js` |
