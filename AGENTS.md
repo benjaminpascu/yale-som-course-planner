@@ -72,6 +72,7 @@ Full detail: **`docs/PROJECT_STATUS.md`**.
 | Tags | Inline `tags` column on those CSVs (semicolon-separated names), set from Yale's attribute codes (`MGMS` → STEM, `MGGE` → GBS Req). Sections of one course share tags at load time (`harmonizeSectionTags`). |
 | **Updating courses** | Automatic: a GitHub job (`.github/workflows/update-courses.yml`) pulls Yale SOM's course feed every 6 hours, adds new semesters and commits changes. Other schools: `.github/workflows/update-yale-courses.yml`, once a day, into `yale_courses_<term>.csv` (needs the `YALE_API_KEY` secret). Details: `docs/updating-course-data.md` |
 | Manual data fixes that survive updates | `docs/data-samples/course_overrides.csv` |
+| Registrar rules (e.g. Law: one course per semester, unit conversion) | `docs/registrar-rules.md` |
 | Vercel deploy steps | `docs/vercel-setup.md` |
 
 ### Scheduling columns (courses CSV)
