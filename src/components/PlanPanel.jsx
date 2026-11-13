@@ -64,8 +64,8 @@ export default function PlanPanel({
   const headerPad = compact ? 'px-3 py-1.5' : 'px-4 py-2'
   const toolbarPad = compact ? 'px-3 py-1.5' : 'px-4 py-2'
   const listWrapClass = compact
-    ? 'space-y-0 border-l-2 border-yale-200 pb-2 pl-3 pr-3 pt-0.5'
-    : 'space-y-0 border-l-2 border-yale-200 pb-3 pl-5 pr-4 pt-1 sm:pl-6'
+    ? 'space-y-0 px-3 pb-2 pt-1.5'
+    : 'space-y-0 px-4 pb-3 pt-2'
 
   const showSummary =
     showHeaderSummary && (activePlanName != null || courseCount > 0)
@@ -118,28 +118,19 @@ export default function PlanPanel({
               : 'flex flex-col'
           }
         >
-          {!activePlanName || isDirty ? (
+          {/* Unsaved changes show next to Save Plan at the top, so no line here. */}
+          {!activePlanName ? (
             <div
               className={`flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-yale-150 ${toolbarPad}`}
             >
-              <p className="text-xs text-yale-700">
-                {!activePlanName ? planEmptyHint : (
-                  <>
-                    Unsaved changes to{' '}
-                    <span className="italic">{activePlanName}</span>. Save when
-                    you&apos;re done editing.
-                  </>
-                )}
-              </p>
+              <p className="text-xs text-yale-700">{planEmptyHint}</p>
             </div>
           ) : null}
 
           {courseCount === 0 ? (
             <p
-              className={`shrink-0 border-l-2 border-yale-200 text-center text-gray-500 ${
-                compact
-                  ? 'py-4 pl-3 pr-3 text-xs'
-                  : 'py-6 pl-5 pr-4 text-sm sm:pl-6'
+              className={`shrink-0 text-center text-gray-500 ${
+                compact ? 'px-3 py-4 text-xs' : 'px-4 py-6 text-sm'
               }`}
             >
               No courses yet
@@ -168,12 +159,10 @@ export default function PlanPanel({
                       >
                         {group.session === 'Other'
                           ? 'Other'
-                          : formatSessionLabel(group.session, {
-                              fallYear,
-                              springYear,
-                            })}
+                          : formatSessionLabel(group.session)}
                       </h3>
-                      <ul className="space-y-0">
+                      {/* One flat block per session, thin lines between courses. */}
+                      <ul className="overflow-hidden rounded-md border border-save-100">
                         {group.courses.map((course) => (
                           <PlanCourseRow
                             key={course.courseId}

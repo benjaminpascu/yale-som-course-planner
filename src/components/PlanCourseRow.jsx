@@ -19,7 +19,6 @@ import {
   hasMeetingTime,
   NO_MEETING_TIME_MESSAGE,
 } from '../lib/parseCourses'
-import { IN_PLAN_SURFACE } from '../lib/sectionTheme'
 import { CalendarCourseDetail } from './CalendarCourseBlock'
 import CourseDetailSheet from './CourseDetailSheet'
 
@@ -121,10 +120,8 @@ export default function PlanCourseRow({
       />
 
       <li
-        className={`flex items-start rounded-md shadow-sm ${IN_PLAN_SURFACE} ${
-          compact
-            ? 'mb-1 gap-1.5 px-2 py-1.5 text-xs'
-            : 'mb-2 gap-2 px-3 py-2 text-sm'
+        className={`flex items-start border-b border-save-100 bg-save-50 last:border-b-0 ${
+          compact ? 'gap-1.5 px-2 py-1.5 text-xs' : 'gap-2 px-3 py-2 text-sm'
         }`}
       >
         <button
