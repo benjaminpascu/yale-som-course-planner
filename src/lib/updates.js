@@ -10,6 +10,14 @@
  */
 export const UPDATES = [
   {
+    version: '1.2.0',
+    date: '2026-11-13',
+    changes: [
+      'Shortlist: open a course and click the blue ☆ next to Add to Plan to star it. Click ★ next to the search to see only your starred courses, so you can always come back to them. Each semester has its own shortlist, shared by all your plans.',
+      'Your Plan now shows only the semester you are looking at, in a cleaner list. Hovering a course opens its details to the side, so you can move straight to the next course.',
+    ],
+  },
+  {
     version: '1.1.1',
     date: '2026-11-13',
     changes: [

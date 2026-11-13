@@ -60,6 +60,8 @@ The user is a non-technical student. Explain clearly; ask explicitly when a prod
 | **Automatic course updates** | ✅ Every 6 hours from Yale SOM's feed (Nov 2026); new semesters appear, finished ones hide |
 | **Updates page** (`/updates`, patch notes; version 1.0.1) | ✅ Live (Nov 2026); every change adds an entry (Workflow step 5) |
 | **Courses from across Yale** (School picker; spec `docs/specs/cross-registration.md`; version 1.1.0) | ✅ Live (Nov 2026); daily Yale job; Law reader unfinished |
+| **Release 1.2** (`release/1.2`; features collect there, go live together) | In progress |
+| **Shortlist** (★ star + ★ button by search; spec `docs/specs/shortlist.md`; part of 1.2.0) | Preview, waiting for approval (issue #11) |
 | **Wider promo** | When you choose (not a separate dev milestone) |
 
 Full detail: **`docs/PROJECT_STATUS.md`**.
@@ -122,6 +124,8 @@ No database or environment variables. Course data is the CSVs in `docs/data-samp
 | Compare Courses UI | `src/components/compare/` (`CompareView`, `ShortlistStep`, `ScoreStep`, `RatingInput`, `WeightInput`) — visual spec in `docs/design/compare/` |
 | Compare Plans (two plans side by side) | `src/lib/comparePlans.js`, `src/components/ComparePlansView.jsx`; state in `App.jsx` |
 | Header (nav bar + mode sub bar) | `src/components/NavBar.jsx`, `src/components/SubBar.jsx` |
+| Shortlist (stars per semester; ★ button next to search; star button in course details; tip `shortlist`) | `src/lib/shortlistStorage.js`, state in `App.jsx`, `CourseBrowser.jsx` (★ button, filter), `CourseRow.jsx` (star button) |
+| Your Plan shows the semester on screen; Clear all clears only that semester | `src/lib/planSemester.js`, `PlanPanel.jsx`; popup beside the row: `besidePlacement` in `src/lib/portaledTooltip.js` |
 | Updates page at `/updates` (patch notes + site version; new-update dot) | `src/lib/updates.js`, `src/components/UpdatesPage.jsx`, `UpdatesButton.jsx`; routing in `App.jsx`; `/updates` served by `vercel.json` |
 | Old address → new address move (forwards with saved data; keep while old links are around) | `src/lib/domainMove.js`, called from `src/main.jsx` |
 

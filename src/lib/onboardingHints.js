@@ -11,6 +11,7 @@ export const HINTS_STORAGE_KEY = 'yale-som-course-planner-hints'
 export const PLANNER_HINTS = [
   'phone-courses',
   'add-course',
+  'shortlist',
   'clash',
   'calendar-details',
   'set-targets',
@@ -64,6 +65,8 @@ export function nextPlannerHint({
   hasPlan,
   phone,
   hasConflict = false,
+  // A course's details are open in the list (where the star button is).
+  detailsOpen = false,
 }) {
   for (const id of PLANNER_HINTS) {
     if (seen.has(id)) continue
@@ -72,6 +75,7 @@ export function nextPlannerHint({
     if (PHONE_ONLY.has(id) && !phone) continue
     if (COMPUTER_ONLY.has(id) && phone) continue
     if (NEEDS_A_COURSE.has(id) && shownCount < 1) return null
+    if (id === 'shortlist' && !detailsOpen) return null
     if (id === 'save-plan' && (selectedCount < 3 || hasPlan)) return null
     return id
   }
