@@ -1,6 +1,6 @@
 # Spec: Shortlist
 
-GitHub issue: none yet (opened when this spec is approved) · Status: **approved** (Nov 13, 2026) · Nov 2026 · Version **1.2.0**
+GitHub issue: #11 · Status: **approved** (Nov 13, 2026) · Nov 2026 · Version **1.2.0**
 
 A throwaway prototype is on local branch `spike/shortlist` (not for merging;
 use it as the visual reference). The build starts from `main` on
