@@ -10,8 +10,10 @@ import { createPortal } from 'react-dom'
 import {
   LARGE_DESCRIPTION_LINE_COUNT,
   TOOLTIP_HIDE_DELAY_MS,
+  besidePlacement,
   calendarCourseTooltipStyle,
   clampPortaledTooltipLeft,
+  getViewportBottomInsetPx,
 } from '../lib/portaledTooltip'
 import { formatCourseHeading } from '../lib/courseDisplay'
 import {
@@ -37,6 +39,8 @@ export default function PlanCourseRow({
   const triggerRef = useRef(null)
   const tooltipRef = useRef(null)
   const hideTimerRef = useRef(null)
+  // Placed beside the row: its left edge is already right, so skip the clamp below.
+  const besideRef = useRef(false)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [desktopTooltipOpen, setDesktopTooltipOpen] = useState(false)
   const [tooltipStyle, setTooltipStyle] = useState(null)
@@ -49,8 +53,19 @@ export default function PlanCourseRow({
 
   const refreshTooltipStyle = useCallback(() => {
     if (!triggerRef.current) return
+    const row = triggerRef.current.closest('li') ?? triggerRef.current
+    const beside = besidePlacement(
+      row.getBoundingClientRect(),
+      {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        bottomInset: getViewportBottomInsetPx(),
+      },
+      { hasDescription: Boolean(course.description) },
+    )
+    besideRef.current = beside != null
     setTooltipStyle(
-      calendarCourseTooltipStyle(triggerRef.current, {
+      beside ?? calendarCourseTooltipStyle(triggerRef.current, {
         above: preferAbove(),
         hasDescription: Boolean(course.description),
         large: true,
@@ -95,6 +110,7 @@ export default function PlanCourseRow({
     if (!desktopTooltipOpen || !triggerRef.current || !tooltipRef.current) {
       return
     }
+    if (besideRef.current) return
     const left = clampPortaledTooltipLeft(
       triggerRef.current,
       tooltipRef.current,
