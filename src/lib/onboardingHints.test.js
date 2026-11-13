@@ -36,7 +36,7 @@ describe('nextPlannerHint', () => {
   })
 
   test('clash tip only once a Conflict label shows; the others go ahead meanwhile', () => {
-    const seen = new Set(['add-course'])
+    const seen = new Set(['add-course', 'shortlist'])
     expect(nextPlannerHint({ ...base, seen })).toBe(null)
     expect(nextPlannerHint({ ...base, seen, selectedCount: 1 })).toBe('calendar-details')
     expect(nextPlannerHint({ ...base, seen, selectedCount: 1, hasConflict: true })).toBe('clash')
@@ -45,14 +45,14 @@ describe('nextPlannerHint', () => {
   })
 
   test('course tips wait while the semester on screen has none of the plan\'s courses', () => {
-    const seen = new Set(['add-course', 'clash', 'calendar-details', 'set-targets', 'requirements'])
+    const seen = new Set(['add-course', 'shortlist', 'clash', 'calendar-details', 'set-targets', 'requirements'])
     // Courses only in Fall while Spring is shown: the calendar is empty, so nothing to point at.
     expect(nextPlannerHint({ ...base, seen, selectedCount: 2, shownCount: 0 })).toBe(null)
     expect(nextPlannerHint({ ...base, seen, selectedCount: 2, shownCount: 1 })).toBe('your-plan')
   })
 
   test('computer order: calendar, set targets, requirements, your plan, plans menu, compare, term switch', () => {
-    const seen = new Set(['add-course', 'clash'])
+    const seen = new Set(['add-course', 'shortlist', 'clash'])
     const order = []
     for (;;) {
       const id = nextPlannerHint({ ...base, seen, selectedCount: 1 })
@@ -72,18 +72,38 @@ describe('nextPlannerHint', () => {
   })
 
   test('computer: a saved plan does not hold back the later tips', () => {
-    const seen = new Set(['add-course', 'clash', 'calendar-details', 'set-targets', 'requirements', 'your-plan'])
+    const seen = new Set(['add-course', 'shortlist', 'clash', 'calendar-details', 'set-targets', 'requirements', 'your-plan'])
     expect(nextPlannerHint({ ...base, seen, selectedCount: 1, hasPlan: true })).toBe('plans-menu')
   })
 
   test('phone: no computer-only tips; save tip needs 3 courses and no saved plan', () => {
-    const seen = new Set(['phone-courses', 'add-course', 'clash', 'calendar-details', 'set-targets', 'requirements'])
+    const seen = new Set(['phone-courses', 'add-course', 'shortlist', 'clash', 'calendar-details', 'set-targets', 'requirements'])
     const phone = { ...base, seen, phone: true }
     expect(nextPlannerHint({ ...phone, selectedCount: 2 })).toBe(null)
     expect(nextPlannerHint({ ...phone, selectedCount: 3 })).toBe('save-plan')
     expect(nextPlannerHint({ ...phone, selectedCount: 3, hasPlan: true })).toBe(null)
     seen.add('save-plan')
     expect(nextPlannerHint({ ...phone, selectedCount: 3 })).toBe(null)
+  })
+
+  test('shortlist tip comes right after add-course, once a course is open', () => {
+    const seen = new Set(['add-course'])
+    expect(nextPlannerHint({ ...base, seen, selectedCount: 1, detailsOpen: true })).toBe('shortlist')
+    const phoneSeen = new Set(['phone-courses', 'add-course'])
+    expect(
+      nextPlannerHint({ ...base, seen: phoneSeen, selectedCount: 1, detailsOpen: true, phone: true }),
+    ).toBe('shortlist')
+  })
+
+  test('shortlist tip holds back later tips until a course is open', () => {
+    const seen = new Set(['add-course'])
+    expect(nextPlannerHint({ ...base, seen, selectedCount: 1, detailsOpen: false })).toBe(null)
+  })
+
+  test('students who saw every other tip still get the shortlist tip once', () => {
+    const seen = new Set(PLANNER_HINTS.filter((id) => id !== 'shortlist'))
+    expect(nextPlannerHint({ ...base, seen, selectedCount: 3, detailsOpen: true })).toBe('shortlist')
+    expect(nextPlannerHint({ ...base, seen, selectedCount: 3, detailsOpen: false })).toBe(null)
   })
 
   test('nothing once every tip is seen', () => {

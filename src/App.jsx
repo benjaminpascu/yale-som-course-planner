@@ -85,6 +85,9 @@ function App() {
   const [selectedIds, setSelectedIds] = useState(() => new Set())
   // Starred course sections, one list per semester, shared by all plans.
   const [shortlistStore, setShortlistStore] = useState(() => loadShortlistStore())
+  // Whether a course's details are open in each course list (the star tip waits for it).
+  const [desktopDetailsOpen, setDesktopDetailsOpen] = useState(false)
+  const [phoneDetailsOpen, setPhoneDetailsOpen] = useState(false)
   const [mobileTab, setMobileTab] = useState('calendar')
   const [view, setView] = useState('planner')
   // /updates is its own page; the planner stays loaded (hidden) underneath so nothing resets.
@@ -224,8 +227,11 @@ function App() {
     [shortlistStore, activeTermCode],
   )
   const toggleShortlist = useCallback(
-    (courseId) => setShortlistStore((store) => toggleShortlisted(store, activeTermCode, courseId)),
-    [activeTermCode],
+    (courseId) => {
+      setShortlistStore((store) => toggleShortlisted(store, activeTermCode, courseId))
+      markHintSeen('shortlist') // Starring is what that tip asks for.
+    },
+    [activeTermCode, markHintSeen],
   )
 
   const schools = useMemo(() => pickerSchools(courses, activeTermCode), [courses, activeTermCode])
@@ -294,14 +300,14 @@ function App() {
       (c) => c.termCode === activeTermCode && conflictIds.has(c.courseId) && !selectedIds.has(c.courseId),
     ),
   }
-  const desktopHint = nextPlannerHint({ ...hintState, phone: false })
-  const phoneHint = nextPlannerHint({ ...hintState, phone: true })
+  const desktopHint = nextPlannerHint({ ...hintState, phone: false, detailsOpen: desktopDetailsOpen })
+  const phoneHint = nextPlannerHint({ ...hintState, phone: true, detailsOpen: phoneDetailsOpen })
   // The tip actually on screen: each waits until the spot it points at is showing.
   const desktopTip = view === 'planner' && !planSlots ? desktopHint : null
   const phoneTip = (() => {
     if (computerNoticeOpen) return null // Phone tips wait until the "Best on a computer" note is closed.
     if (phoneHint === 'phone-courses') return ['catalog', 'compare'].includes(mobileTab) ? null : phoneHint
-    if (phoneHint === 'add-course' || phoneHint === 'clash') return mobileTab === 'catalog' ? phoneHint : null
+    if (['add-course', 'shortlist', 'clash'].includes(phoneHint)) return mobileTab === 'catalog' ? phoneHint : null
     if (['calendar-details', 'requirements', 'set-targets'].includes(phoneHint)) {
       return mobileTab === 'calendar' ? phoneHint : null
     }
@@ -721,7 +727,7 @@ function App() {
       >
         <aside
           className={`flex min-h-0 flex-col overflow-hidden border-r-2 border-yale-600 ${
-            desktopTip === 'add-course' || desktopTip === 'clash' ? SPOTLIGHT : ''
+            ['add-course', 'shortlist', 'clash'].includes(desktopTip) ? SPOTLIGHT : ''
           }`}
         >
           <CourseBrowser
@@ -732,6 +738,7 @@ function App() {
             onToggleCourse={toggleCourse}
             shortlistIds={shortlistIds}
             onToggleShortlist={toggleShortlist}
+            onDetailsOpenChange={setDesktopDetailsOpen}
             fallYear={fallYear}
             springYear={springYear}
             termCode={activeTermCode}
@@ -803,7 +810,7 @@ function App() {
             />
           )}
         </section>
-        {desktopTip === 'add-course' || desktopTip === 'clash' ? (
+        {['add-course', 'shortlist', 'clash'].includes(desktopTip) ? (
           <HintBubble
             arrow="left"
             className="absolute top-24 left-[23rem]"
@@ -813,6 +820,8 @@ function App() {
               <>
                 Click a course to see its details, then <b>Add to Plan</b> to put it in your plan
               </>
+            ) : desktopTip === 'shortlist' ? (
+              <ShortlistTipText />
             ) : (
               <>
                 <b>Conflict</b> means the course overlaps in time with a course already in your plan
@@ -824,7 +833,7 @@ function App() {
 
       <div
         className={`${mobileTab === 'compare' ? 'hidden' : 'flex'} min-h-0 flex-1 flex-col overflow-hidden bg-white pb-[calc(3rem+env(safe-area-inset-bottom))] lg:hidden ${
-          phoneTip === 'add-course' || phoneTip === 'clash' ? SPOTLIGHT : ''
+          ['add-course', 'shortlist', 'clash'].includes(phoneTip) ? SPOTLIGHT : ''
         }`}
       >
         {mobileTab === 'calendar' ? (
@@ -844,6 +853,7 @@ function App() {
             onToggleCourse={toggleCourse}
             shortlistIds={shortlistIds}
             onToggleShortlist={toggleShortlist}
+            onDetailsOpenChange={setPhoneDetailsOpen}
             fallYear={fallYear}
             springYear={springYear}
             termCode={activeTermCode}
@@ -892,7 +902,7 @@ function App() {
           Tap <b>Courses</b> to add courses
         </HintBubble>
       ) : null}
-      {phoneTip === 'add-course' || phoneTip === 'clash' ? (
+      {['add-course', 'shortlist', 'clash'].includes(phoneTip) ? (
         <HintBubble
           className="fixed bottom-[calc(3.75rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 lg:hidden"
           onDismiss={() => markHintSeen(phoneTip)}
@@ -901,6 +911,8 @@ function App() {
             <>
               Tap a course to see its details, then <b>Add to Plan</b> to put it in your plan
             </>
+          ) : phoneTip === 'shortlist' ? (
+            <ShortlistTipText />
           ) : (
             <>
               <b>Conflict</b> means the course overlaps in time with a course already in your plan
@@ -928,3 +940,13 @@ function App() {
 }
 
 export default App
+
+/** Shortlist tip: why to star, and where starred courses are. */
+function ShortlistTipText() {
+  return (
+    <>
+      <b>Star</b> courses you&apos;re interested in, so you can always come back to them later. Click{' '}
+      <b>★</b> next to the search to see only your starred courses.
+    </>
+  )
+}

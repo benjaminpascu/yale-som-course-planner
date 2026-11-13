@@ -143,6 +143,8 @@ export default function CourseBrowser({
   somFilters = true,
   shortlistIds = NO_IDS,
   onToggleShortlist,
+  // Tells the tips whether a course's details (and its star button) are open.
+  onDetailsOpenChange,
 }) {
   const [filters, setFilters] = useState(createEmptyFilters)
   // ★ next to the search: only starred courses. Not part of Filters (Clear leaves it on).
@@ -150,6 +152,11 @@ export default function CourseBrowser({
   const [page, setPage] = useState(1)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [expandedCourseId, setExpandedCourseId] = useState(null)
+  const detailsOpen = expandedCourseId != null
+  useEffect(() => {
+    onDetailsOpenChange?.(detailsOpen)
+  }, [detailsOpen, onDetailsOpenChange])
+  useEffect(() => () => onDetailsOpenChange?.(false), [onDetailsOpenChange])
 
   const termCourses = useMemo(
     () =>
