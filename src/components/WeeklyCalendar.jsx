@@ -460,6 +460,48 @@ export default function WeeklyCalendar({
     />
   ) : null
 
+  // Computer, no courses this semester: same open/close header as a full
+  // calendar (so it collapses properly when Your Plan opens), with a hint below.
+  if (!hasSelection && !fillViewport) {
+    return (
+      <section
+        id="weekly-calendar"
+        className={`flex flex-col border-b ${className} ${calendarTone.section} ${
+          expanded ? 'min-h-44 shrink-0 lg:min-h-0 lg:flex-1 lg:overflow-hidden' : 'shrink-0'
+        }`}
+        aria-label="Weekly schedule"
+      >
+        <div className={`flex items-center justify-between gap-2 border-b px-4 py-2.5 ${calendarTone.header}`}>
+          {collapsible ? (
+            <button
+              type="button"
+              onClick={onToggle}
+              aria-expanded={expanded}
+              className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-left"
+            >
+              <CollapseChevron open={expanded} />
+              <div className="min-w-0 flex-1">
+                <h2 className="text-sm font-semibold text-yale-950">Weekly Calendar</h2>
+                <p className="mt-0.5 text-xs leading-snug text-yale-700">No courses yet</p>
+              </div>
+            </button>
+          ) : (
+            <div className="min-w-0 flex-1">
+              <h2 className="text-sm font-semibold text-yale-950">Weekly Calendar</h2>
+              <p className="mt-0.5 text-xs leading-snug text-yale-700">No courses yet</p>
+            </div>
+          )}
+          {headerAction}
+        </div>
+        {expanded ? (
+          <p className="flex flex-1 items-center justify-center px-4 py-10 text-center text-sm text-gray-500">
+            ← Add courses from the list on the left
+          </p>
+        ) : null}
+      </section>
+    )
+  }
+
   if (!hasSelection) {
     return (
       <section
