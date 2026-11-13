@@ -70,8 +70,8 @@ export default function CourseRow({
         onClick={onExpandToggle}
         aria-expanded={isExpanded}
         className={`relative grid w-full items-start gap-x-1.5 px-3 py-2 text-left transition-colors ${
-          // Open course: no time line under the title, so the squares get their own line.
-          biddingRounds && isExpanded ? 'pb-6' : ''
+          // Open course without a Bid required tag under the title: the squares get their own line.
+          biddingRounds && isExpanded && !showRegistrationTag ? 'pb-6' : ''
         } ${
           showRightRail
             ? 'grid-cols-[auto_minmax(0,1fr)_auto]'
@@ -112,6 +112,12 @@ export default function CourseRow({
                 </>
               )}
             </span>
+          ) : showRegistrationTag ? (
+            // Open course: the time moves into the details, so the Bid required tag takes its line.
+            <RegistrationTag
+              bidOrPermission={course.bidOrPermission}
+              className="mt-1 !px-1 !py-px !text-[10px]"
+            />
           ) : null}
         </span>
         {showRightRail ? (
@@ -184,13 +190,6 @@ export default function CourseRow({
             <FactItem label="Room" value={course.room} />
             <FactItem label="Also listed as" value={course.crossListings?.join(', ')} />
           </div>
-
-          {showRegistrationTag ? (
-            <RegistrationTag
-              bidOrPermission={course.bidOrPermission}
-              className="!px-1 !py-px !text-[10px]"
-            />
-          ) : null}
 
           {course.prerequisites ? (
             <p className="border-t border-gray-200/60 pt-2 text-gray-600">{course.prerequisites}</p>
