@@ -28,7 +28,7 @@ export default function NavBar({
         <h1 className="py-3">
           {/* On the Updates page the logo leads back to the planner. */}
           {onUpdatesPage && onGoHome ? (
-            <button type="button" onClick={onGoHome} aria-label="SOMtimes, back to planner" className="block">
+            <button type="button" onClick={onGoHome} aria-label="SOMtimes, back to planner" className="block cursor-pointer">
               {wordmark}
             </button>
           ) : (
