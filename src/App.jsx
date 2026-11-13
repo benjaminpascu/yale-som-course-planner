@@ -65,6 +65,17 @@ import { UPDATES_PATH, isUpdatesPath } from './lib/updates'
 const RANK_UNLOCKED =
   typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('rank')
 
+/** Bidding history tip (same words on computer and phone, except Hover over / Tap). */
+function BiddingTipText({ action }) {
+  return (
+    <>
+      The small squares on a course are its <b>Bidding History</b>: points needed in Round 1 and 2
+      of the last two years. White means basically free; orange, red and dark red mean 50, 100 and
+      150+ points. {action} them for the exact numbers.
+    </>
+  )
+}
+
 function App() {
   const [somCourses, setSomCourses] = useState([])
   // Courses from the rest of Yale load in the background after SOM's.
@@ -283,7 +294,7 @@ function App() {
   const phoneTip = (() => {
     if (computerNoticeOpen) return null // Phone tips wait until the "Best on a computer" note is closed.
     if (phoneHint === 'phone-courses') return ['catalog', 'compare'].includes(mobileTab) ? null : phoneHint
-    if (phoneHint === 'add-course' || phoneHint === 'clash') return mobileTab === 'catalog' ? phoneHint : null
+    if (['add-course', 'bidding', 'clash'].includes(phoneHint)) return mobileTab === 'catalog' ? phoneHint : null
     if (['calendar-details', 'requirements', 'set-targets'].includes(phoneHint)) {
       return mobileTab === 'calendar' ? phoneHint : null
     }
@@ -703,7 +714,7 @@ function App() {
       >
         <aside
           className={`flex min-h-0 flex-col overflow-hidden border-r-2 border-yale-600 ${
-            desktopTip === 'add-course' || desktopTip === 'clash' ? SPOTLIGHT : ''
+            ['add-course', 'bidding', 'clash'].includes(desktopTip) ? SPOTLIGHT : ''
           }`}
         >
           <CourseBrowser
@@ -783,7 +794,7 @@ function App() {
             />
           )}
         </section>
-        {desktopTip === 'add-course' || desktopTip === 'clash' ? (
+        {['add-course', 'bidding', 'clash'].includes(desktopTip) ? (
           <HintBubble
             arrow="left"
             className="absolute top-24 left-[23rem]"
@@ -793,6 +804,8 @@ function App() {
               <>
                 Click a course to see its details, then <b>Add to Plan</b> to put it in your plan
               </>
+            ) : desktopTip === 'bidding' ? (
+              <BiddingTipText action="Hover over" />
             ) : (
               <>
                 <b>Conflict</b> means the course overlaps in time with a course already in your plan
@@ -804,7 +817,7 @@ function App() {
 
       <div
         className={`${mobileTab === 'compare' ? 'hidden' : 'flex'} min-h-0 flex-1 flex-col overflow-hidden bg-white pb-[calc(3rem+env(safe-area-inset-bottom))] lg:hidden ${
-          phoneTip === 'add-course' || phoneTip === 'clash' ? SPOTLIGHT : ''
+          ['add-course', 'bidding', 'clash'].includes(phoneTip) ? SPOTLIGHT : ''
         }`}
       >
         {mobileTab === 'calendar' ? (
@@ -870,7 +883,7 @@ function App() {
           Tap <b>Courses</b> to add courses
         </HintBubble>
       ) : null}
-      {phoneTip === 'add-course' || phoneTip === 'clash' ? (
+      {['add-course', 'bidding', 'clash'].includes(phoneTip) ? (
         <HintBubble
           className="fixed bottom-[calc(3.75rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 lg:hidden"
           onDismiss={() => markHintSeen(phoneTip)}
@@ -879,6 +892,8 @@ function App() {
             <>
               Tap a course to see its details, then <b>Add to Plan</b> to put it in your plan
             </>
+          ) : phoneTip === 'bidding' ? (
+            <BiddingTipText action="Tap" />
           ) : (
             <>
               <b>Conflict</b> means the course overlaps in time with a course already in your plan

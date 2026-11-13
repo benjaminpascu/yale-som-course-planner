@@ -1,0 +1,102 @@
+# Keeps the bidding history (past clearing prices) in sync with SOM's public
+# Auction-Bidding-History.xlsx. Once a month:
+#   - looks for a newer upload, downloads the file, and commits any changes;
+#   - if the saved link is broken, opens an issue for the repo owner and fails
+#     (GitHub emails failed runs), so the new link can be pasted in;
+#   - if a semester has started but SOM hasn't posted its results, opens one
+#     issue for that semester.
+# Run it by hand from the GitHub "Actions" tab → "Update bidding history".
+# Full notes: docs/updating-course-data.md
+name: Update bidding history
+
+on:
+  schedule:
+    - cron: '41 14 1 * *' # 1st of each month, 14:41 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write # commit the updated bidding file
+  issues: write # tell the owner when the link breaks or a semester is missing
+  actions: write # keep this schedule from being paused (see the last step)
+
+concurrency:
+  group: update-bidding-history
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Download bidding history
+        run: npm run update-bidding-history -- --status-file "$RUNNER_TEMP/status.json"
+
+      - name: Read status
+        id: status
+        run: |
+          echo "changed=$(jq -r .changed "$RUNNER_TEMP/status.json")" >> "$GITHUB_OUTPUT"
+          echo "broken=$(jq -r .brokenLink "$RUNNER_TEMP/status.json")" >> "$GITHUB_OUTPUT"
+          echo "missing=$(jq -r '.missingTerm // ""' "$RUNNER_TEMP/status.json")" >> "$GITHUB_OUTPUT"
+          echo "url=$(jq -r .url "$RUNNER_TEMP/status.json")" >> "$GITHUB_OUTPUT"
+
+      # Never publish data that breaks the tests or the build.
+      - name: Test and build
+        if: steps.status.outputs.changed == 'true'
+        run: |
+          npm test
+          npm run build
+
+      - name: Commit and push
+        if: steps.status.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data-samples/bidding_history.csv docs/data-samples/bidding_history_source.json
+          git commit -m "chore(bidding): update bidding history from SOM"
+          git push
+
+      - name: Ask for a new link
+        if: steps.status.outputs.broken == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OWNER: ${{ github.repository_owner }}
+          URL: ${{ steps.status.outputs.url }}
+        run: |
+          title="Bidding history link is broken: paste the new one"
+          if [ -z "$(gh issue list --state open --search "\"$title\" in:title" --json number --jq '.[].number')" ]; then
+            gh issue create --title "$title" --assignee "$OWNER" --body "@$OWNER the saved bidding history link no longer downloads:
+          $URL
+
+          SOM probably posted a new file. Open https://som.yale.edu/myportal/course-bidding-and-enrollment-history, right-click the bidding history download → Copy Link Address, and paste it into \`docs/data-samples/bidding_history_source.json\` (or give it to an agent). The site keeps showing the last data until then."
+          fi
+          echo "::error::The bidding history link is broken. See the issue that was opened."
+          exit 1
+
+      - name: Note a missing semester
+        if: steps.status.outputs.missing != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OWNER: ${{ github.repository_owner }}
+          TERM_NAME: ${{ steps.status.outputs.missing }}
+        run: |
+          title="SOM hasn't posted $TERM_NAME bidding results yet"
+          if [ -z "$(gh issue list --state all --search "\"$title\" in:title" --json number --jq '.[].number')" ]; then
+            gh issue create --title "$title" --assignee "$OWNER" --body "@$OWNER the bidding history file has no $TERM_NAME tab yet, although that semester has started. If SOM has posted a new file, its link may have changed: check https://som.yale.edu/myportal/course-bidding-and-enrollment-history and paste the new link into \`docs/data-samples/bidding_history_source.json\`. Otherwise, close this issue; it won't come back for $TERM_NAME."
+          fi
+
+      # GitHub pauses scheduled jobs in public repos after 60 days without
+      # activity. Re-enabling the workflow resets that clock.
+      - name: Keep the schedule alive
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/update-bidding-history.yml/enable"

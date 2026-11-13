@@ -10,6 +10,13 @@
  */
 export const UPDATES = [
   {
+    version: '1.2.0',
+    date: '2026-11-13',
+    changes: [
+      'Bidding history: courses in the Course Catalog now show four small squares in the bottom right, one for each of the last two years\' Round 1 and Round 2. White means it was basically free (under 50 points); orange, red and dark red mean it took 50, 100 or 150+ points; gray means no data. Hover over the squares to see the exact points; they also show when you hover a course on your Weekly Calendar or in Your Plan.',
+    ],
+  },
+  {
     version: '1.1.1',
     date: '2026-11-13',
     changes: [

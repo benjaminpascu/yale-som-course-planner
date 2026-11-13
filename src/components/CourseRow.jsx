@@ -12,6 +12,7 @@ import {
 } from '../lib/parseCourses'
 import { isSomCourse } from '../lib/schools'
 import { formatSessionLabel } from '../lib/sessionDisplay'
+import BiddingHistory, { useBiddingRounds } from './BiddingHistory'
 import CollapseChevron from './CollapseChevron'
 import RegistrationTag from './RegistrationTag'
 import NoDescription from './NoDescription'
@@ -40,6 +41,14 @@ export default function CourseRow({
     Boolean(course.bidOrPermission) &&
     normalizeBidType(course.bidOrPermission) !== 'core'
 
+  const biddingRounds = useBiddingRounds(course)
+  // Open bid course with no past results: "No bidding history" where the squares would be.
+  const showNoBiddingHistory =
+    biddingRounds === null &&
+    isExpanded &&
+    isSomCourse(course) &&
+    normalizeBidType(course.bidOrPermission) === 'bid'
+
   const showRightRail =
     requirementTagCodes.length > 0 ||
     isSelected ||
@@ -66,7 +75,7 @@ export default function CourseRow({
         type="button"
         onClick={onExpandToggle}
         aria-expanded={isExpanded}
-        className={`grid w-full items-start gap-x-1.5 px-3 py-2 text-left transition-colors ${
+        className={`relative grid w-full items-start gap-x-1.5 px-3 py-2 text-left transition-colors ${
           showRightRail
             ? 'grid-cols-[auto_minmax(0,1fr)_auto]'
             : 'grid-cols-[auto_minmax(0,1fr)]'
@@ -84,7 +93,12 @@ export default function CourseRow({
             {formatCourseHeading(course)}
           </span>
           {!isExpanded ? (
-            <span className="mt-0.5 block truncate text-[11px] leading-snug">
+            <span
+              className={`mt-0.5 block truncate text-[11px] leading-snug ${
+                // Room for the squares pinned at the end of this line.
+                biddingRounds ? (showRightRail ? 'pr-5' : 'pr-14') : ''
+              }`}
+            >
               {hasMeetingTime(course) ? (
                 <span className="text-gray-500">
                   {formatSessionLabel(course.session)} ·{' '}
@@ -101,10 +115,26 @@ export default function CourseRow({
                 </>
               )}
             </span>
-          ) : null}
+          ) : (
+            // Open course: the time moves into the details. Its line stays (exactly as tall)
+            // so the row doesn't change height, and holds the Bid required tag if any.
+            <span className="mt-0.5 flex h-[1.375em] items-center text-[11px]">
+              {showRegistrationTag ? (
+                <RegistrationTag
+                  bidOrPermission={course.bidOrPermission}
+                  className="!px-1 !py-px !text-[10px]"
+                />
+              ) : null}
+            </span>
+          )}
         </span>
         {showRightRail ? (
-          <span className="flex max-w-[9rem] flex-col items-end gap-1 self-stretch sm:max-w-[11rem]">
+          <span
+            className={`flex max-w-[9rem] flex-col items-end gap-1 self-stretch sm:max-w-[11rem] ${
+              // Keep In Plan / Conflict above the squares in the corner.
+              (biddingRounds || showNoBiddingHistory) && (isSelected || hasConflict) ? 'pb-4' : ''
+            }`}
+          >
             {requirementTagCodes.length > 0 ? (
               <span className="flex flex-wrap items-center justify-end gap-1">
                 {requirementTagCodes.map((code) => (
@@ -136,6 +166,15 @@ export default function CourseRow({
             ) : null}
           </span>
         ) : null}
+        {biddingRounds ? (
+          // Pinned in the bottom-right corner, on the time line, so it doesn't
+          // take width from the title.
+          <BiddingHistory rounds={biddingRounds} className="absolute right-3 bottom-[11px]" />
+        ) : showNoBiddingHistory ? (
+          <span className="absolute right-3 bottom-[9px] text-[10px] leading-tight text-gray-400">
+            No bidding history
+          </span>
+        ) : null}
       </button>
 
       {isExpanded ? (
@@ -159,16 +198,10 @@ export default function CourseRow({
             />
             <FactItem label="Category" value={categoryLabel} />
             <FactItem label="Units" value={isSomCourse(course) ? formatCourseUnits(course.units) : null} />
+            <FactItem label="Section" value={course.section} />
             <FactItem label="Room" value={course.room} />
             <FactItem label="Also listed as" value={course.crossListings?.join(', ')} />
           </div>
-
-          {showRegistrationTag ? (
-            <RegistrationTag
-              bidOrPermission={course.bidOrPermission}
-              className="!px-1 !py-px !text-[10px]"
-            />
-          ) : null}
 
           {course.prerequisites ? (
             <p className="border-t border-gray-200/60 pt-2 text-gray-600">{course.prerequisites}</p>
