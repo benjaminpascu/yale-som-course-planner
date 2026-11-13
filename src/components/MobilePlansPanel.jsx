@@ -60,7 +60,6 @@ export default function MobilePlansPanel({
         collapsible={false}
         expanded
         planEmptyHint="Name a plan above, then add courses from the Courses tab."
-        catalogSelectHint="the Courses tab"
         onRemoveCourse={onRemoveCourse}
         onClearPlan={onClearPlan}
       />

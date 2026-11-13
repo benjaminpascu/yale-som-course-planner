@@ -34,7 +34,6 @@ export default function PlanPanel({
   expanded,
   onToggle,
   planEmptyHint = 'Pick or save a plan in the Plan menu',
-  catalogSelectHint = 'the catalog on the left',
   onRemoveCourse,
   onClearPlan,
   // Compare plans: one full-width "Your plan" bar ('header') above each plan's list ('body').
@@ -136,9 +135,7 @@ export default function PlanPanel({
                   : 'py-6 pl-5 pr-4 text-sm sm:pl-6'
               }`}
             >
-              No courses in your plan yet. Select courses from {catalogSelectHint}{' '}
-              — they appear here and on the calendar when they have a weekly
-              time.
+              No courses yet
             </p>
           ) : (
             <>
