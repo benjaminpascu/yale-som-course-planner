@@ -76,9 +76,6 @@ export default function CourseRow({
         onClick={onExpandToggle}
         aria-expanded={isExpanded}
         className={`relative grid w-full items-start gap-x-1.5 px-3 py-2 text-left transition-colors ${
-          // Open course without a Bid required tag under the title: the squares get their own line.
-          biddingRounds && isExpanded && !showRegistrationTag ? 'pb-6' : ''
-        } ${
           showRightRail
             ? 'grid-cols-[auto_minmax(0,1fr)_auto]'
             : 'grid-cols-[auto_minmax(0,1fr)]'
@@ -118,13 +115,18 @@ export default function CourseRow({
                 </>
               )}
             </span>
-          ) : showRegistrationTag ? (
-            // Open course: the time moves into the details, so the Bid required tag takes its line.
-            <RegistrationTag
-              bidOrPermission={course.bidOrPermission}
-              className="mt-1 !px-1 !py-px !text-[10px]"
-            />
-          ) : null}
+          ) : (
+            // Open course: the time moves into the details. Its line stays (exactly as tall)
+            // so the row doesn't change height, and holds the Bid required tag if any.
+            <span className="mt-0.5 flex h-[1.375em] items-center text-[11px]">
+              {showRegistrationTag ? (
+                <RegistrationTag
+                  bidOrPermission={course.bidOrPermission}
+                  className="!px-1 !py-px !text-[10px]"
+                />
+              ) : null}
+            </span>
+          )}
         </span>
         {showRightRail ? (
           <span
