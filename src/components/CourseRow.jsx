@@ -180,6 +180,7 @@ export default function CourseRow({
             />
             <FactItem label="Category" value={categoryLabel} />
             <FactItem label="Units" value={isSomCourse(course) ? formatCourseUnits(course.units) : null} />
+            <FactItem label="Section" value={course.section} />
             <FactItem label="Room" value={course.room} />
             <FactItem label="Also listed as" value={course.crossListings?.join(', ')} />
           </div>
