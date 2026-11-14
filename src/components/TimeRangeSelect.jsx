@@ -1,7 +1,10 @@
 import { TIME_PICKER_OPTIONS } from '../lib/courseDisplay'
+import Dropdown from './Dropdown'
 
-const selectClassName =
-  'mt-0.5 w-full max-w-40 rounded-md border border-yale-200 bg-yale-50/80 px-2 py-2 text-sm focus:border-yale-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-yale-800'
+const TIME_OPTIONS = [{ value: '', label: 'Any' }, ...TIME_PICKER_OPTIONS]
+
+const buttonClassName =
+  'rounded-md border border-yale-200 bg-yale-50/80 py-2 pl-2 text-sm hover:bg-yale-50 focus:border-yale-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-yale-800'
 
 export default function TimeRangeSelect({
   timeFrom,
@@ -14,45 +17,34 @@ export default function TimeRangeSelect({
       <legend className="text-xs font-semibold uppercase tracking-wide text-gray-500">
         Time range
       </legend>
-      <p className="text-xs text-gray-500">
-        Pick begin and/or end. Timed courses only.
-      </p>
       <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
         <div>
           <label htmlFor="time-from" className="text-xs text-gray-600">
             Begin
           </label>
-          <select
+          <Dropdown
             id="time-from"
+            options={TIME_OPTIONS}
             value={timeFrom}
-            onChange={(e) => onTimeFromChange(e.target.value)}
-            className={selectClassName}
-          >
-            <option value="">Any</option>
-            {TIME_PICKER_OPTIONS.map((opt) => (
-              <option key={`from-${opt.value}`} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+            onChange={onTimeFromChange}
+            className="mt-0.5 w-40"
+            buttonClassName={buttonClassName}
+            listClassName="max-h-60"
+          />
         </div>
         <div>
           <label htmlFor="time-to" className="text-xs text-gray-600">
             End
           </label>
-          <select
+          <Dropdown
             id="time-to"
+            options={TIME_OPTIONS}
             value={timeTo}
-            onChange={(e) => onTimeToChange(e.target.value)}
-            className={selectClassName}
-          >
-            <option value="">Any</option>
-            {TIME_PICKER_OPTIONS.map((opt) => (
-              <option key={`to-${opt.value}`} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+            onChange={onTimeToChange}
+            className="mt-0.5 w-40"
+            buttonClassName={buttonClassName}
+            listClassName="max-h-60"
+          />
         </div>
       </div>
     </fieldset>
