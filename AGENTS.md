@@ -127,6 +127,7 @@ No database or environment variables. Course data is the CSVs in `docs/data-samp
 | Compare Courses UI | `src/components/compare/` (`CompareView`, `ShortlistStep`, `ScoreStep`, `RatingInput`, `WeightInput`) — visual spec in `docs/design/compare/` |
 | Compare Plans (two plans side by side) | `src/lib/comparePlans.js`, `src/components/ComparePlansView.jsx`; state in `App.jsx` |
 | Header (nav bar + mode sub bar) | `src/components/NavBar.jsx`, `src/components/SubBar.jsx` |
+| Amber heads-up flag (⚠ + small text, e.g. Unsaved, Non-SOM units note); reuse for new flags | `src/components/CautionFlag.jsx` |
 | Shortlist (stars per semester; ★ button next to search; star button in course details; tip `shortlist`) | `src/lib/shortlistStorage.js`, state in `App.jsx`, `CourseBrowser.jsx` (★ button, filter), `CourseRow.jsx` (star button) |
 | Your Plan shows the semester on screen; Clear all clears only that semester | `src/lib/planSemester.js`, `PlanPanel.jsx`; popup beside the row: `besidePlacement` in `src/lib/portaledTooltip.js` |
 | Updates page at `/updates` (patch notes + site version; new-update dot) | `src/lib/updates.js`, `src/components/UpdatesPage.jsx`, `UpdatesButton.jsx`; routing in `App.jsx`; `/updates` served by `vercel.json` |

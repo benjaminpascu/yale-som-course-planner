@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { PLAN_BUTTON_EDITING, SAVE_BUTTON } from '../lib/sectionTheme'
 import { downloadPlanExport, parsePlanImport } from '../lib/planTransfer'
 import SavedPlansPanel from './SavedPlansPanel'
+import CautionFlag from './CautionFlag'
 
 export default function PlansMenu({
   plans,
@@ -125,7 +126,7 @@ export default function PlansMenu({
     <div ref={rootRef} className="relative flex shrink-0">
       <div className="flex flex-wrap items-center gap-2">
         {isDirty ? (
-          <span className="shrink-0 text-sm font-medium text-caution">unsaved</span>
+          <CautionFlag>Unsaved</CautionFlag>
         ) : null}
         <button
           type="button"

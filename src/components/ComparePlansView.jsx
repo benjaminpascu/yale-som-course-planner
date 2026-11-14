@@ -3,6 +3,7 @@ import { PLAN_BUTTON_EDITING, PLAN_BUTTON_OTHER, SAVE_BUTTON } from '../lib/sect
 import PlanPanel from './PlanPanel'
 import TagUnitTracker from './TagUnitTracker'
 import WeeklyCalendar from './WeeklyCalendar'
+import CautionFlag from './CautionFlag'
 
 const CONTROLS = 'button, a, input, select, textarea, label, [role="button"]'
 
@@ -75,7 +76,7 @@ export default function ComparePlansView({
     return (
       <div className="flex items-center gap-2">
         {side === editSide && isDirty ? (
-          <span className="shrink-0 text-sm font-medium text-caution">unsaved</span>
+          <CautionFlag>Unsaved</CautionFlag>
         ) : null}
         {/* Looks like the "Plan:" button; an invisible menu on top keeps the ▾ right after the name. */}
         <label
