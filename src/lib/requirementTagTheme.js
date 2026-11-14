@@ -6,6 +6,7 @@
 const TAG_COLOR_OVERRIDES = {
   STEM: { bg: '#001a33', fg: '#ffffff' }, // dark navy
   'GBS Req': { bg: '#b3d4f5', fg: '#00356b' }, // light blue
+  Leadership: { bg: '#facc15', fg: '#422006' }, // yellow
 }
 
 /**
