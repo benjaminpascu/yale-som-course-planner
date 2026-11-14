@@ -256,7 +256,28 @@ export function createEmptyFilters() {
     categories: new Set(),
     tagCodes: new Set(),
     subjects: new Set(),
+    // Filters → Conflicts: 'only' or 'hide' (one at a time), checked against the open plan.
+    conflicts: new Set(),
   }
+}
+
+/**
+ * Filters → Conflicts. 'only' keeps courses that conflict with the plan,
+ * 'hide' keeps the ones that still fit. Courses already in the plan stay either way.
+ *
+ * @template {{ courseId: string }} T
+ * @param {T[]} courses
+ * @param {Set<string>} mode
+ * @param {Set<string>} conflictingIds
+ * @param {Set<string>} selectedIds
+ * @returns {T[]}
+ */
+export function filterByConflicts(courses, mode, conflictingIds, selectedIds) {
+  if (mode.has('only')) {
+    return courses.filter((c) => conflictingIds.has(c.courseId) || selectedIds.has(c.courseId))
+  }
+  if (mode.has('hide')) return courses.filter((c) => !conflictingIds.has(c.courseId))
+  return courses
 }
 
 /** @param {ReturnType<typeof createEmptyFilters>} filters */
@@ -271,6 +292,7 @@ export function hasActiveFilters(filters) {
     filters.bidTypes.size > 0 ||
     filters.categories.size > 0 ||
     filters.tagCodes.size > 0 ||
-    (filters.subjects?.size ?? 0) > 0
+    (filters.subjects?.size ?? 0) > 0 ||
+    (filters.conflicts?.size ?? 0) > 0
   )
 }

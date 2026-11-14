@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   createEmptyFilters,
+  filterByConflicts,
   filterCourses,
   getTimeRangeError,
   hasActiveFilters,
@@ -82,6 +83,9 @@ function CatalogSearchBar({
   onSearchChange,
   onOpenFilters,
   panelFilterCount,
+  shortlistCount = 0,
+  onlyShortlisted = false,
+  onToggleShortlisted,
   inputId = 'course-search',
 }) {
   return (
@@ -97,6 +101,21 @@ function CatalogSearchBar({
         onChange={(e) => onSearchChange(e.target.value)}
         className="min-w-0 flex-1 rounded-md border border-yale-200 bg-yale-50/80 px-2.5 py-1.5 text-xs text-yale-950 focus:border-yale-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-yale-800"
       />
+      {/* One click to your starred courses (this school and semester), one click back. */}
+      <button
+        type="button"
+        onClick={onToggleShortlisted}
+        aria-pressed={onlyShortlisted}
+        aria-label="Show only Shortlisted courses"
+        className={`shrink-0 rounded-md border px-2.5 py-1.5 text-xs font-medium shadow-sm ${
+          onlyShortlisted
+            ? 'border-short-700 bg-short-600 text-white hover:bg-short-700'
+            : 'border-yale-200 bg-white text-short-700 hover:bg-yale-50'
+        }`}
+      >
+        ★
+        {shortlistCount > 0 ? <span className="ml-1 tabular-nums">{shortlistCount}</span> : null}
+      </button>
       <button
         type="button"
         onClick={onOpenFilters}
@@ -111,6 +130,8 @@ function CatalogSearchBar({
   )
 }
 
+const NO_IDS = new Set()
+
 export default function CourseBrowser({
   courses,
   selectedIds,
@@ -121,11 +142,22 @@ export default function CourseBrowser({
   termCode = null,
   fullHeight = false,
   somFilters = true,
+  shortlistIds = NO_IDS,
+  onToggleShortlist,
+  // Tells the tips whether a course's details (and its star button) are open.
+  onDetailsOpenChange,
 }) {
   const [filters, setFilters] = useState(createEmptyFilters)
+  // ★ next to the search: only starred courses. Not part of Filters (Clear leaves it on).
+  const [onlyShortlisted, setOnlyShortlisted] = useState(false)
   const [page, setPage] = useState(1)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [expandedCourseId, setExpandedCourseId] = useState(null)
+  const detailsOpen = expandedCourseId != null
+  useEffect(() => {
+    onDetailsOpenChange?.(detailsOpen)
+  }, [detailsOpen, onDetailsOpenChange])
+  useEffect(() => () => onDetailsOpenChange?.(false), [onDetailsOpenChange])
 
   const termCourses = useMemo(
     () =>
@@ -176,17 +208,30 @@ export default function CourseBrowser({
 
   const timeRangeError = useMemo(() => getTimeRangeError(filters), [filters])
 
+  const conflictingIds = useMemo(
+    // The plan can hold other schools' courses, so check against all of them.
+    () => getConflictingCourseIds(courses, selectedIds, selectedCourses),
+    [courses, selectedIds, selectedCourses],
+  )
+
   const filtered = useMemo(() => {
     if (timeRangeError) return []
-    return filterCourses(termCourses, filters)
-  }, [termCourses, filters, timeRangeError])
+    // Filters → Conflicts follows the plan, so the list updates as courses are added or removed.
+    const matches = filterByConflicts(
+      filterCourses(termCourses, filters),
+      filters.conflicts,
+      conflictingIds,
+      selectedIds,
+    )
+    return onlyShortlisted ? matches.filter((c) => shortlistIds.has(c.courseId)) : matches
+  }, [termCourses, filters, timeRangeError, onlyShortlisted, shortlistIds, conflictingIds, selectedIds])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
 
   useEffect(() => {
     setPage(1)
     setExpandedCourseId(null)
-  }, [filters, timeRangeError, termCode])
+  }, [filters, timeRangeError, termCode, onlyShortlisted])
 
   useEffect(() => {
     setExpandedCourseId(null)
@@ -220,14 +265,9 @@ export default function CourseBrowser({
     count += filters.categories.size
     count += filters.tagCodes.size
     count += filters.subjects.size
+    count += filters.conflicts.size
     return count
   }, [filters])
-
-  const conflictingIds = useMemo(
-    // The plan can hold other schools' courses, so check against all of them.
-    () => getConflictingCourseIds(courses, selectedIds, selectedCourses),
-    [courses, selectedIds, selectedCourses],
-  )
 
   function getCourseRowProps(course) {
     return {
@@ -241,13 +281,19 @@ export default function CourseBrowser({
           id === course.courseId ? null : course.courseId,
         ),
       onTogglePlan: () => onToggleCourse(course.courseId),
+      isShortlisted: shortlistIds.has(course.courseId),
+      onToggleShortlist: () => onToggleShortlist?.(course.courseId),
     }
   }
 
   function handleToggle(key, value) {
     setFilters((prev) => ({
       ...prev,
-      [key]: toggleInSet(prev[key], value),
+      // Conflicts: Only and Hide are opposites, so ticking one unticks the other.
+      [key]:
+        key === 'conflicts'
+          ? new Set(prev.conflicts.has(value) ? [] : [value])
+          : toggleInSet(prev[key], value),
     }))
   }
 
@@ -274,12 +320,25 @@ export default function CourseBrowser({
     hasFilters: panelFiltersActive,
   }
 
+  const shortlistCount = useMemo(
+    () => termCourses.filter((c) => shortlistIds.has(c.courseId)).length,
+    [termCourses, shortlistIds],
+  )
+  // Nothing starred here: say so, so it doesn't look like a filter problem.
+  const emptyMessage =
+    onlyShortlisted && shortlistCount === 0
+      ? 'No shortlisted courses'
+      : 'No courses found. Try expanding your selection criteria.'
+
   const searchBarProps = {
     search: filters.search,
     onSearchChange: (search) =>
       setFilters((prev) => ({ ...prev, search })),
     onOpenFilters: () => setFiltersOpen(true),
     panelFilterCount,
+    shortlistCount,
+    onlyShortlisted,
+    onToggleShortlisted: () => setOnlyShortlisted((on) => !on),
   }
 
   const filterTone = sectionTone('filters')
@@ -315,8 +374,7 @@ export default function CourseBrowser({
                 timeRangeError ? 'text-danger' : 'text-gray-500'
               }`}
             >
-              {timeRangeError ??
-                'No courses found. Try expanding your selection criteria.'}
+              {timeRangeError ?? emptyMessage}
             </p>
           ) : (
             <ul className="divide-y divide-yale-200">
@@ -356,8 +414,7 @@ export default function CourseBrowser({
               timeRangeError ? 'text-danger' : 'text-gray-500'
             }`}
           >
-            {timeRangeError ??
-              'No courses found. Try expanding your selection criteria.'}
+            {timeRangeError ?? emptyMessage}
           </p>
         ) : (
           <>

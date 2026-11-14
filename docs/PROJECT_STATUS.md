@@ -129,6 +129,19 @@ Desktop (`lg+`): unchanged — catalog sidebar + planning stack; **Plans** in he
 - Not yet: **Law School** (reader in `scripts/lib/lawImport.js` needs the request format of Law's public course page); issue #8 (tell Yale's API team about the empty servers).
 - Spec: `docs/specs/cross-registration.md`; plan: `docs/superpowers/plans/2026-11-11-cross-registration.md`.
 
+### Shortlist ✅ (live in 1.2.0, Nov 2026)
+
+- Blue ☆ next to **Add to Plan** in a course's details stars that section; starred rows show a small ★. One shortlist per semester, shared by all plans, saved in the browser (`yale-som-course-planner-shortlist`).
+- **★ button** next to the search (with a count) shows only starred courses of the school and semester on screen; "No shortlisted courses" when there are none. Same in Single plan, Compare plans and on phones.
+- Tutorial tip `shortlist` right after the Add to Plan tip.
+- Your Plan: only the semester on screen (Clear all clears only that semester), flat rows, no "Unsaved changes" line, no year in session headings, hover popup opens beside the row.
+- Live with **1.2.0**. Spec: `docs/specs/shortlist.md`; plan: `docs/specs/shortlist-plan.md`; issue #11.
+
+### Conflicts filter ✅ (live in 1.2.0, Nov 2026)
+
+- **Filters → Conflicts** (under Time range, every school): **Only** lists courses that clash with the plan being edited plus the plan's own courses; **Hide** lists what still fits. One at a time, labeled with the red Conflict badge, live as the plan changes. In Compare plans it follows the edited (green "Plan:") side.
+- `filterByConflicts` in `src/lib/filterCourses.js`, applied in `CourseBrowser.jsx` with the same `getConflictingCourseIds` as the badge. Issue #13.
+
 ### Compare Courses ✅ (live Nov 2026)
 
 > **Hidden for launch (Nov 2026).** The Rank tab only shows when the link ends in `?rank` (e.g. `https://<site>/?rank`), the owner's private link. Everyone else sees Plan only (no Plan/Rank tabs; 3 phone tabs). Saved Rank data in a browser is kept. Switch: `RANK_UNLOCKED` in `src/App.jsx`. Why: most students only need Plan, and Rank needs a redesign first (146 courses to sort incl. EMBA/PhD/core, ignores the plan, own visual style, many tips).
@@ -195,3 +208,7 @@ Course CSVs update themselves every 6 hours (`docs/updating-course-data.md`); fo
 | Nov 2026 | Courses update automatically every 6 hours from Yale SOM's course feed (GitHub job); new semesters added, finished ones hidden; Yale-hidden courses left out; legacy cleanup (Cursor rules, Supabase leftovers, manual import) |
 | Nov 2026 | Version 1.0.1; Updates page at `/updates` with patch notes and version rules |
 | Nov 2026 | Version 1.1.0: courses from across Yale (School picker, Department filter, cross-listings, daily Yale job); Law pending |
+| Nov 2026 | 1.1.1: opens on the upcoming semester. Release branches: features collect on `release/<x.y>` and go live together |
+| Nov 2026 | Shortlist built on `feature/shortlist` → `release/1.2` (1.2.0) |
+| Nov 2026 | 1.1.2: Leadership tag (Yale `MGLD`, yellow). Time range boxes use the School picker's dropdown (`Dropdown.jsx`). Conflicts filter merged into `release/1.2` |
+| Nov 14, 2026 | **1.2.0 live**: Shortlist, Bidding history, Conflicts filter (`release/1.2` → `main`) |

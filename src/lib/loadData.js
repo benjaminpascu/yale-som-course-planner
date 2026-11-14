@@ -35,3 +35,15 @@ export async function loadAppData() {
   const courses = Object.values(termCsvs).flatMap((csv) => parseCoursesCsv(csv))
   return { courses: harmonizeSectionTags(courses) }
 }
+
+/** Past bidding clearing prices (docs/data-samples/bidding_history.csv), loaded on first use. */
+const biddingCsvs = import.meta.glob('../../docs/data-samples/bidding_history.csv', {
+  query: '?raw',
+  import: 'default',
+})
+
+/** @returns {Promise<string>} the CSV text, or '' if the file is missing */
+export async function loadBiddingHistoryCsv() {
+  const [load] = Object.values(biddingCsvs)
+  return load ? load() : ''
+}
