@@ -85,6 +85,7 @@ export default function PlanningPanel({
           showHeaderSummary={false}
           className={tip === 'your-plan' ? 'relative z-[45]' : ''}
           selectedCourses={selectedCourses}
+          termCode={termCode}
           activePlanName={activePlanName}
           isDirty={isDirty}
           fallYear={fallYear}

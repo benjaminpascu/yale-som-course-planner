@@ -36,6 +36,8 @@ export default function CourseRow({
   isExpanded,
   onExpandToggle,
   onTogglePlan,
+  isShortlisted = false,
+  onToggleShortlist,
 }) {
   const showRegistrationTag =
     Boolean(course.bidOrPermission) &&
@@ -50,6 +52,7 @@ export default function CourseRow({
     normalizeBidType(course.bidOrPermission) === 'bid'
 
   const showRightRail =
+    isShortlisted ||
     requirementTagCodes.length > 0 ||
     isSelected ||
     (hasConflict && !isSelected)
@@ -135,8 +138,13 @@ export default function CourseRow({
               (biddingRounds || showNoBiddingHistory) && (isSelected || hasConflict) ? 'pb-4' : ''
             }`}
           >
-            {requirementTagCodes.length > 0 ? (
+            {requirementTagCodes.length > 0 || isShortlisted ? (
               <span className="flex flex-wrap items-center justify-end gap-1">
+                {isShortlisted ? (
+                  <span className="text-sm leading-none text-short-600" aria-label="Shortlisted">
+                    ★
+                  </span>
+                ) : null}
                 {requirementTagCodes.map((code) => (
                   <RequirementTag
                     key={code}
@@ -236,10 +244,11 @@ export default function CourseRow({
             </a>
           ) : null}
 
+          <div className="flex gap-1.5">
           <button
             type="button"
             onClick={onTogglePlan}
-            className={`w-full rounded-md border px-2.5 py-1.5 text-xs font-semibold shadow-sm ${
+            className={`flex-1 rounded-md border px-2.5 py-1.5 text-xs font-semibold shadow-sm ${
               isSelected
                 ? 'border-danger-hover bg-danger text-white hover:bg-danger-hover'
                 : 'border-save-900 bg-save-800 text-white hover:bg-save-900'
@@ -247,6 +256,19 @@ export default function CourseRow({
           >
             {isSelected ? 'Remove from Plan' : 'Add to Plan'}
           </button>
+          {/* Shortlist: blue, about square, so the plan button stays the main one. */}
+          <button
+            type="button"
+            onClick={onToggleShortlist}
+            aria-pressed={isShortlisted}
+            aria-label={isShortlisted ? 'Remove from Shortlist' : 'Add to Shortlist'}
+            className="flex w-10 shrink-0 items-center justify-center rounded-md border border-short-700 bg-short-600 text-white shadow-sm hover:bg-short-700"
+          >
+            <span aria-hidden className="text-lg leading-none">
+              {isShortlisted ? '★' : '☆'}
+            </span>
+          </button>
+          </div>
         </div>
       ) : null}
     </li>

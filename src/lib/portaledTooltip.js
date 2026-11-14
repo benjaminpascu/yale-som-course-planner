@@ -147,3 +147,41 @@ export function clampPortaledTooltipLeft(anchorEl, tooltipEl) {
   const width = tooltipEl.offsetWidth
   return computePortaledTooltipLeft(anchorRect, width)
 }
+
+/**
+ * Your Plan popup beside its row (on the side with more room), so it never
+ * covers the rows above or below and the mouse can move straight to the next
+ * course. Null when neither side fits; callers then fall back to above/below.
+ *
+ * @param {{ left: number, right: number, top: number, bottom: number }} rowRect
+ * @param {{ width: number, height: number, bottomInset: number }} viewport
+ */
+export function besidePlacement(rowRect, viewport, { hasDescription = false } = {}) {
+  const gap = 8
+  const roomRight = viewport.width - VIEWPORT_MARGIN - rowRect.right - gap
+  const roomLeft = rowRect.left - VIEWPORT_MARGIN - gap
+  const onRight = roomRight >= roomLeft
+  const room = onRight ? roomRight : roomLeft
+  if (room < CALENDAR_TOOLTIP_MIN_WIDTH) return null
+
+  const width = Math.min(LARGE_TOOLTIP_MAX_WIDTH, room)
+  const roomDown = viewport.height - viewport.bottomInset - VIEWPORT_MARGIN - rowRect.top
+  const roomUp = rowRect.bottom - VIEWPORT_MARGIN
+  // Hang down from the row's top; near the bottom of the screen, grow up from its bottom.
+  const down = roomDown >= Math.min(LARGE_TOOLTIP_MAX_HEIGHT_PX, roomUp)
+  const maxHeight = Math.max(96, Math.min(LARGE_TOOLTIP_MAX_HEIGHT_PX, down ? roomDown : roomUp))
+
+  const style = {
+    position: 'fixed',
+    left: onRight ? rowRect.right + gap : rowRect.left - gap - width,
+    width,
+    zIndex: TOOLTIP_Z_INDEX,
+    maxHeight,
+  }
+  if (hasDescription) {
+    style['--tooltip-desc-max'] = `${Math.max(64, maxHeight - DESCRIPTION_CHROME_PX)}px`
+  }
+  if (down) style.top = rowRect.top
+  else style.bottom = viewport.height - rowRect.bottom
+  return style
+}
