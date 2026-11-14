@@ -83,8 +83,11 @@ export default function CourseRow({
             ? 'grid-cols-[auto_minmax(0,1fr)_auto]'
             : 'grid-cols-[auto_minmax(0,1fr)]'
         } ${
-          isSelected ? 'hover:bg-save-100' : 'hover:bg-save-50'
-        }`}
+          // Tab moves through the rows: show it like hover, not the browser's blue box.
+          isSelected
+            ? 'hover:bg-save-100 focus-visible:bg-save-100'
+            : 'hover:bg-save-50 focus-visible:bg-save-50'
+        } focus:outline-none`}
       >
         <CollapseChevron open={isExpanded} />
         <span className="min-w-0">
