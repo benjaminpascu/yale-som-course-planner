@@ -10,6 +10,13 @@
  */
 export const UPDATES = [
   {
+    version: '1.1.2',
+    date: '2026-11-14',
+    changes: [
+      'Courses that count toward the MBA leadership distribution requirement now show a Leadership tag. To track your units, tick Leadership under Select Requirements in the Requirements box, or filter for it with Filters → Requirements.',
+    ],
+  },
+  {
     version: '1.1.1',
     date: '2026-11-13',
     changes: [

@@ -32,14 +32,15 @@ describe('parseDaytimes', () => {
 })
 
 describe('buildCourseRows', () => {
-  it('maps feed fields and tags STEM/GBS from attributes', () => {
+  it('maps feed fields and tags STEM/GBS/Leadership from attributes', () => {
     const { rows, problems } = buildCourseRows([
       item('1', { daysTimes: 'M  W 1:00 PM-2:20 PM', courseAttributes: 'MGMS|MGAE', courseType: 'elective|MMS AM', room: 'EVANS 2400' }),
       item('2', { courseAttributes: 'MGGE|MGMS' }),
       item('3'),
+      item('4', { courseAttributes: 'MGLD' }),
     ])
     expect(problems).toEqual([])
-    expect(rows.map((row) => row.tags)).toEqual(['STEM', 'STEM;GBS Req', ''])
+    expect(rows.map((row) => row.tags)).toEqual(['STEM', 'STEM;GBS Req', '', 'Leadership'])
     expect(rows[0]).toMatchObject({ 'Course Type': 'elective,MMS AM', Room: 'EVANS 2400', days_clean: 'Mo,We', start_24h: '13:00', end_24h: '14:20', Visible: '1' })
     expect(rows[1]).toMatchObject({ days_clean: '', start_24h: '', end_24h: '', Room: '' })
   })
