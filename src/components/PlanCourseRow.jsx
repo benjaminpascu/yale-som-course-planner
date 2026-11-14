@@ -24,6 +24,18 @@ import {
 import { CalendarCourseDetail } from './CalendarCourseBlock'
 import CourseDetailSheet from './CourseDetailSheet'
 
+/** Right edge of the text itself (not of its full-width lines). */
+function textRightEdge(el) {
+  let right = el.getBoundingClientRect().left
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT)
+  const range = document.createRange()
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    range.selectNodeContents(node)
+    right = Math.max(right, range.getBoundingClientRect().right)
+  }
+  return right
+}
+
 function isDesktopDetail() {
   return window.matchMedia('(min-width: 768px)').matches
 }
@@ -54,6 +66,8 @@ export default function PlanCourseRow({
   const refreshTooltipStyle = useCallback(() => {
     if (!triggerRef.current) return
     const row = triggerRef.current.closest('li') ?? triggerRef.current
+    // Where the course name ends and the remove × begins, so the popup can use the
+    // empty space between them.
     const beside = besidePlacement(
       row.getBoundingClientRect(),
       {
@@ -61,7 +75,11 @@ export default function PlanCourseRow({
         height: window.innerHeight,
         bottomInset: getViewportBottomInsetPx(),
       },
-      { hasDescription: Boolean(course.description) },
+      {
+        hasDescription: Boolean(course.description),
+        textRight: textRightEdge(triggerRef.current),
+        contentRight: triggerRef.current.getBoundingClientRect().right,
+      },
     )
     besideRef.current = beside != null
     setTooltipStyle(

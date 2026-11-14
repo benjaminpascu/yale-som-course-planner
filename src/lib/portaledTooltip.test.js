@@ -36,4 +36,19 @@ describe('besidePlacement', () => {
     const style = besidePlacement(row(370, 700, 120, 160), viewport, { hasDescription: true })
     expect(style['--tooltip-desc-max']).toMatch(/px$/)
   })
+
+  test('Single plan (rows span the whole right side): opens over the empty right part of the row', () => {
+    // Row 370–1420, course name ends at 800, remove × starts at 1380.
+    const style = besidePlacement(row(370, 1420, 200, 240), viewport, { textRight: 800, contentRight: 1380 })
+    expect(style.left).toBeGreaterThanOrEqual(800 + 8)
+    expect(style.left + style.width).toBeLessThanOrEqual(1380 - 8)
+    expect(style.width).toBeGreaterThan(500)
+  })
+
+  test('Compare plans: a wide neighbor column still wins over the row itself', () => {
+    const left = besidePlacement(row(370, 895, 200, 240), viewport, { textRight: 800, contentRight: 860 })
+    expect(left.left).toBe(895 + 8)
+    const right = besidePlacement(row(905, 1420, 200, 240), viewport, { textRight: 1300, contentRight: 1380 })
+    expect(right.left + right.width).toBe(905 - 8)
+  })
 })

@@ -149,22 +149,31 @@ export function clampPortaledTooltipLeft(anchorEl, tooltipEl) {
 }
 
 /**
- * Your Plan popup beside its row (on the side with more room), so it never
- * covers the rows above or below and the mouse can move straight to the next
- * course. Null when neither side fits; callers then fall back to above/below.
+ * Your Plan popup where it has the most room without covering the rows above or
+ * below, so the mouse can move straight to the next course: right of the row, left
+ * of it, or (Single plan, where rows span the whole right side) over the row's empty
+ * right part, between the course name (`textRight`) and the remove × (`contentRight`).
+ * Null when nothing fits; callers then fall back to above/below.
  *
  * @param {{ left: number, right: number, top: number, bottom: number }} rowRect
  * @param {{ width: number, height: number, bottomInset: number }} viewport
+ * @param {{ hasDescription?: boolean, textRight?: number, contentRight?: number }} [opts]
  */
-export function besidePlacement(rowRect, viewport, { hasDescription = false } = {}) {
+export function besidePlacement(rowRect, viewport, { hasDescription = false, textRight, contentRight } = {}) {
   const gap = 8
   const roomRight = viewport.width - VIEWPORT_MARGIN - rowRect.right - gap
   const roomLeft = rowRect.left - VIEWPORT_MARGIN - gap
-  const onRight = roomRight >= roomLeft
-  const room = onRight ? roomRight : roomLeft
+  const roomInside =
+    textRight != null && contentRight != null ? contentRight - gap - (textRight + gap) : 0
+  const room = Math.max(roomRight, roomLeft, roomInside)
   if (room < CALENDAR_TOOLTIP_MIN_WIDTH) return null
 
   const width = Math.min(LARGE_TOOLTIP_MAX_WIDTH, room)
+  let left
+  if (room === roomRight) left = rowRect.right + gap
+  else if (room === roomLeft) left = rowRect.left - gap - width
+  // Inside the row: hug the remove ×, so the popup sits on the empty right side.
+  else left = contentRight - gap - width
   const roomDown = viewport.height - viewport.bottomInset - VIEWPORT_MARGIN - rowRect.top
   const roomUp = rowRect.bottom - VIEWPORT_MARGIN
   // Hang down from the row's top; near the bottom of the screen, grow up from its bottom.
@@ -173,7 +182,7 @@ export function besidePlacement(rowRect, viewport, { hasDescription = false } = 
 
   const style = {
     position: 'fixed',
-    left: onRight ? rowRect.right + gap : rowRect.left - gap - width,
+    left,
     width,
     zIndex: TOOLTIP_Z_INDEX,
     maxHeight,
