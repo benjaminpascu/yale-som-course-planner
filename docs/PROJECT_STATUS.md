@@ -129,15 +129,15 @@ Desktop (`lg+`): unchanged — catalog sidebar + planning stack; **Plans** in he
 - Not yet: **Law School** (reader in `scripts/lib/lawImport.js` needs the request format of Law's public course page); issue #8 (tell Yale's API team about the empty servers).
 - Spec: `docs/specs/cross-registration.md`; plan: `docs/superpowers/plans/2026-11-11-cross-registration.md`.
 
-### Shortlist (release 1.2, preview Nov 2026)
+### Shortlist ✅ (live in 1.2.0, Nov 2026)
 
 - Blue ☆ next to **Add to Plan** in a course's details stars that section; starred rows show a small ★. One shortlist per semester, shared by all plans, saved in the browser (`yale-som-course-planner-shortlist`).
 - **★ button** next to the search (with a count) shows only starred courses of the school and semester on screen; "No shortlisted courses" when there are none. Same in Single plan, Compare plans and on phones.
 - Tutorial tip `shortlist` right after the Add to Plan tip.
 - Your Plan: only the semester on screen (Clear all clears only that semester), flat rows, no "Unsaved changes" line, no year in session headings, hover popup opens beside the row.
-- Ships with the rest of **release 1.2** (`release/1.2` → `main` when the user says ship it). Spec: `docs/specs/shortlist.md`; plan: `docs/specs/shortlist-plan.md`; issue #11.
+- Live with **1.2.0**. Spec: `docs/specs/shortlist.md`; plan: `docs/specs/shortlist-plan.md`; issue #11.
 
-### Conflicts filter (release 1.2, merged into `release/1.2` Nov 2026)
+### Conflicts filter ✅ (live in 1.2.0, Nov 2026)
 
 - **Filters → Conflicts** (under Time range, every school): **Only** lists courses that clash with the plan being edited plus the plan's own courses; **Hide** lists what still fits. One at a time, labeled with the red Conflict badge, live as the plan changes. In Compare plans it follows the edited (green "Plan:") side.
 - `filterByConflicts` in `src/lib/filterCourses.js`, applied in `CourseBrowser.jsx` with the same `getConflictingCourseIds` as the badge. Issue #13.
@@ -211,3 +211,4 @@ Course CSVs update themselves every 6 hours (`docs/updating-course-data.md`); fo
 | Nov 2026 | 1.1.1: opens on the upcoming semester. Release branches: features collect on `release/<x.y>` and go live together |
 | Nov 2026 | Shortlist built on `feature/shortlist` → `release/1.2` (1.2.0) |
 | Nov 2026 | 1.1.2: Leadership tag (Yale `MGLD`, yellow). Time range boxes use the School picker's dropdown (`Dropdown.jsx`). Conflicts filter merged into `release/1.2` |
+| Nov 14, 2026 | **1.2.0 live**: Shortlist, Bidding history, Conflicts filter (`release/1.2` → `main`) |
