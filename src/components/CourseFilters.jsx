@@ -16,6 +16,28 @@ function formatUnits(units) {
   return `${units} units`
 }
 
+/** Same red Conflict badge as the catalog, at the size of the requirement tags here. */
+function ConflictTag() {
+  return (
+    <span className="inline-flex shrink-0 items-center rounded bg-danger px-1.5 py-0.5 text-xs font-semibold leading-tight text-white">
+      Conflict
+    </span>
+  )
+}
+
+const CONFLICT_OPTIONS = [
+  { id: 'only', label: 'Only conflicts' },
+  { id: 'hide', label: 'Hide conflicts' },
+].map((opt) => ({
+  ...opt,
+  renderLabel: () => (
+    <span className="inline-flex items-center gap-1">
+      {opt.id === 'only' ? 'Only' : 'Hide'}
+      <ConflictTag />
+    </span>
+  ),
+}))
+
 const FILTER_CARD =
   'rounded-lg border border-yale-200/90 bg-white p-3 shadow-sm space-y-4'
 
@@ -87,6 +109,13 @@ export default function CourseFilters({
             timeTo={filters.timeTo}
             onTimeFromChange={onTimeFromChange}
             onTimeToChange={onTimeToChange}
+          />
+          <FilterCheckboxGroup
+            legend="Conflicts"
+            layout="wrap"
+            options={CONFLICT_OPTIONS}
+            selected={filters.conflicts}
+            onToggle={(id) => onToggle('conflicts', id)}
           />
         </div>
 
