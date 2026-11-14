@@ -62,6 +62,7 @@ The user is a non-technical student. Explain clearly; ask explicitly when a prod
 | **Courses from across Yale** (School picker; spec `docs/specs/cross-registration.md`; version 1.1.0) | ✅ Live (Nov 2026); daily Yale job; Law reader unfinished |
 | **Release 1.2** (`release/1.2`; features collect there, go live together) | In progress |
 | **Shortlist** (★ star + ★ button by search; spec `docs/specs/shortlist.md`; part of 1.2.0) | Preview, waiting for approval (issue #11) |
+| **Conflicts filter** (Filters → Conflicts: Only / Hide, follows the plan being edited; `filterByConflicts` in `src/lib/filterCourses.js`; part of 1.2.0) | Preview, waiting for approval (issue #13) |
 | **Wider promo** | When you choose (not a separate dev milestone) |
 
 Full detail: **`docs/PROJECT_STATUS.md`**.

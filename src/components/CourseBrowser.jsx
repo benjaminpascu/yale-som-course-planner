@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   createEmptyFilters,
+  filterByConflicts,
   filterCourses,
   getTimeRangeError,
   hasActiveFilters,
@@ -207,11 +208,23 @@ export default function CourseBrowser({
 
   const timeRangeError = useMemo(() => getTimeRangeError(filters), [filters])
 
+  const conflictingIds = useMemo(
+    // The plan can hold other schools' courses, so check against all of them.
+    () => getConflictingCourseIds(courses, selectedIds, selectedCourses),
+    [courses, selectedIds, selectedCourses],
+  )
+
   const filtered = useMemo(() => {
     if (timeRangeError) return []
-    const matches = filterCourses(termCourses, filters)
+    // Filters → Conflicts follows the plan, so the list updates as courses are added or removed.
+    const matches = filterByConflicts(
+      filterCourses(termCourses, filters),
+      filters.conflicts,
+      conflictingIds,
+      selectedIds,
+    )
     return onlyShortlisted ? matches.filter((c) => shortlistIds.has(c.courseId)) : matches
-  }, [termCourses, filters, timeRangeError, onlyShortlisted, shortlistIds])
+  }, [termCourses, filters, timeRangeError, onlyShortlisted, shortlistIds, conflictingIds, selectedIds])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
 
@@ -252,14 +265,9 @@ export default function CourseBrowser({
     count += filters.categories.size
     count += filters.tagCodes.size
     count += filters.subjects.size
+    count += filters.conflicts.size
     return count
   }, [filters])
-
-  const conflictingIds = useMemo(
-    // The plan can hold other schools' courses, so check against all of them.
-    () => getConflictingCourseIds(courses, selectedIds, selectedCourses),
-    [courses, selectedIds, selectedCourses],
-  )
 
   function getCourseRowProps(course) {
     return {
@@ -281,7 +289,11 @@ export default function CourseBrowser({
   function handleToggle(key, value) {
     setFilters((prev) => ({
       ...prev,
-      [key]: toggleInSet(prev[key], value),
+      // Conflicts: Only and Hide are opposites, so ticking one unticks the other.
+      [key]:
+        key === 'conflicts'
+          ? new Set(prev.conflicts.has(value) ? [] : [value])
+          : toggleInSet(prev[key], value),
     }))
   }
 
