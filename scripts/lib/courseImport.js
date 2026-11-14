@@ -69,6 +69,7 @@ const FEED_FIELDS = {
 export const TAG_ATTRIBUTES = [
   { attribute: 'MGMS', tag: 'STEM' },
   { attribute: 'MGGE', tag: 'GBS Req' },
+  { attribute: 'MGLD', tag: 'Leadership' },
 ]
 
 const DAY_CODES = { M: 'Mo', T: 'Tu', W: 'We', Th: 'Th', F: 'Fr', Sa: 'Sa', Su: 'Su' }
