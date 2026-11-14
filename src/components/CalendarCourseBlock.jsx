@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { BiddingHistoryDetail } from './BiddingHistory'
 import CourseDetailSheet from './CourseDetailSheet'
 import { normalizeCategory } from '../lib/categoryDisplay'
 import {
@@ -89,6 +90,9 @@ export function CalendarCourseDetail({
               </div>
             ) : null}
           </dl>
+          <div className="text-xs">
+            <BiddingHistoryDetail course={course} />
+          </div>
           {course.syllabusUrl ? (
             <a
               href={course.syllabusUrl}

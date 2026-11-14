@@ -174,3 +174,23 @@ School picker.
 
 Code: `scripts/update-yale-courses.js`, `scripts/lib/yaleImport.js` (tests next
 to it), `src/lib/schools.js`, `src/components/SchoolPicker.jsx`.
+
+## Bidding history (past clearing prices)
+
+`docs/data-samples/bidding_history.csv` comes from SOM's public
+`Auction-Bidding-History.xlsx` (one tab per semester). Its link is saved in
+`docs/data-samples/bidding_history_source.json`. The page that lists it
+(https://som.yale.edu/myportal/course-bidding-and-enrollment-history) needs a Yale
+login, but the file link itself doesn't.
+
+`.github/workflows/update-bidding-history.yml` runs on the 1st of each month (or by
+hand from the Actions tab):
+
+- It tries this month's and last month's upload folder for a newer file, then
+  downloads the file and commits any change (after tests and build).
+- **Broken link:** it opens an issue assigned to the repo owner and fails the run.
+  Fix: copy the new link from the portal page into `bidding_history_source.json`.
+- **Missing semester:** if a semester has started (Spring: Jan 20, Fall: Sep 1) but
+  the file has no tab for it, it opens one issue for that semester.
+
+Run it now: `npm run update-bidding-history` (add `-- --check` to preview).

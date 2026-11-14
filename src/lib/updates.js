@@ -15,6 +15,7 @@ export const UPDATES = [
     changes: [
       'Shortlist: open a course and click the blue ☆ next to Add to Plan to star it. Click ★ next to the search to see only your starred courses, so you can always come back to them. Each semester has its own shortlist, shared by all your plans.',
       'Your Plan now shows only the semester you are looking at, in a cleaner list. Hovering a course opens its details to the side, so you can move straight to the next course.',
+      'Bidding history: courses in the Course Catalog now show four small squares in the bottom right, one for each of the last two years\' Round 1 and Round 2. White means it was basically free (under 50 points); orange, red and dark red mean it took 50, 100 or 150+ points; gray means no data. Hover over the squares to see the exact points; they also show when you hover a course on your Weekly Calendar or in Your Plan.',
     ],
   },
   {

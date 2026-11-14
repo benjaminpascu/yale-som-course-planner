@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "update-courses": "node scripts/update-courses.js",
-    "update-yale-courses": "node scripts/update-yale-courses.js"
+    "update-yale-courses": "node scripts/update-yale-courses.js",
+    "update-bidding-history": "node scripts/update-bidding-history.js"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

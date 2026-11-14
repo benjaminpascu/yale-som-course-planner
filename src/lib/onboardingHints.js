@@ -12,6 +12,7 @@ export const PLANNER_HINTS = [
   'phone-courses',
   'add-course',
   'shortlist',
+  'bidding',
   'clash',
   'calendar-details',
   'set-targets',
@@ -23,6 +24,7 @@ export const PLANNER_HINTS = [
   'term-switch',
 ]
 const NEEDS_A_COURSE = new Set([
+  'bidding', // right after the first course is added, while the course list is on screen
   'calendar-details',
   'set-targets',
   'requirements',
