@@ -10,6 +10,13 @@
  */
 export const UPDATES = [
   {
+    version: '1.2.1',
+    date: '2026-11-15',
+    changes: [
+      'Bidding history colors now fade smoothly with the points instead of jumping between a few colors: a course that took 40 points shows as light orange, not white, so it no longer looks free.',
+    ],
+  },
+  {
     version: '1.2.0',
     date: '2026-11-14',
     changes: [

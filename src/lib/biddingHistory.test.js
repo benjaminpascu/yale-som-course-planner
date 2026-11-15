@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   NO_DATA_COLOR,
   destinationOf,
+  BIDDING_STOPS,
   biddingColor,
   formatPoints,
   getBiddingRounds,
@@ -69,14 +70,14 @@ describe('bidding history', () => {
     expect(showsBiddingHistory(course({ school: 'Yale College' }), withHistory)).toBe(false)
   })
 
-  it('colors by fixed bands: pale under 50, orange from 50, red from 100, dark from 150', () => {
+  it('fades smoothly from white (0) to orange (50), red (100) and dark red (150+)', () => {
     expect(biddingColor(null)).toBe(NO_DATA_COLOR)
-    const [pale, orange, red, dark] = [0, 50, 100, 150].map(biddingColor)
-    expect(new Set([pale, orange, red, dark, NO_DATA_COLOR]).size).toBe(5)
-    expect([1, 49].map(biddingColor)).toEqual([pale, pale])
-    expect(biddingColor(99)).toBe(orange)
-    expect(biddingColor(149)).toBe(red)
-    expect(biddingColor(900)).toBe(dark)
+    expect([0, 50, 100, 150].map(biddingColor)).toEqual(BIDDING_STOPS.map((stop) => stop.color))
+    expect(biddingColor(900)).toBe('#7f1d12')
+    // In between: a blend, not the lower stop's color.
+    expect(biddingColor(25)).toBe('#facd9e')
+    expect(biddingColor(40)).not.toBe('#ffffff')
+    expect(biddingColor(125)).toBe('#ac2f18')
   })
 
   it('formats points', () => {

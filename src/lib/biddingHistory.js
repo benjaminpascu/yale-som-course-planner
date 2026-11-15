@@ -87,21 +87,33 @@ export function showsBiddingHistory(course, rounds) {
 }
 
 /**
- * Fixed color bands, the same for every course and year (user-set Nov 13, 2026):
- * under 50 points is basically free (white), orange from 50, red from 100, very
- * dark from 150.
+ * Color stops, the same for every course and year (user-set Nov 13, 2026; smooth
+ * fade Nov 15, 2026): white at 0 points, orange at 50, red at 100, very dark red
+ * at 150+. Points in between blend between the two nearest stops, so 40 points
+ * is close to orange, not white.
  */
-export const BIDDING_BANDS = [
-  { min: 150, color: '#7f1d12' },
-  { min: 100, color: '#d9411e' },
-  { min: 50, color: '#f59a3c' },
-  { min: 0, color: '#ffffff' },
+export const BIDDING_STOPS = [
+  { points: 0, color: '#ffffff' },
+  { points: 50, color: '#f59a3c' },
+  { points: 100, color: '#d9411e' },
+  { points: 150, color: '#7f1d12' },
 ]
 export const NO_DATA_COLOR = '#ebebee'
 
+const toRgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))
+const toHex = (rgb) => `#${rgb.map((c) => Math.round(c).toString(16).padStart(2, '0')).join('')}`
+
 export function biddingColor(points) {
   if (points == null) return NO_DATA_COLOR
-  return BIDDING_BANDS.find((band) => points >= band.min)?.color ?? NO_DATA_COLOR
+  const last = BIDDING_STOPS[BIDDING_STOPS.length - 1]
+  if (points >= last.points) return last.color
+  if (points <= 0) return BIDDING_STOPS[0].color
+  const upper = BIDDING_STOPS.findIndex((stop) => points < stop.points)
+  const from = BIDDING_STOPS[upper - 1]
+  const to = BIDDING_STOPS[upper]
+  const t = (points - from.points) / (to.points - from.points)
+  const [a, b] = [toRgb(from.color), toRgb(to.color)]
+  return toHex(a.map((c, i) => c + (b[i] - c) * t))
 }
 
 export function formatPoints(points, { short = false } = {}) {

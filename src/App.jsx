@@ -77,8 +77,8 @@ function BiddingTipText({ action }) {
   return (
     <>
       The small squares on a course are its <b>Bidding History</b>: points needed in Round 1 and 2
-      of the last two years. White means basically free; orange, red and dark red mean 50, 100 and
-      150+ points. {action} them for the exact numbers.
+      of the last two years. The color darkens with the points: white is free, then orange (50), red
+      (100) and dark red (150+). {action} them for the exact numbers.
     </>
   )
 }

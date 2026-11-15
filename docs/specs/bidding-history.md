@@ -70,14 +70,17 @@ nobody opens it while planning.
   tapping the squares opens and closes the box (same as requirement tags) without
   opening the course.
 
-### Colors (fixed bands, same for every course and year; user-set Nov 13, 2026)
+### Colors (same for every course and year; user-set Nov 13, 2026; smooth fade Nov 15, 2026)
+
+The square's color fades smoothly with the points between these stops (e.g. 40
+points is close to orange, not white), so close prices look close:
 
 | Cleared at | Square |
 |---|---|
 | No data | light gray |
-| 0–49 points (basically free) | white (thin outline) |
-| 50–99 | orange |
-| 100–149 | red |
+| 0 points (free) | white (thin outline) |
+| 50 | orange |
+| 100 | red |
 | 150+ | very dark red |
 
 ### Hover box (a small table that mirrors the squares)
@@ -112,8 +115,9 @@ first course is added, pointing at the course list (computer: next to it; phone:
 above the tab bar on the Courses tab). Students who have seen every tip get it once.
 
 > The small squares on a course are its **Bidding History**: points needed in Round
-> 1 and 2 of the last two years. White means basically free; orange, red and dark
-> red mean 50, 100 and 150+ points. Hover over (phone: Tap) them for the exact numbers.
+> 1 and 2 of the last two years. The color darkens with the points: white is free,
+> then orange (50), red (100) and dark red (150+). Hover over (phone: Tap) them for
+> the exact numbers.
 
 ## Data
 
