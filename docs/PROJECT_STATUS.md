@@ -121,7 +121,7 @@ Desktop (`lg+`): unchanged — catalog sidebar + planning stack; **Plans** in he
 - Version rules: small fixes to `main` bump the last number (1.0.1 → 1.0.2); spec'd features bump the middle (1.1 is planned for courses from across Yale). Agents add the entry right before every commit (`AGENTS.md` step 5).
 - Spec: `docs/specs/updates.md`. Code: `src/lib/updates.js` (+ tests), `UpdatesPage.jsx`, `UpdatesButton.jsx`, `vercel.json`.
 
-### Non-SOM Units (built Nov 2026, version 1.3.0, on `release/1.3`)
+### Non-SOM Units ✅ (live Nov 16, 2026, version 1.3.0)
 
 - **Set Non-SOM Units** button in the Requirements bar when the plan has a course from another school (amber with ⚠ while one counts 0). Its window: one line per school in the plan; numbers add to Semester / Year Totals.
 - Spec: `docs/specs/non-som-units.md`. Code: `countedUnits` in `src/lib/requirementSettings.js`, `NonSomUnitsModal.jsx`, `TagUnitTracker.jsx`.
@@ -217,4 +217,4 @@ Course CSVs update themselves every 6 hours (`docs/updating-course-data.md`); fo
 | Nov 2026 | Shortlist built on `feature/shortlist` → `release/1.2` (1.2.0) |
 | Nov 2026 | 1.1.2: Leadership tag (Yale `MGLD`, yellow). Time range boxes use the School picker's dropdown (`Dropdown.jsx`). Conflicts filter merged into `release/1.2` |
 | Nov 14, 2026 | **1.2.0 live**: Shortlist, Bidding history, Conflicts filter (`release/1.2` → `main`) |
-| Nov 16, 2026 | Non-SOM Units built on `feature/non-som-units` → `release/1.3` (1.3.0) |
+| Nov 16, 2026 | **1.3.0 live**: Non-SOM Units (`release/1.3` → `main`) |

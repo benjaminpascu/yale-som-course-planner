@@ -60,10 +60,10 @@ The user is a non-technical student. Explain clearly; ask explicitly when a prod
 | **Automatic course updates** | ✅ Every 6 hours from Yale SOM's feed (Nov 2026); new semesters appear, finished ones hide |
 | **Updates page** (`/updates`, patch notes; version 1.0.1) | ✅ Live (Nov 2026); every change adds an entry (Workflow step 5) |
 | **Courses from across Yale** (School picker; spec `docs/specs/cross-registration.md`; version 1.1.0) | ✅ Live (Nov 2026); daily Yale job; Law reader unfinished |
-| **Release 1.2** (version 1.2.0: Shortlist, Bidding history, Conflicts filter) | ✅ Live (Nov 14, 2026). `release/1.3` is open (Non-SOM Units) |
+| **Release 1.2** (version 1.2.0: Shortlist, Bidding history, Conflicts filter) | ✅ Live (Nov 14, 2026). Release 1.3 (version 1.3.0: Non-SOM Units) live Nov 16, 2026. Next release: make `release/1.4` from `main` when the next feature starts |
 | **Shortlist** (★ star + ★ button by search; spec `docs/specs/shortlist.md`; part of 1.2.0) | ✅ Live (issue #11) |
 | **Conflicts filter** (Filters → Conflicts: Only / Hide, follows the plan being edited; `filterByConflicts` in `src/lib/filterCourses.js`; part of 1.2.0) | ✅ Live (issue #13) |
-| **Non-SOM Units** (button + window in Requirements; spec `docs/specs/non-som-units.md`; part of 1.3.0) | Built on `release/1.3`, waiting on preview approval |
+| **Non-SOM Units** (button + window in Requirements; spec `docs/specs/non-som-units.md`; part of 1.3.0) | ✅ Live (Nov 16, 2026) |
 | **Wider promo** | When you choose (not a separate dev milestone) |
 
 Full detail: **`docs/PROJECT_STATUS.md`**.
