@@ -14,6 +14,7 @@ import { isSomCourse } from '../lib/schools'
 import { formatSessionLabel } from '../lib/sessionDisplay'
 import BiddingHistory, { useBiddingRounds } from './BiddingHistory'
 import CollapseChevron from './CollapseChevron'
+import ConflictTag from './ConflictTag'
 import RegistrationTag from './RegistrationTag'
 import NoDescription from './NoDescription'
 import RequirementTag from './RequirementTag'
@@ -33,6 +34,7 @@ export default function CourseRow({
   requirementTagCodes = [],
   isSelected,
   hasConflict,
+  conflictsWith,
   isExpanded,
   onExpandToggle,
   onTogglePlan,
@@ -166,11 +168,7 @@ export default function CourseRow({
                     In Plan
                   </span>
                 ) : null}
-                {hasConflict && !isSelected ? (
-                  <span className="rounded bg-danger px-1 py-px text-[10px] font-semibold leading-tight text-white shadow-sm">
-                    Conflict
-                  </span>
-                ) : null}
+                {hasConflict && !isSelected ? <ConflictTag conflictsWith={conflictsWith} /> : null}
               </span>
             ) : null}
           </span>

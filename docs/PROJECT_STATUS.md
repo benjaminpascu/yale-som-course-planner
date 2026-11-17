@@ -218,3 +218,4 @@ Course CSVs update themselves every 6 hours (`docs/updating-course-data.md`); fo
 | Nov 2026 | 1.1.2: Leadership tag (Yale `MGLD`, yellow). Time range boxes use the School picker's dropdown (`Dropdown.jsx`). Conflicts filter merged into `release/1.2` |
 | Nov 14, 2026 | **1.2.0 live**: Shortlist, Bidding history, Conflicts filter (`release/1.2` → `main`) |
 | Nov 16, 2026 | **1.3.0 live**: Non-SOM Units (`release/1.3` → `main`) |
+| Nov 16, 2026 | Conflict tag hover lists the plan courses it clashes with (issue #19; `ConflictTag.jsx`, `getConflictsByCourseId` in `scheduleConflicts.js`). Added to the 1.3.0 Updates entry, no new version (owner's call) |

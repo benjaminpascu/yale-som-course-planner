@@ -15,7 +15,7 @@ import {
   getCourseRequirementTags,
   uniqueRequirementTags,
 } from '../lib/requirementTags'
-import { getConflictingCourseIds } from '../lib/scheduleConflicts'
+import { getConflictsByCourseId } from '../lib/scheduleConflicts'
 import { sectionTone } from '../lib/sectionTheme'
 import CourseFilters from './CourseFilters'
 import CourseRow from './CourseRow'
@@ -208,9 +208,10 @@ export default function CourseBrowser({
 
   const timeRangeError = useMemo(() => getTimeRangeError(filters), [filters])
 
+  // Course id → the plan courses it clashes with (shown when hovering the Conflict tag).
   const conflictingIds = useMemo(
     // The plan can hold other schools' courses, so check against all of them.
-    () => getConflictingCourseIds(courses, selectedIds, selectedCourses),
+    () => getConflictsByCourseId(courses, selectedIds, selectedCourses),
     [courses, selectedIds, selectedCourses],
   )
 
@@ -275,6 +276,7 @@ export default function CourseBrowser({
       requirementTagCodes: getCourseRequirementTags(course),
       isSelected: selectedIds.has(course.courseId),
       hasConflict: conflictingIds.has(course.courseId),
+      conflictsWith: conflictingIds.get(course.courseId),
       isExpanded: expandedCourseId === course.courseId,
       onExpandToggle: () =>
         setExpandedCourseId((id) =>

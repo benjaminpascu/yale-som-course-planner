@@ -99,27 +99,35 @@ export function coursesConflict(a, b) {
 }
 
 /**
+ * For each catalog course that would time-conflict with the plan, the plan
+ * courses it clashes with (in plan order). Pass `selectedCourses` when the plan
+ * can hold courses that aren't in `courses` (e.g. the catalog shows one school,
+ * the plan mixes schools).
+ * @param {import('./parseCourses').Course[]} courses
+ * @param {Set<string>} selectedIds
+ * @param {import('./parseCourses').Course[]} [selectedCourses]
+ * @returns {Map<string, import('./parseCourses').Course[]>}
+ */
+export function getConflictsByCourseId(courses, selectedIds, selectedCourses) {
+  const selected = selectedCourses ?? courses.filter((c) => selectedIds.has(c.courseId))
+  const timedSelected = selected.filter(hasMeetingTime)
+  const conflicts = new Map()
+  if (timedSelected.length === 0) return conflicts
+
+  for (const course of courses) {
+    if (selectedIds.has(course.courseId) || !hasMeetingTime(course)) continue
+    const clashes = timedSelected.filter((sel) => coursesConflict(course, sel))
+    if (clashes.length > 0) conflicts.set(course.courseId, clashes)
+  }
+  return conflicts
+}
+
+/**
  * Course IDs that would time-conflict with at least one selected timed course.
- * Pass `selectedCourses` when the plan can hold courses that aren't in
- * `courses` (e.g. the catalog shows one school, the plan mixes schools).
  * @param {import('./parseCourses').Course[]} courses
  * @param {Set<string>} selectedIds
  * @param {import('./parseCourses').Course[]} [selectedCourses]
  */
 export function getConflictingCourseIds(courses, selectedIds, selectedCourses) {
-  const selected = selectedCourses ?? courses.filter((c) => selectedIds.has(c.courseId))
-  const timedSelected = selected.filter(hasMeetingTime)
-  if (timedSelected.length === 0) return new Set()
-
-  const conflicts = new Set()
-  for (const course of courses) {
-    if (selectedIds.has(course.courseId) || !hasMeetingTime(course)) continue
-    for (const sel of timedSelected) {
-      if (coursesConflict(course, sel)) {
-        conflicts.add(course.courseId)
-        break
-      }
-    }
-  }
-  return conflicts
+  return new Set(getConflictsByCourseId(courses, selectedIds, selectedCourses).keys())
 }

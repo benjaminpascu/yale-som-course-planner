@@ -268,7 +268,7 @@ export function createEmptyFilters() {
  * @template {{ courseId: string }} T
  * @param {T[]} courses
  * @param {Set<string>} mode
- * @param {Set<string>} conflictingIds
+ * @param {{ has(id: string): boolean }} conflictingIds  a Set of ids, or the Map from getConflictsByCourseId
  * @param {Set<string>} selectedIds
  * @returns {T[]}
  */
