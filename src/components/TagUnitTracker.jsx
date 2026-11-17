@@ -2,7 +2,7 @@ import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useSta
 import { createPortal } from 'react-dom'
 import { sectionTone } from '../lib/sectionTheme'
 import { formatTermLabel, termCodeToSemester } from '../lib/academicYear'
-import { isSomCourse } from '../lib/schools'
+import { SOM_SCHOOL, isSomCourse, pickerSchools } from '../lib/schools'
 import { formatCourseHeading } from '../lib/courseDisplay'
 import { formatSessionLabel } from '../lib/sessionDisplay'
 import {
@@ -13,6 +13,7 @@ import {
 } from '../lib/portaledTooltip'
 import { formatRequirementProgress } from '../lib/requirementTargets'
 import {
+  countedUnits,
   loadRequirementSettings,
   persistRequirementSettings,
   requirementRows,
@@ -22,7 +23,7 @@ import { formatTagUnits } from '../lib/tagUnitTracker'
 import RequirementTag from './RequirementTag'
 import RequirementSettingsModal from './RequirementSettingsModal'
 import SectionHeader from './SectionHeader'
-import CautionFlag from './CautionFlag'
+import NonSomUnitsModal from './NonSomUnitsModal'
 
 const EMPTY_HINT = 'Nothing selected'
 
@@ -30,12 +31,37 @@ const EMPTY_HINT = 'Nothing selected'
 const REQUIREMENTS_BODY_CLASS =
   'flex px-4 py-2 lg:h-[4.75rem] lg:items-center lg:overflow-x-hidden lg:overflow-y-auto lg:py-0'
 
-const OTHER_SCHOOL_UNITS_HOVER =
-  'Courses from other schools count as 0 units here. Check with the registrar how they count toward your SOM units.'
+const NON_SOM_ZERO_HOVER =
+  'Courses from other schools count as 0 units until you set how many they count for you.'
 
-/** Caution note left of Select Requirements when the plan has a non-SOM course. */
-function OtherSchoolUnitsNote() {
-  return <CautionFlag title={OTHER_SCHOOL_UNITS_HOVER}>Non-SOM courses count as 0 units</CautionFlag>
+/**
+ * Opens Non-SOM Units. Shown when the plan has a course from another school;
+ * amber with a warning triangle while one of them still counts 0 units.
+ */
+function NonSomUnitsButton({ needsAttention, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={needsAttention ? NON_SOM_ZERO_HOVER : undefined}
+      className={
+        needsAttention
+          ? 'inline-flex shrink-0 items-center gap-1 rounded border border-caution/40 bg-amber-50 px-2.5 py-1 text-xs font-medium text-caution hover:bg-amber-100'
+          : 'shrink-0 rounded border border-yale-300 bg-white px-2.5 py-1 text-xs font-medium text-yale-900 hover:bg-yale-50'
+      }
+    >
+      {needsAttention ? (
+        <svg aria-hidden viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5 shrink-0">
+          <path
+            fillRule="evenodd"
+            d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z"
+            clipRule="evenodd"
+          />
+        </svg>
+      ) : null}
+      Non-SOM Units
+    </button>
+  )
 }
 
 function AddRequirementsButton({ onClick, inverse = false }) {
@@ -278,6 +304,7 @@ export default function TagUnitTracker({
   const tagNames = useMemo(() => uniqueRequirementTags(courses), [courses])
   const [settings, setSettings] = useState(() => loadRequirementSettings(tagNames))
   const [modalOpen, setModalOpen] = useState(false)
+  const [nonSomOpen, setNonSomOpen] = useState(false)
 
   useEffect(() => {
     setSettings(loadRequirementSettings(tagNames))
@@ -295,16 +322,27 @@ export default function TagUnitTracker({
     [selectedCourses, semester, tagNames, settings],
   )
 
-  const handleSaveSettings = (next) => {
+  // Select Requirements and Non-SOM Units each save their own part of the settings.
+  const handleSaveSettings = (changes) => {
+    const next = { ...settings, ...changes }
     setSettings(next)
     persistRequirementSettings(next, tagNames)
     window.dispatchEvent(new Event(SETTINGS_CHANGED_EVENT))
   }
 
   const reqTone = sectionTone('requirements')
-  // Other schools' courses add 0 units; say so whenever one is in the plan this semester.
-  const hasOtherSchoolCourse = selectedCourses.some(
-    (c) => !isSomCourse(c) && (!termCode || c.termCode === termCode),
+  // Non-SOM Units: only when the plan has a course from another school (any semester,
+  // since Year Total counts them too); amber while one of them still counts 0 units.
+  const planOtherSchoolCourses = useMemo(
+    () => selectedCourses.filter((c) => !isSomCourse(c)),
+    [selectedCourses],
+  )
+  const planSchools = useMemo(
+    () => pickerSchools(planOtherSchoolCourses, null).filter((s) => s.id !== SOM_SCHOOL),
+    [planOtherSchoolCourses],
+  )
+  const nonSomNeedsAttention = planOtherSchoolCourses.some(
+    (c) => countedUnits(c, settings.nonSom) === 0,
   )
 
   return (
@@ -320,7 +358,12 @@ export default function TagUnitTracker({
             title={termCode ? `Requirements · ${formatTermLabel(termCode)}` : 'Requirements'}
           >
             <div className="flex items-center gap-3">
-              {hasOtherSchoolCourse ? <OtherSchoolUnitsNote /> : null}
+              {planSchools.length > 0 ? (
+                <NonSomUnitsButton
+                  needsAttention={nonSomNeedsAttention}
+                  onClick={() => setNonSomOpen(true)}
+                />
+              ) : null}
               <AddRequirementsButton onClick={() => setModalOpen(true)} />
             </div>
           </SectionHeader>
@@ -341,6 +384,15 @@ export default function TagUnitTracker({
           tagNames={tagNames}
           onClose={() => setModalOpen(false)}
           onSave={handleSaveSettings}
+        />
+      )}
+      {part === 'rows' ? null : (
+        <NonSomUnitsModal
+          open={nonSomOpen}
+          nonSom={settings.nonSom}
+          schools={planSchools}
+          onClose={() => setNonSomOpen(false)}
+          onSave={(nonSom) => handleSaveSettings({ nonSom })}
         />
       )}
     </>

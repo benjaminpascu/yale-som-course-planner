@@ -121,10 +121,15 @@ Desktop (`lg+`): unchanged — catalog sidebar + planning stack; **Plans** in he
 - Version rules: small fixes to `main` bump the last number (1.0.1 → 1.0.2); spec'd features bump the middle (1.1 is planned for courses from across Yale). Agents add the entry right before every commit (`AGENTS.md` step 5).
 - Spec: `docs/specs/updates.md`. Code: `src/lib/updates.js` (+ tests), `UpdatesPage.jsx`, `UpdatesButton.jsx`, `vercel.json`.
 
+### Non-SOM Units (built Nov 2026, version 1.3.0, on `release/1.3`)
+
+- **Non-SOM Units** button in the Requirements bar when the plan has a course from another school (amber with ⚠ while one counts 0). Its window: All schools + one line per school in the plan; numbers add to Semester / Year Totals.
+- Spec: `docs/specs/non-som-units.md`. Code: `countedUnits` in `src/lib/requirementSettings.js`, `NonSomUnitsModal.jsx`, `TagUnitTracker.jsx`.
+
 ### Courses from across Yale ✅ (live Nov 2026, version 1.1.0)
 
 - **School picker** above the Course Catalog: one Yale school at a time (SOM default). Plans and the calendar mix schools; clashes are checked across schools. Single Plan / Compare Plans sit over the calendar.
-- Other schools' courses: no units shown, count 0 units (amber "Non-SOM courses count as 0 units" note in Requirements), filters are Day, Time and **Department**; "Also listed as" for cross-listings (search and Department use them); prerequisites; Bulletin descriptions where Yale's API has none.
+- Other schools' courses: no units shown; in Requirements they count the student's own number from **Non-SOM Units** (1.3.0, see below), filters are Day, Time and **Department**; "Also listed as" for cross-listings (search and Department use them); prerequisites; Bulletin descriptions where Yale's API has none.
 - Data: daily GitHub job (`update-yale-courses.yml`, secret `YALE_API_KEY`) from Yale's Courses Web Service v3, pinned to the one Yale server that returns data. ~3,350 Fall / ~2,700 Spring classes from 13 schools. Details: `docs/updating-course-data.md`.
 - Not yet: **Law School** (reader in `scripts/lib/lawImport.js` needs the request format of Law's public course page); issue #8 (tell Yale's API team about the empty servers).
 - Spec: `docs/specs/cross-registration.md`; plan: `docs/superpowers/plans/2026-11-11-cross-registration.md`.
@@ -212,3 +217,4 @@ Course CSVs update themselves every 6 hours (`docs/updating-course-data.md`); fo
 | Nov 2026 | Shortlist built on `feature/shortlist` → `release/1.2` (1.2.0) |
 | Nov 2026 | 1.1.2: Leadership tag (Yale `MGLD`, yellow). Time range boxes use the School picker's dropdown (`Dropdown.jsx`). Conflicts filter merged into `release/1.2` |
 | Nov 14, 2026 | **1.2.0 live**: Shortlist, Bidding history, Conflicts filter (`release/1.2` → `main`) |
+| Nov 16, 2026 | Non-SOM Units built on `feature/non-som-units` → `release/1.3` (1.3.0) |
