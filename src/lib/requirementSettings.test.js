@@ -29,7 +29,7 @@ describe('defaults', () => {
       semester: { on: true, target: null },
       year: { on: false, target: null },
       tags: {},
-      nonSom: { units: 0, bySchool: {} },
+      nonSom: { bySchool: {} },
     })
   })
 })
@@ -45,14 +45,13 @@ describe('normalizeRequirementSettings', () => {
       semester: { on: true, target: 18 },
       year: { on: false, target: null },
       tags: { STEM: { on: true, target: 8 } },
-      nonSom: { units: 0, bySchool: {} },
+      nonSom: { bySchool: {} },
     })
   })
 
-  it('keeps zero-or-more non-SOM units; blank or bad school numbers are dropped', () => {
-    const raw = { nonSom: { units: '2', bySchool: { YC: 2, GB: '', FS: -1, PH: '0', DI: 'x' } } }
-    expect(normalizeRequirementSettings(raw, tags).nonSom).toEqual({ units: 2, bySchool: { YC: 2, PH: 0 } })
-    expect(normalizeRequirementSettings({ nonSom: { units: -4 } }, tags).nonSom).toEqual({ units: 0, bySchool: {} })
+  it('keeps zero-or-more units per school; blank or bad numbers are dropped', () => {
+    const raw = { nonSom: { units: 2, bySchool: { YC: 2, GB: '', FS: -1, PH: '0', DI: 'x' } } }
+    expect(normalizeRequirementSettings(raw, tags).nonSom).toEqual({ bySchool: { YC: 2, PH: 0 } })
   })
 
   it('falls back to the defaults for junk', () => {
@@ -67,7 +66,7 @@ describe('load / persist', () => {
       semester: { on: true, target: 18 },
       year: { on: true, target: 36 },
       tags: { 'GBS Req': { on: true, target: 8 } },
-      nonSom: { units: 1, bySchool: { YC: 2 } },
+      nonSom: { bySchool: { YC: 2 } },
     }
     persistRequirementSettings(settings, tags, storage)
     expect(loadRequirementSettings(tags, storage)).toEqual(settings)
@@ -79,7 +78,7 @@ describe('load / persist', () => {
       semester: { on: true, target: null },
       year: { on: false, target: null },
       tags: { 'GBS Req': { on: true, target: 8 } },
-      nonSom: { units: 0, bySchool: {} },
+      nonSom: { bySchool: {} },
     })
   })
 
@@ -135,24 +134,25 @@ describe('requirementRows', () => {
     expect(requirementRows({ planCourses: plan, semester: 'fall', tagNames: tags, settings })).toEqual([])
   })
 
-  it('non-SOM courses add the student\'s number to the Totals: school first, then the main number', () => {
+  it('non-SOM courses add their school\'s number to the Totals; a school without one counts 0', () => {
     const yc = { ...course('ECON 1100', 'fall', 0), school: 'YC' }
     const gb = { ...course('GLBL 5010', 'fall', 0), school: 'GB' }
     const settings = {
       ...defaultRequirementSettings(),
       year: { on: true, target: null },
-      nonSom: { units: 1, bySchool: { YC: 2 } },
+      nonSom: { bySchool: { YC: 2 } },
     }
     const rows = requirementRows({ planCourses: [...plan, yc, gb], semester: 'fall', tagNames: tags, settings })
     expect(rows.map((r) => [r.label, r.totalUnits])).toEqual([
-      ['Semester', 9],
-      ['Year', 13],
+      ['Semester', 8],
+      ['Year', 12],
     ])
   })
 
   it('countedUnits: SOM courses keep their own units; non-SOM default to 0', () => {
-    expect(countedUnits(course('MGT 510', 'fall', 4), { units: 3, bySchool: {} })).toBe(4)
+    expect(countedUnits(course('MGT 510', 'fall', 4), { bySchool: { SOM: 3 } })).toBe(4)
     expect(countedUnits({ ...course('ECON 1100', 'fall', 0), school: 'YC' }, undefined)).toBe(0)
-    expect(countedUnits({ ...course('ECON 1100', 'fall', 0), school: 'YC' }, { units: 2, bySchool: { YC: 0 } })).toBe(0)
+    expect(countedUnits({ ...course('ECON 1100', 'fall', 0), school: 'YC' }, { bySchool: { GB: 2 } })).toBe(0)
+    expect(countedUnits({ ...course('ECON 1100', 'fall', 0), school: 'YC' }, { bySchool: { YC: 2 } })).toBe(2)
   })
 })

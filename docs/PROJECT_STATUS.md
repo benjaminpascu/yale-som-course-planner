@@ -123,7 +123,7 @@ Desktop (`lg+`): unchanged — catalog sidebar + planning stack; **Plans** in he
 
 ### Non-SOM Units (built Nov 2026, version 1.3.0, on `release/1.3`)
 
-- **Set Non-SOM Units** button in the Requirements bar when the plan has a course from another school (amber with ⚠ while one counts 0). Its window: All schools + one line per school in the plan; numbers add to Semester / Year Totals.
+- **Set Non-SOM Units** button in the Requirements bar when the plan has a course from another school (amber with ⚠ while one counts 0). Its window: one line per school in the plan; numbers add to Semester / Year Totals.
 - Spec: `docs/specs/non-som-units.md`. Code: `countedUnits` in `src/lib/requirementSettings.js`, `NonSomUnitsModal.jsx`, `TagUnitTracker.jsx`.
 
 ### Courses from across Yale ✅ (live Nov 2026, version 1.1.0)

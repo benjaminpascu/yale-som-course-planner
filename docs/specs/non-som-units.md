@@ -13,8 +13,7 @@ other schools. So each student sets the number themselves.
 
 ## Goals
 
-- A student says how many SOM units one course from another school counts:
-  one number for all schools, and an optional number per school.
+- A student says how many SOM units one course from each school in their plan counts.
 - Those numbers add to the **Semester Total** and **Year Total** in Requirements.
 - Easy to find exactly when it matters, and easy to change later.
 - Same in Single plan and Compare plans.
@@ -66,9 +65,8 @@ Clicking it opens a small window:
 ┌ Non-SOM Units ────────────────────────┐
 │ How many SOM units one course from    │
 │ each school counts for you.           │
-│ All schools                [ 0 ] units│
-│   Yale College             [ 2 ] units│
-│   Jackson School of…       [ 0 ] units│   ← blank box shows All schools in grey
+│ Yale College               [ 2 ] units│
+│ Jackson School of…         [ 0 ] units│   ← blank box counts 0
 │ Check with the registrar how … (in    │   ← footer, same look as the
 │ Select Requirements' note style)      │     Select Requirements note
 │                        Cancel   Save  │
@@ -76,16 +74,18 @@ Clicking it opens a small window:
 ```
 
 - One line per school in the plan on screen (Compare plans: both plans), in
-  School picker order.
-- A blank school box uses the All schools number. Zero is allowed. Numbers for
-  schools not listed are kept.
+  School picker order. Usually 1–3 schools.
+- No "All schools" line (built on the preview, then removed by the user: every
+  school in the plan already has its own box, so it only confused). A blank box
+  counts 0; zero is allowed. Numbers for schools not listed are kept, so a school
+  added later starts at 0 and turns the button amber again.
 - Shared by every plan, like Select Requirements (saved in this browser).
 - Phones: same button and window (mobile is deprioritized; it just needs to work).
 
 ## Data
 
 Saved with the requirement settings (`yale-som-course-planner-requirements` in
-localStorage) as `nonSom: { units, bySchool: { <school code>: units } }`.
+localStorage) as `nonSom: { bySchool: { <school code>: units } }`.
 `countedUnits` / `withNonSomUnits` in `src/lib/requirementSettings.js` apply it
 before the Totals are added up. UI: `NonSomUnitsModal.jsx`, button in
 `TagUnitTracker.jsx`.
