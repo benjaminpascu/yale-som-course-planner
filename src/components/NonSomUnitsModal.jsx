@@ -5,7 +5,7 @@ import { parseUnitCount } from '../lib/requirementSettings'
 function draftFromNonSom(nonSom) {
   const bySchool = {}
   for (const [code, units] of Object.entries(nonSom?.bySchool ?? {})) bySchool[code] = String(units)
-  return { units: String(nonSom?.units ?? 0), bySchool }
+  return { bySchool }
 }
 
 function nonSomFromDraft(draft) {
@@ -14,13 +14,13 @@ function nonSomFromDraft(draft) {
     const n = parseUnitCount(text)
     if (n != null) bySchool[code] = n
   }
-  return { units: parseUnitCount(draft.units) ?? 0, bySchool }
+  return { bySchool }
 }
 
 /** "label ... [ 2 ] units". */
-function UnitLine({ id, label, value, placeholder, onChange, inputRef, indent = false }) {
+function UnitLine({ id, label, value, onChange, inputRef }) {
   return (
-    <li className={`flex items-center gap-3 border-b border-gray-100 py-2 last:border-b-0 ${indent ? 'pl-4' : ''}`}>
+    <li className="flex items-center gap-3 border-b border-gray-100 py-2 last:border-b-0">
       <label htmlFor={id} className="min-w-0 flex-1 cursor-pointer text-sm text-gray-900">
         {label}
       </label>
@@ -32,7 +32,7 @@ function UnitLine({ id, label, value, placeholder, onChange, inputRef, indent = 
           type="text"
           inputMode="decimal"
           autoComplete="off"
-          placeholder={placeholder}
+          placeholder="0"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className="w-16 rounded border border-gray-300 px-2 py-1 text-right text-sm tabular-nums text-gray-900 placeholder:text-gray-400 focus:border-yale-600 focus:outline-none focus:ring-1 focus:ring-yale-600"
@@ -45,16 +45,15 @@ function UnitLine({ id, label, value, placeholder, onChange, inputRef, indent = 
 
 /**
  * Non-SOM Units: how many SOM units one course from another school counts.
- * "All schools" applies to every non-SOM course; each school in the plan gets its
- * own line, and a blank line uses the All schools number. Numbers for schools not
- * listed are kept as they were.
+ * One line per school in the plan; a blank line counts 0. Numbers for schools
+ * not listed are kept as they were.
  *
  * @param {{
  *   open: boolean,
- *   nonSom: { units: number, bySchool: Record<string, number> },
+ *   nonSom: { bySchool: Record<string, number> },
  *   schools: { id: string, label: string }[],
  *   onClose: () => void,
- *   onSave: (nonSom: { units: number, bySchool: Record<string, number> }) => void,
+ *   onSave: (nonSom: { bySchool: Record<string, number> }) => void,
  * }} props
  */
 export default function NonSomUnitsModal({ open, nonSom, schools = [], onClose, onSave }) {
@@ -76,8 +75,6 @@ export default function NonSomUnitsModal({ open, nonSom, schools = [], onClose, 
     onSave(nonSomFromDraft(draft))
     onClose()
   }
-
-  const allSchoolsPlaceholder = String(parseUnitCount(draft.units) ?? 0)
 
   return (
     <div
@@ -104,22 +101,13 @@ export default function NonSomUnitsModal({ open, nonSom, schools = [], onClose, 
               How many SOM units one course from each school counts for you.
             </p>
             <ul>
-              <UnitLine
-                id="non-som-all"
-                label="All schools"
-                value={draft.units}
-                placeholder="0"
-                inputRef={firstInputRef}
-                onChange={(units) => setDraft((d) => ({ ...d, units }))}
-              />
-              {schools.map((school) => (
+              {schools.map((school, i) => (
                 <UnitLine
                   key={school.id}
                   id={`non-som-${school.id}`}
                   label={school.label}
                   value={draft.bySchool[school.id] ?? ''}
-                  placeholder={allSchoolsPlaceholder}
-                  indent
+                  inputRef={i === 0 ? firstInputRef : undefined}
                   onChange={(value) =>
                     setDraft((d) => ({ ...d, bySchool: { ...d.bySchool, [school.id]: value } }))
                   }

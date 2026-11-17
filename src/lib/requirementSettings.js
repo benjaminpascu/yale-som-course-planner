@@ -11,10 +11,11 @@ export const REQUIREMENT_SETTINGS_KEY = 'yale-som-course-planner-requirements'
 
 /**
  * Non-SOM courses: Yale's feed has no units for them, so each student says how many
- * SOM units one course counts. `bySchool` (school code → units) wins over `units`.
+ * SOM units one course from each school counts (`bySchool`: school code → units).
+ * A school without a number counts 0.
  */
 export function defaultNonSomUnits() {
-  return { units: 0, bySchool: {} }
+  return { bySchool: {} }
 }
 
 /** Semester Total on, Year Total off, no requirements (most MBAs need none). */
@@ -41,13 +42,13 @@ function normalizeNonSom(raw) {
     const n = parseUnitCount(value)
     if (n != null) bySchool[code] = n
   }
-  return { units: parseUnitCount(raw.units) ?? 0, bySchool }
+  return { bySchool }
 }
 
 /** Units a course adds to the Requirements lines (non-SOM: the student's own number). */
 export function countedUnits(course, nonSom) {
   if (isSomCourse(course)) return course.units
-  return nonSom?.bySchool?.[course.school] ?? nonSom?.units ?? 0
+  return nonSom?.bySchool?.[course.school] ?? 0
 }
 
 /** The courses with non-SOM units replaced by the student's numbers. */
