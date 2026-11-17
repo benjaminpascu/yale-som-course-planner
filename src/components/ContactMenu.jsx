@@ -81,14 +81,7 @@ export default function ContactMenu() {
           aria-label="Contact"
           className="absolute right-0 top-full z-50 mt-2 w-[min(20rem,calc(100vw-2rem))] rounded-lg border border-yale-200 bg-white p-4 text-sm text-yale-950 shadow-xl"
         >
-          <p className="italic text-gray-600">
-            Made with love for the Yale community{' '}
-            <span role="img" aria-label="blue heart" className="not-italic">
-              💙
-            </span>
-          </p>
-          <p className="mt-2 font-semibold">Suggestions or found a bug?</p>
-          <p className="mt-0.5 text-gray-600">Contact Benjamin Pascu (GBS &apos;27)</p>
+          <p className="font-semibold">Suggestions or found a bug?</p>
 
           <div className="mt-2 space-y-1.5">
             <div className="flex items-center gap-2">
@@ -115,7 +108,16 @@ export default function ContactMenu() {
 
           {/* Smaller fine print, so the disclaimer fits on one line. */}
           <div className="mt-3 border-t border-yale-150 pt-2.5 text-xs text-gray-500">
-            <p>
+            {/* Broken after "community" on purpose, so it doesn't wrap mid-name. */}
+            <p className="italic">
+              Made with love for the Yale community
+              <br />
+              by Benjamin Pascu (GBS &apos;27){' '}
+              <span role="img" aria-label="blue heart" className="not-italic">
+                💙
+              </span>
+            </p>
+            <p className="mt-1">
               Course data:{' '}
               <a
                 href={YALE_COURSE_LIST_URL}
