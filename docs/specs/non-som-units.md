@@ -53,7 +53,7 @@ Requirements bar, only when the plan on screen has a course from another school
 
 ```
 Requirements · Spring 2027    [⚠ Set Non-SOM Units]  [Select Requirements]   ← amber while one counts 0
-Requirements · Spring 2027    [Non-SOM Units]        [Select Requirements]   ← normal once all count more
+Requirements · Spring 2027    [Set Non-SOM Units]    [Select Requirements]   ← same words, normal look once all count more
 ```
 
 The amber button replaces the old "Non-SOM courses count as 0 units" note. Its
