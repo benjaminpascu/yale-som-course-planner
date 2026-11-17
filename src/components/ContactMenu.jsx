@@ -88,6 +88,7 @@ export default function ContactMenu() {
             </span>
           </p>
           <p className="mt-2 font-semibold">Suggestions or found a bug?</p>
+          <p className="mt-0.5 text-gray-600">Contact Benjamin Pascu (GBS &apos;27)</p>
 
           <div className="mt-2 space-y-1.5">
             <div className="flex items-center gap-2">
@@ -112,18 +113,21 @@ export default function ContactMenu() {
             </p>
           </div>
 
-          <p className="mt-3 border-t border-yale-150 pt-2.5 text-gray-500">
-            Course data:{' '}
-            <a
-              href={YALE_COURSE_LIST_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium text-yale-700 underline underline-offset-2 hover:text-yale-900"
-            >
-              Yale SOM Course List
-            </a>
-          </p>
-          <p className="mt-1 text-gray-500">Student-built. Not affiliated with Yale University.</p>
+          {/* Smaller fine print, so the disclaimer fits on one line. */}
+          <div className="mt-3 border-t border-yale-150 pt-2.5 text-xs text-gray-500">
+            <p>
+              Course data:{' '}
+              <a
+                href={YALE_COURSE_LIST_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-yale-700 underline underline-offset-2 hover:text-yale-900"
+              >
+                Yale SOM Course List
+              </a>
+            </p>
+            <p className="mt-1">Student-built. Not affiliated with Yale University.</p>
+          </div>
         </div>
       ) : null}
     </div>
