@@ -59,7 +59,7 @@ function NonSomUnitsButton({ needsAttention, onClick }) {
           />
         </svg>
       ) : null}
-      Non-SOM Units
+      {needsAttention ? 'Set Non-SOM Units' : 'Non-SOM Units'}
     </button>
   )
 }
