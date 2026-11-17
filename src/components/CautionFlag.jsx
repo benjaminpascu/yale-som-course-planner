@@ -1,6 +1,6 @@
 /**
  * Small amber heads-up with a warning triangle, e.g. "Unsaved" next to the Plan button
- * or "Non-SOM courses count as 0 units" in Requirements.
+ * in Plans and Compare Plans.
  *
  * @param {{ children: import('react').ReactNode, title?: string, className?: string }} props
  */

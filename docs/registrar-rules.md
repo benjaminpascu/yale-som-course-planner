@@ -1,8 +1,9 @@
 # Registrar rules
 
 Rules from Yale SOM's Registrar's Office that affect how SOMtimes counts or
-warns about courses. **The app doesn't use these yet**: today every non-SOM
-course counts 0 units (`docs/specs/cross-registration.md`). Check this file
+warns about courses. **The app doesn't apply these itself**: each student sets
+how many units a non-SOM course counts under **Non-SOM Units**
+(`docs/specs/non-som-units.md`); otherwise it counts 0. Check this file
 before changing units, requirements or warnings for courses from other schools.
 
 ## Yale Law School (YLS) — from the SOM Registrar, Nov 2026
