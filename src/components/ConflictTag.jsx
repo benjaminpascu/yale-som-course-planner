@@ -1,17 +1,15 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { formatCourseHeading } from '../lib/courseDisplay'
-import { formatSchedule } from '../lib/parseCourses'
 import {
   TOOLTIP_HIDE_DELAY_MS,
   basePortaledTooltipStyle,
   clampPortaledTooltipLeft,
 } from '../lib/portaledTooltip'
-import { formatSessionLabel } from '../lib/sessionDisplay'
 
 /**
  * Red Conflict tag on a catalog row. Hover (tap on phones) lists the plan
- * courses it clashes with, like the bidding history squares (issue #19).
+ * courses it clashes with (number and title
+ * only, in dark red), like the bidding history squares (issue #19).
  */
 export default function ConflictTag({ conflictsWith = [] }) {
   const tooltipId = useId()
@@ -101,20 +99,16 @@ export default function ConflictTag({ conflictsWith = [] }) {
               id={tooltipId}
               role="tooltip"
               className="overflow-y-auto rounded-lg border border-gray-200 bg-white p-3 text-left shadow-xl"
-              style={{ ...style, maxWidth: Math.min(style.maxWidth, 320) }}
+              style={style}
               onMouseEnter={show}
               onMouseLeave={scheduleHide}
             >
-              <p className="mb-1 text-xs font-medium text-gray-700">Conflicts with</p>
-              <ul className="space-y-1.5">
+              {/* Same look as the Requirements hover (Contributing courses). */}
+              <p className="mb-2 text-xs font-medium text-gray-700">Conflicts with</p>
+              <ul className="space-y-1 border-l-2 border-gray-200 pl-3 text-xs">
                 {conflictsWith.map((c) => (
-                  <li key={c.courseId} className="border-t border-gray-100 pt-1.5 first:border-t-0 first:pt-0">
-                    <p className="text-xs font-medium leading-snug text-gray-900">
-                      {formatCourseHeading(c)}
-                    </p>
-                    <p className="text-[11px] leading-snug text-gray-500">
-                      {formatSessionLabel(c.session)} · {formatSchedule(c)}
-                    </p>
+                  <li key={c.courseId} className="text-danger">
+                    {c.courseNumber} — {c.title}
                   </li>
                 ))}
               </ul>
