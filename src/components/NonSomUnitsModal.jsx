@@ -101,7 +101,7 @@ export default function NonSomUnitsModal({ open, nonSom, schools = [], onClose, 
 
           <div className="px-4 pb-2 pt-3">
             <p className="mb-2 text-xs leading-snug text-gray-600">
-              How many SOM units one course from each school counts for you. Check with the registrar.
+              How many SOM units one course from each school counts for you.
             </p>
             <ul>
               <UnitLine
@@ -128,20 +128,26 @@ export default function NonSomUnitsModal({ open, nonSom, schools = [], onClose, 
             </ul>
           </div>
 
-          <div className="flex justify-end gap-2 border-t border-gray-200 bg-gray-50 px-4 py-2.5">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="rounded bg-yale-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-yale-800"
-            >
-              Save
-            </button>
+          <div className="border-t border-gray-200 bg-gray-50 px-4 py-2.5">
+            {/* Same look as the note at the bottom of Select Requirements. */}
+            <p className="text-[11px] leading-snug text-amber-900/90">
+              Check with the registrar how courses from other schools count toward your SOM units.
+            </p>
+            <div className="mt-2 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="rounded bg-yale-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-yale-800"
+              >
+                Save
+              </button>
+            </div>
           </div>
         </form>
       </div>

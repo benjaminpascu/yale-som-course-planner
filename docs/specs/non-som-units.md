@@ -65,11 +65,12 @@ Clicking it opens a small window:
 ```
 ┌ Non-SOM Units ────────────────────────┐
 │ How many SOM units one course from    │
-│ each school counts for you. Check     │
-│ with the registrar.                   │
+│ each school counts for you.           │
 │ All schools                [ 0 ] units│
 │   Yale College             [ 2 ] units│
 │   Jackson School of…       [ 0 ] units│   ← blank box shows All schools in grey
+│ Check with the registrar how … (in    │   ← footer, same look as the
+│ Select Requirements' note style)      │     Select Requirements note
 │                        Cancel   Save  │
 └───────────────────────────────────────┘
 ```
