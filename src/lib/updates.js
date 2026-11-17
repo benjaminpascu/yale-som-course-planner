@@ -10,6 +10,13 @@
  */
 export const UPDATES = [
   {
+    version: '1.3.0',
+    date: '2026-11-16',
+    changes: [
+      'Courses from other schools can now count toward your units. When your plan has one, click Set Non-SOM Units in the Requirements box and type how many SOM units one course from each school counts (for example 2 for Yale College). Your Semester and Year Totals update right away.',
+    ],
+  },
+  {
     version: '1.2.1',
     date: '2026-11-15',
     changes: [

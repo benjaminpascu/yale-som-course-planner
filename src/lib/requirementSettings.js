@@ -5,8 +5,18 @@
  */
 import { normalizeRequirementTargets, REQUIREMENT_TARGETS_KEY } from './requirementTargets.js'
 import { computePlanUnitTotal, computeTagUnitTotals, courseSemester } from './tagUnitTracker.js'
+import { isSomCourse } from './schools.js'
 
 export const REQUIREMENT_SETTINGS_KEY = 'yale-som-course-planner-requirements'
+
+/**
+ * Non-SOM courses: Yale's feed has no units for them, so each student says how many
+ * SOM units one course from each school counts (`bySchool`: school code → units).
+ * A school without a number counts 0.
+ */
+export function defaultNonSomUnits() {
+  return { bySchool: {} }
+}
 
 /** Semester Total on, Year Total off, no requirements (most MBAs need none). */
 export function defaultRequirementSettings() {
@@ -14,7 +24,36 @@ export function defaultRequirementSettings() {
     semester: { on: true, target: null },
     year: { on: false, target: null },
     tags: {},
+    nonSom: defaultNonSomUnits(),
   }
+}
+
+/** Zero or more units, or null when blank / not a number. */
+export function parseUnitCount(value) {
+  if (value == null || (typeof value === 'string' && value.trim() === '')) return null
+  const n = typeof value === 'number' ? value : Number(value)
+  return Number.isFinite(n) && n >= 0 ? n : null
+}
+
+function normalizeNonSom(raw) {
+  if (!raw || typeof raw !== 'object') return defaultNonSomUnits()
+  const bySchool = {}
+  for (const [code, value] of Object.entries(raw.bySchool ?? {})) {
+    const n = parseUnitCount(value)
+    if (n != null) bySchool[code] = n
+  }
+  return { bySchool }
+}
+
+/** Units a course adds to the Requirements lines (non-SOM: the student's own number). */
+export function countedUnits(course, nonSom) {
+  if (isSomCourse(course)) return course.units
+  return nonSom?.bySchool?.[course.school] ?? 0
+}
+
+/** The courses with non-SOM units replaced by the student's numbers. */
+export function withNonSomUnits(courses, nonSom) {
+  return courses.map((c) => (isSomCourse(c) ? c : { ...c, units: countedUnits(c, nonSom) }))
 }
 
 function normalizeTarget(value) {
@@ -40,6 +79,7 @@ export function normalizeRequirementSettings(raw, knownTags) {
     semester: normalizeLine(raw.semester, true),
     year: normalizeLine(raw.year, false),
     tags,
+    nonSom: normalizeNonSom(raw.nonSom),
   }
 }
 
@@ -81,9 +121,10 @@ export function persistRequirementSettings(settings, knownTags, storage = global
 /**
  * The Requirements bar's lines, in order: Semester, Year, then ticked requirements
  * in catalog order. Semester and requirements count the semester being viewed;
- * Year counts the whole plan.
+ * Year counts the whole plan. Non-SOM courses count the student's own number.
  */
-export function requirementRows({ planCourses, semester, tagNames, settings }) {
+export function requirementRows({ planCourses: rawPlanCourses, semester, tagNames, settings }) {
+  const planCourses = withNonSomUnits(rawPlanCourses, settings.nonSom)
   const semesterCourses = planCourses.filter((c) => courseSemester(c) === semester)
   const rows = []
   if (settings.semester.on) {
