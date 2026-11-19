@@ -59,26 +59,64 @@ export function pastTermsFor(termCode) {
 }
 
 /**
- * The four squares for a section: Round 1 and 2 of last year, then of the year
- * before. `points` is null when there's no result.
+ * The six semesters before this one (three years, both seasons), newest first:
+ * 202701 → ["Fall 2026", "Spring 2026", "Fall 2025", "Spring 2025", "Fall 2024", "Spring 2024"].
+ */
+export function recentTermsFor(termCode) {
+  const semester = termCodeToSemester(termCode)
+  const year = termCodeToCalendarYear(termCode)
+  if (!semester || year == null) return []
+  const terms = []
+  let season = semester === 'fall' ? 'Fall' : 'Spring'
+  let y = year
+  for (let i = 0; i < 6; i += 1) {
+    if (season === 'Spring') {
+      season = 'Fall'
+      y -= 1
+    } else {
+      season = 'Spring'
+    }
+    terms.push(`${season} ${y}`)
+  }
+  return terms
+}
+
+/** Round 1 and 2 of one past semester for this section. */
+function roundsIn(term, course, history) {
+  const matchByTitle = history?.byTitle.has(`${term}|${course.courseNumber.trim()}`)
+  const entry = history?.rounds.get(
+    keyOf(
+      term,
+      course.courseNumber,
+      matchByTitle ? `@${destinationOf(course.title)}` : course.section,
+    ),
+  )
+  return [
+    { label: `Round 1, ${term}`, points: entry?.round1 ?? null },
+    { label: `Round 2, ${term}`, points: entry?.round2 ?? null },
+  ]
+}
+
+const hasResult = (rounds) => rounds.some((round) => round.points != null)
+
+/**
+ * The squares for a section, Round 1 and 2 per semester, newest first. Normally
+ * the same season of the last two years (four squares). When neither has a
+ * result (e.g. MGT 674 moved from fall to spring), the two newest semesters of
+ * the last three years, either season, that have a result for this same section
+ * (two or four squares). Never another section's numbers. `points` is null when
+ * there's no result.
  *
  * @returns {{ label: string, points: number|null }[]}
  */
 export function getBiddingRounds(course, history) {
-  return pastTermsFor(course.termCode).flatMap((term) => {
-    const matchByTitle = history?.byTitle.has(`${term}|${course.courseNumber.trim()}`)
-    const entry = history?.rounds.get(
-      keyOf(
-        term,
-        course.courseNumber,
-        matchByTitle ? `@${destinationOf(course.title)}` : course.section,
-      ),
-    )
-    return [
-      { label: `Round 1, ${term}`, points: entry?.round1 ?? null },
-      { label: `Round 2, ${term}`, points: entry?.round2 ?? null },
-    ]
-  })
+  const sameSeason = pastTermsFor(course.termCode).map((term) => roundsIn(term, course, history))
+  if (sameSeason.some(hasResult)) return sameSeason.flat()
+  const withResults = recentTermsFor(course.termCode)
+    .map((term) => roundsIn(term, course, history))
+    .filter(hasResult)
+    .slice(0, 2)
+  return withResults.length ? withResults.flat() : sameSeason.flat()
 }
 
 /** SOM sections with at least one past result. Blank = no history; gray = no result that round. */

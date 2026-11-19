@@ -8,6 +8,7 @@ import {
   getBiddingRounds,
   parseBiddingCsv,
   pastTermsFor,
+  recentTermsFor,
   showsBiddingHistory,
 } from './biddingHistory'
 
@@ -20,6 +21,13 @@ const csv = [
   'Spring 2026,MGT 416,03,0,21,International Experience: Mexico',
   'Spring 2025,MGT 416,02,300,551,International Experience: Spain',
   'Spring 2025,MGT 416,05,1,11,"International Experience: India, Bangalore"',
+  'Fall 2025,MGT 674,01,376,580',
+  'Fall 2024,MGT 674,01,310,600',
+  'Fall 2023,MGT 674,01,298,600',
+  'Fall 2025,MGT 531,01,999,999',
+  'Fall 2025,MGT 777,01,,',
+  'Spring 2024,MGT 777,01,40,',
+  'Spring 2023,MGT 888,01,50,60',
 ].join('\n')
 
 const course = (overrides = {}) => ({
@@ -37,6 +45,45 @@ describe('bidding history', () => {
     expect(pastTermsFor('202701')).toEqual(['Spring 2026', 'Spring 2025'])
     expect(pastTermsFor('202603')).toEqual(['Fall 2025', 'Fall 2024'])
     expect(pastTermsFor('')).toEqual([])
+  })
+
+  it('lists the six semesters before this one, both seasons', () => {
+    expect(recentTermsFor('202701')).toEqual([
+      'Fall 2026', 'Spring 2026', 'Fall 2025', 'Spring 2025', 'Fall 2024', 'Spring 2024',
+    ])
+    expect(recentTermsFor('202603')[0]).toBe('Spring 2026')
+    expect(recentTermsFor('')).toEqual([])
+  })
+
+  it('uses the other season when the same season has no results (course moved semesters)', () => {
+    const moved = course({ courseNumber: 'MGT 674', section: '01' })
+    expect(getBiddingRounds(moved, history)).toEqual([
+      { label: 'Round 1, Fall 2025', points: 376 },
+      { label: 'Round 2, Fall 2025', points: 580 },
+      { label: 'Round 1, Fall 2024', points: 310 },
+      { label: 'Round 2, Fall 2024', points: 600 },
+    ])
+  })
+
+  it('keeps the same season when it has a result', () => {
+    expect(getBiddingRounds(course(), history).map((r) => r.label)).toEqual([
+      'Round 1, Spring 2026', 'Round 2, Spring 2026', 'Round 1, Spring 2025', 'Round 2, Spring 2025',
+    ])
+  })
+
+  it('never borrows another section and skips semesters without results', () => {
+    const newSection = course({ courseNumber: 'MGT 674', section: '02' })
+    expect(showsBiddingHistory(newSection, getBiddingRounds(newSection, history))).toBe(false)
+    // Fall 2025 row has no numbers, so only Spring 2024 is shown.
+    expect(getBiddingRounds(course({ courseNumber: 'MGT 777' }), history)).toEqual([
+      { label: 'Round 1, Spring 2024', points: 40 },
+      { label: 'Round 2, Spring 2024', points: null },
+    ])
+  })
+
+  it('ignores results older than three years', () => {
+    const old = course({ courseNumber: 'MGT 888' })
+    expect(showsBiddingHistory(old, getBiddingRounds(old, history))).toBe(false)
   })
 
   it('gives four rounds for the exact section, newest first', () => {

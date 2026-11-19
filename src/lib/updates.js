@@ -10,6 +10,13 @@
  */
 export const UPDATES = [
   {
+    version: '1.3.1',
+    date: '2026-11-18',
+    changes: [
+      'Bidding history now also shows for courses that moved to a different semester, like Leading Small and Medium Enterprises: hover the squares to see which semester the points are from (for example Fall 2025).',
+    ],
+  },
+  {
     version: '1.3.0',
     date: '2026-11-16',
     changes: [

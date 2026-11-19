@@ -57,6 +57,13 @@ nobody opens it while planning.
   year, then Round 1 and Round 2 of the year before.** A Spring 2027 course shows
   Spring 2026 R1, Spring 2026 R2, Spring 2025 R1, Spring 2025 R2. A Fall 2026 course
   shows Fall 2025 and Fall 2024.
+- **Course changed semester** (issue #23, Nov 18, 2026; e.g. MGT 674 was fall, now
+  spring): when neither same-season semester has a result, the squares show the two
+  newest semesters of the last three years (either season) with a result for **this
+  same section**, labeled with their real semester ("Fall 2025"). Only one found →
+  two squares. A section with no past results of its own (e.g. a new section 02)
+  stays blank; it never borrows another section's numbers (user: "no info rather
+  than false info").
 - No labels, no legend.
 - Shown only for SOM sections with **at least one past result** (user decision, Nov
   13, 2026). Blank = no bidding history; a gray square = no result for that round.
