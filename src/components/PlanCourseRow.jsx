@@ -161,8 +161,9 @@ export default function PlanCourseRow({
         hideFromClass={compact ? 'lg:hidden' : 'md:hidden'}
       />
 
+      {/* The whole row lights up on hover (not just the name), × included. */}
       <li
-        className={`flex items-start border-b border-save-100 bg-save-50 last:border-b-0 ${
+        className={`flex items-start border-b border-save-100 bg-save-50 transition-colors last:border-b-0 hover:bg-save-100/60 ${
           compact ? 'gap-1.5 px-2 py-1.5 text-xs' : 'gap-2 px-3 py-2 text-sm'
         }`}
       >
@@ -184,7 +185,7 @@ export default function PlanCourseRow({
           onMouseLeave={scheduleHideDesktopTooltip}
           onFocus={openDesktopTooltip}
           onBlur={scheduleHideDesktopTooltip}
-          className={`min-w-0 flex-1 rounded-md text-left transition-colors hover:bg-save-100/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-yale-400 focus-visible:ring-offset-1 ${
+          className={`min-w-0 flex-1 rounded-md text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-yale-400 focus-visible:ring-offset-1 ${
             compact ? '-my-1.5 -ml-2 py-1.5 pl-2 pr-1' : '-my-2 -ml-3 py-2 pl-3 pr-1'
           }`}
         >
@@ -207,7 +208,7 @@ export default function PlanCourseRow({
         <button
           type="button"
           onClick={() => onRemoveCourse(course.courseId)}
-          className={`-mr-1 flex shrink-0 items-center justify-center rounded-md leading-none text-gray-400 hover:bg-danger/5 hover:text-danger ${
+          className={`-mr-1 flex shrink-0 items-center justify-center rounded-md leading-none text-gray-400 transition-colors hover:text-danger focus:outline-none focus-visible:ring-2 focus-visible:ring-yale-400 ${
             compact ? 'h-6 w-6 text-base' : 'h-7 w-7 text-lg'
           }`}
           aria-label={`Remove ${course.courseNumber} from plan`}
