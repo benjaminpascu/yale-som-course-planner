@@ -46,9 +46,8 @@ function formatCatalogSubtitle(filteredCount, rangeStart, rangeEnd) {
   return `Showing ${rangeStart}–${rangeEnd} of ${filteredCount} ${courses}`
 }
 
+/** Always shown (user, Nov 19, 2026): one page = "Page 1 of 1" with both buttons grayed out. */
 function CatalogPagination({ page, totalPages, onPageChange }) {
-  if (totalPages <= 1) return null
-
   const { header } = sectionTone('catalog')
 
   return (
