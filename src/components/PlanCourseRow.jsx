@@ -8,7 +8,6 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import {
-  LARGE_DESCRIPTION_LINE_COUNT,
   TOOLTIP_HIDE_DELAY_MS,
   besidePlacement,
   calendarCourseTooltipStyle,
@@ -21,6 +20,7 @@ import {
   hasMeetingTime,
   NO_MEETING_TIME_MESSAGE,
 } from '../lib/parseCourses'
+import { useBiddingTableWidth } from './BiddingHistory'
 import { CalendarCourseDetail } from './CalendarCourseBlock'
 import CourseDetailSheet from './CourseDetailSheet'
 
@@ -56,6 +56,7 @@ export default function PlanCourseRow({
   const [sheetOpen, setSheetOpen] = useState(false)
   const [desktopTooltipOpen, setDesktopTooltipOpen] = useState(false)
   const [tooltipStyle, setTooltipStyle] = useState(null)
+  const tableMinWidth = useBiddingTableWidth(tooltipRef, desktopTooltipOpen)
 
   const preferAbove = useCallback(() => {
     if (!triggerRef.current) return true
@@ -76,9 +77,10 @@ export default function PlanCourseRow({
         bottomInset: getViewportBottomInsetPx(),
       },
       {
-        hasDescription: Boolean(course.description),
         textRight: textRightEdge(triggerRef.current),
         contentRight: triggerRef.current.getBoundingClientRect().right,
+        // Too narrow for the bidding table beside the row → above/below instead.
+        minWidth: tableMinWidth,
       },
     )
     besideRef.current = beside != null
@@ -87,9 +89,15 @@ export default function PlanCourseRow({
         above: preferAbove(),
         hasDescription: Boolean(course.description),
         large: true,
+        minWidth: tableMinWidth,
       }),
     )
-  }, [course.description, preferAbove])
+  }, [course.description, preferAbove, tableMinWidth])
+
+  // The bidding table is wider than the popup: place it again at that width.
+  useEffect(() => {
+    if (desktopTooltipOpen && tableMinWidth) refreshTooltipStyle()
+  }, [desktopTooltipOpen, tableMinWidth, refreshTooltipStyle])
 
   const cancelHideTooltip = useCallback(() => {
     if (hideTimerRef.current !== null) {
@@ -214,7 +222,7 @@ export default function PlanCourseRow({
               ref={tooltipRef}
               id={detailId}
               role="tooltip"
-              className="overflow-y-auto rounded-lg border border-gray-200 bg-white p-4 text-left shadow-xl max-md:hidden"
+              className="overflow-y-auto overscroll-contain rounded-lg border border-gray-200 bg-white p-4 text-left shadow-xl max-md:hidden"
               style={tooltipStyle}
               onMouseEnter={openDesktopTooltip}
               onMouseLeave={scheduleHideDesktopTooltip}
@@ -223,7 +231,6 @@ export default function PlanCourseRow({
                 course={course}
                 fallYear={fallYear}
                 springYear={springYear}
-                descriptionLines={LARGE_DESCRIPTION_LINE_COUNT}
               />
             </div>,
             document.body,

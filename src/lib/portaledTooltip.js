@@ -3,17 +3,15 @@ export const MOBILE_BOTTOM_NAV_ID = 'app-mobile-bottom-nav'
 export const TOOLTIP_HIDE_DELAY_MS = 80
 export const CALENDAR_TOOLTIP_MIN_WIDTH = 288
 export const CALENDAR_TOOLTIP_MAX_WIDTH = 448
-/** Description body height in the calendar hover popup (matches ~metadata column). */
-export const CALENDAR_DESCRIPTION_LINE_COUNT = 13
-/** Course hover popup (Weekly Calendar + Your Plan): wide and tall, so most descriptions fit without scrolling. */
+/**
+ * Course hover popup (Weekly Calendar + Your Plan): wide and tall, so most courses fit
+ * without scrolling. When they don't, the whole popup scrolls (never the description alone).
+ */
 export const LARGE_TOOLTIP_MAX_WIDTH = 640
-export const LARGE_TOOLTIP_MAX_HEIGHT_PX = 560
-export const LARGE_DESCRIPTION_LINE_COUNT = 22
+export const LARGE_TOOLTIP_MAX_HEIGHT_PX = 720
 
 const VIEWPORT_MARGIN = 16
 const TOOLTIP_MAX_HEIGHT_PX = 320
-/** Popup padding + course title + "Description" label, around the scrolling description. */
-const DESCRIPTION_CHROME_PX = 84
 
 /** Height of fixed mobile bottom nav (3rem row + safe area), or 0 on desktop. */
 export function getViewportBottomInsetPx() {
@@ -99,12 +97,13 @@ export function basePortaledTooltipStyle(
 }
 
 /**
- * Calendar popup with description: fixed width, description scrolls past a set number
- * of lines. `large` (Your Plan) is wider and taller.
+ * Calendar popup with description: fixed width; the popup scrolls when it's taller
+ * than the room. `large` (Your Plan) is wider and taller. `minWidth`: the bidding
+ * table's width, so the popup is never narrower than it (as far as the screen allows).
  */
 export function calendarCourseTooltipStyle(
   anchorEl,
-  { above: preferAbove = true, hasDescription = false, large = false } = {},
+  { above: preferAbove = true, hasDescription = false, large = false, minWidth = 0 } = {},
 ) {
   if (!hasDescription) {
     return basePortaledTooltipStyle(anchorEl, { above: preferAbove })
@@ -114,7 +113,10 @@ export function calendarCourseTooltipStyle(
   const gap = 8
   const widthCap = large ? LARGE_TOOLTIP_MAX_WIDTH : CALENDAR_TOOLTIP_MAX_WIDTH
   const heightCap = large ? LARGE_TOOLTIP_MAX_HEIGHT_PX : TOOLTIP_MAX_HEIGHT_PX
-  const width = maxTooltipWidthForAnchor(anchorEl, widthCap)
+  const width = Math.max(
+    maxTooltipWidthForAnchor(anchorEl, widthCap),
+    Math.min(minWidth, window.innerWidth - VIEWPORT_MARGIN * 2),
+  )
   const bottomInsetPx = getViewportBottomInsetPx()
 
   const roomAbove = rect.top - gap - VIEWPORT_MARGIN
@@ -127,11 +129,9 @@ export function calendarCourseTooltipStyle(
     position: 'fixed',
     left: computePortaledTooltipLeft(rect, width),
     width,
-    maxWidth: widthCap,
+    maxWidth: Math.max(widthCap, width),
     zIndex: TOOLTIP_Z_INDEX,
     maxHeight,
-    // Only the description scrolls: it gets the popup's height minus title and padding.
-    '--tooltip-desc-max': `${Math.max(64, maxHeight - DESCRIPTION_CHROME_PX)}px`,
   }
   if (above) {
     style.bottom = Math.max(bottomInsetPx + gap, window.innerHeight - rect.top + gap)
@@ -153,22 +153,24 @@ export function clampPortaledTooltipLeft(anchorEl, tooltipEl) {
  * below, so the mouse can move straight to the next course: right of the row, left
  * of it, or (Single plan, where rows span the whole right side) over the row's empty
  * right part, between the course name (`textRight`) and the remove × (`contentRight`).
- * Null when nothing fits; callers then fall back to above/below.
+ * Null when nothing fits (at least `minWidth`, the bidding table's width); callers
+ * then fall back to above/below.
  *
  * @param {{ left: number, right: number, top: number, bottom: number }} rowRect
  * @param {{ width: number, height: number, bottomInset: number }} viewport
- * @param {{ hasDescription?: boolean, textRight?: number, contentRight?: number }} [opts]
+ * @param {{ textRight?: number, contentRight?: number, minWidth?: number }} [opts]
  */
-export function besidePlacement(rowRect, viewport, { hasDescription = false, textRight, contentRight } = {}) {
+export function besidePlacement(rowRect, viewport, { textRight, contentRight, minWidth = 0 } = {}) {
   const gap = 8
   const roomRight = viewport.width - VIEWPORT_MARGIN - rowRect.right - gap
   const roomLeft = rowRect.left - VIEWPORT_MARGIN - gap
   const roomInside =
     textRight != null && contentRight != null ? contentRight - gap - (textRight + gap) : 0
   const room = Math.max(roomRight, roomLeft, roomInside)
-  if (room < CALENDAR_TOOLTIP_MIN_WIDTH) return null
+  if (room < Math.max(CALENDAR_TOOLTIP_MIN_WIDTH, minWidth)) return null
 
-  const width = Math.min(LARGE_TOOLTIP_MAX_WIDTH, room)
+  // Wider than usual only when the bidding table needs it.
+  const width = Math.min(Math.max(LARGE_TOOLTIP_MAX_WIDTH, minWidth), room)
   let left
   if (room === roomRight) left = rowRect.right + gap
   else if (room === roomLeft) left = rowRect.left - gap - width
@@ -186,9 +188,6 @@ export function besidePlacement(rowRect, viewport, { hasDescription = false, tex
     width,
     zIndex: TOOLTIP_Z_INDEX,
     maxHeight,
-  }
-  if (hasDescription) {
-    style['--tooltip-desc-max'] = `${Math.max(64, maxHeight - DESCRIPTION_CHROME_PX)}px`
   }
   if (down) style.top = rowRect.top
   else style.bottom = viewport.height - rowRect.bottom

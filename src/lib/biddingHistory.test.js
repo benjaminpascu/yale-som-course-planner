@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
   NO_DATA_COLOR,
+  buildSectionIndex,
+  getBiddingGrid,
+  sectionsFor,
   destinationOf,
   BIDDING_STOPS,
   biddingColor,
@@ -28,6 +31,12 @@ const csv = [
   'Fall 2025,MGT 777,01,,',
   'Spring 2024,MGT 777,01,40,',
   'Spring 2023,MGT 888,01,50,60',
+  'Spring 2026,MGT 822,01,0,0',
+  'Spring 2024,MGT 822,01,0,10',
+  'Spring 2023,MGT 822,02,0,0',
+  'Spring 2026,MGT 532,03,1,250',
+  'Spring 2026,MGT 532,01,1,0',
+  'Fall 2025,MGT 532,01,15,100',
 ].join('\n')
 
 const course = (overrides = {}) => ({
@@ -133,5 +142,54 @@ describe('bidding history', () => {
     expect(formatPoints(340)).toBe('340 points')
     expect(formatPoints(1, { short: true })).toBe('1 pt')
     expect(formatPoints(143, { short: true })).toBe('143 pts')
+  })
+})
+
+describe('bidding history by section (popup table)', () => {
+  const history = parseBiddingCsv(csv)
+
+  it('gives a column to every section offered now, even with no results', () => {
+    const grid = getBiddingGrid(course({ courseNumber: 'MGT 822' }), history, ['01', 'G1'])
+    expect(grid.sections).toEqual(['01', 'G1'])
+    expect(grid.thisSection).toBe('01')
+    expect(grid.rows).toEqual([
+      { term: 'Spring 2026', cells: { '01': { round1: 0, round2: 0 } } },
+      { term: 'Spring 2024', cells: { '01': { round1: 0, round2: 10 } } },
+    ])
+  })
+
+  it('lists past sections too, newest semester first, both seasons, last three years only', () => {
+    const grid = getBiddingGrid(course({ courseNumber: 'MGT 532', section: '03' }), history, ['03'])
+    expect(grid.sections).toEqual(['01', '03'])
+    expect(grid.thisSection).toBe('03')
+    expect(grid.rows.map((row) => row.term)).toEqual(['Spring 2026', 'Fall 2025'])
+    // Spring 2023 (MGT 822 section 02) is more than three years back.
+    const old = getBiddingGrid(course({ courseNumber: 'MGT 822' }), history, ['01'])
+    expect(old.sections).toEqual(['01'])
+  })
+
+  it('shows no table for an EMBA course (the file only has full-time results)', () => {
+    const emba = course({ courseNumber: 'MGT 822', section: 'E1', category: 'EMBA' })
+    expect(getBiddingGrid(emba, history, ['E1']).rows).toEqual([])
+  })
+
+  it('puts a trip in one column: its own destination, under its section number', () => {
+    const india = course({ courseNumber: 'MGT 416', section: '07', title: 'IE: India' })
+    const grid = getBiddingGrid(india, history, ['01', '07'])
+    expect(grid.rows).toEqual([
+      { term: 'Spring 2026', cells: { '07': { round1: 0, round2: 0 } } },
+    ])
+  })
+
+  it('indexes sections offered per semester, keeping EMBA apart', () => {
+    const index = buildSectionIndex([
+      course({ courseNumber: 'MGT 822', section: '01' }),
+      course({ courseNumber: 'MGT 822', section: 'G1' }),
+      course({ courseNumber: 'MGT 822', section: 'E1', category: 'EMBA' }),
+      course({ courseNumber: 'MGT 822', section: '01', termCode: '202603' }),
+    ])
+    expect(sectionsFor(index, course({ courseNumber: 'MGT 822' }))).toEqual(['01', 'G1'])
+    expect(sectionsFor(index, course({ courseNumber: 'MGT 822', category: 'EMBA' }))).toEqual(['E1'])
+    expect(sectionsFor(null, course())).toEqual([])
   })
 })

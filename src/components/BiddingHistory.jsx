@@ -1,12 +1,25 @@
-import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
+import {
+  Fragment,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 import { createPortal } from 'react-dom'
+import CautionFlag from './CautionFlag'
 import { isSomCourse } from '../lib/schools'
 import {
   BIDDING_DISCLAIMER,
   biddingColor,
   formatPoints,
+  getBiddingGrid,
   getBiddingRounds,
   parseBiddingCsv,
+  sectionsFor,
   showsBiddingHistory,
 } from '../lib/biddingHistory'
 import { loadBiddingHistoryCsv } from '../lib/loadData'
@@ -32,6 +45,12 @@ function useBiddingHistory() {
 }
 
 /**
+ * Sections offered per semester (`buildSectionIndex`), provided once by App.jsx so
+ * the course popup can give every current section a column.
+ */
+export const CourseSectionsContext = createContext(null)
+
+/**
  * The four rounds for a course; null when it has no past results; undefined
  * while the bidding file is still loading.
  */
@@ -49,11 +68,8 @@ const Swatch = ({ points, className = '' }) => (
   />
 )
 
-/**
- * Rounds come as [R1, R2] per semester; one table row per semester.
- * `compact` (narrow course popups): "R1"/"R2" headers and bare numbers.
- */
-function RoundsTable({ rounds, compact = false }) {
+/** Rounds come as [R1, R2] per semester; one table row per semester. */
+function RoundsTable({ rounds }) {
   const terms = []
   for (let i = 0; i < rounds.length; i += 2) {
     terms.push({ term: rounds[i].label.replace(/^Round 1, /, ''), cells: rounds.slice(i, i + 2) })
@@ -62,12 +78,12 @@ function RoundsTable({ rounds, compact = false }) {
     <table className="w-full border-collapse text-xs">
       <thead>
         <tr className="border-b border-gray-200 text-[11px] text-gray-500">
-          <th className={`py-1 text-left font-medium ${compact ? 'pr-2' : 'pr-4'}`} />
-          <th className={`py-1 text-left font-medium ${compact ? 'px-1' : 'px-2'}`}>
-            {compact ? 'R1' : 'Round 1'}
+          <th className="py-1 pr-4 text-left font-medium" />
+          <th className="px-2 py-1 text-left font-medium">
+            Round 1
           </th>
-          <th className={`py-1 text-left font-medium ${compact ? 'pl-1' : 'pl-2'}`}>
-            {compact ? 'R2' : 'Round 2'}
+          <th className="py-1 pl-2 text-left font-medium">
+            Round 2
           </th>
         </tr>
       </thead>
@@ -76,22 +92,22 @@ function RoundsTable({ rounds, compact = false }) {
           <tr key={term} className="border-b border-gray-100 last:border-b-0">
             <th
               scope="row"
-              className={`py-1.5 text-left font-medium whitespace-nowrap text-gray-900 ${compact ? 'pr-2' : 'pr-4'}`}
+              className="py-1.5 pr-4 text-left font-medium whitespace-nowrap text-gray-900"
             >
               {term}
             </th>
             {cells.map((cell, i) => (
               <td
                 key={cell.label}
-                className={`py-1.5 whitespace-nowrap ${i === 0 ? (compact ? 'px-1' : 'px-2') : compact ? 'pl-1' : 'pl-2'}`}
+                className={`py-1.5 whitespace-nowrap ${i === 0 ? 'px-2' : 'pl-2'}`}
               >
-                <span className={`inline-flex items-center ${compact ? 'gap-1' : 'gap-1.5'}`}>
+                <span className="inline-flex items-center gap-1.5">
                   <Swatch points={cell.points} className="size-2.5" />
                   {cell.points == null ? (
-                    <span className="text-gray-400">{compact ? '–' : 'No data'}</span>
+                    <span className="text-gray-400">No data</span>
                   ) : (
                     <span className="font-medium tabular-nums text-gray-900">
-                      {compact ? cell.points : formatPoints(cell.points, { short: true })}
+                      {formatPoints(cell.points, { short: true })}
                     </span>
                   )}
                 </span>
@@ -105,27 +121,128 @@ function RoundsTable({ rounds, compact = false }) {
 }
 
 /**
- * Bidding history inside a course popup (Weekly Calendar, Your Plan), in the
- * narrow facts column. SOM courses without past results say so; other schools'
- * courses (not in SOM bidding) show nothing.
+ * Width the course popup needs so the bidding table fits without its own scrollbar
+ * (table + the popup's padding and border). Re-measured when the popup's content
+ * changes size, e.g. once the bidding file has loaded. Only grows.
  */
-export function BiddingHistoryDetail({ course }) {
+export function useBiddingTableWidth(popupRef, open) {
+  const [minWidth, setMinWidth] = useState(0)
+  useLayoutEffect(() => {
+    const popup = popupRef.current
+    if (!open || !popup) return undefined
+    const measure = () => {
+      const table = popup.querySelector('[data-bidding-table]')
+      if (!table) return
+      const box = getComputedStyle(popup)
+      const needed = Math.ceil(
+        table.scrollWidth +
+          parseFloat(box.paddingLeft) +
+          parseFloat(box.paddingRight) +
+          parseFloat(box.borderLeftWidth) +
+          parseFloat(box.borderRightWidth),
+      )
+      setMinWidth((prev) => (needed > prev ? needed : prev))
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(popup)
+    return () => observer.disconnect()
+  }, [open, popupRef])
+  return minWidth
+}
+
+/**
+ * "Bidding history by section" at the bottom of the course popup (Weekly Calendar,
+ * Your Plan, phone sheet). Spec: docs/specs/bidding-by-section.md. Semesters down,
+ * sections across (each section over R1 and R2), this section tinted green.
+ */
+export function BiddingHistoryGrid({ course }) {
   const history = useBiddingHistory()
+  const sectionIndex = useContext(CourseSectionsContext)
   if (!history || !isSomCourse(course)) return null
-  const rounds = getBiddingRounds(course, history)
-  if (!showsBiddingHistory(course, rounds)) {
+  const { sections, thisSection, rows } = getBiddingGrid(
+    course,
+    history,
+    sectionsFor(sectionIndex, course),
+  )
+  if (!rows.length) {
     return (
-      <div>
-        <p className="font-medium text-gray-500">Bidding history</p>
-        <p className="text-gray-400">No bidding history</p>
-      </div>
+      <p className="text-xs text-gray-400">
+        <span className="font-medium text-gray-500">Bidding history</span> · No bidding history
+      </p>
     )
   }
+  // This section: the same light green as "In Plan" elsewhere (sectionTheme.js).
+  const highlight = (section) => (section === thisSection ? 'bg-save-50' : '')
+  // Vertical lines only (none between rows), see-through so they look the same on
+  // white and on the green column; a bit darker between sections than R1 | R2, and
+  // one closing the last section on the right.
+  const groupStart = 'border-l border-black/10'
+  const roundLine = 'border-l border-black/5'
+  const lastSection = sections.at(-1)
+  const closing = (section) => (section === lastSection ? 'border-r border-black/10' : '')
+  // Same width for "–" and swatch + number, so every column lines up.
+  const cellBox = 'inline-flex min-w-[2.75rem] items-center justify-center gap-1'
   return (
-    <div>
-      <p className="font-medium text-gray-500">Bidding history (points)</p>
-      <RoundsTable rounds={rounds} compact />
-      <p className="mt-1 text-[10px] leading-snug text-gray-500">{BIDDING_DISCLAIMER}</p>
+    <div className="text-xs">
+      <p className="mb-1 font-medium text-gray-500">Bidding history by section</p>
+      {/* Phones: a table wider than the screen scrolls sideways, semester names stay put.
+          Computers never need it: the popup widens to fit (useBiddingTableWidth). */}
+      <div className="overflow-x-auto">
+      <table data-bidding-table className="w-auto border-collapse text-xs">
+        <thead className="text-[11px] leading-tight text-gray-500">
+          <tr>
+            <th rowSpan={2} className="sticky left-0 border-b border-gray-200 bg-white pr-4" />
+            {sections.map((section) => (
+              <th
+                key={section}
+                colSpan={2}
+                className={`px-2 pt-0.5 text-center ${highlight(section)} ${groupStart} ${closing(section)} ${
+                  section === thisSection ? 'font-semibold text-save-900' : 'font-medium'
+                }`}
+              >
+                {section}
+              </th>
+            ))}
+          </tr>
+          <tr className="border-b border-gray-200">
+            {sections.map((section) => (
+              <Fragment key={section}>
+                <th className={`px-2 pb-1 text-center font-medium ${highlight(section)} ${groupStart}`}>R1</th>
+                <th className={`px-2 pb-1 text-center font-medium ${highlight(section)} ${roundLine} ${closing(section)}`}>R2</th>
+              </Fragment>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(({ term, cells }) => (
+            <tr key={term}>
+              <th scope="row" className="sticky left-0 bg-white py-1 pr-4 text-left font-normal whitespace-nowrap text-gray-700">
+                {term}
+              </th>
+              {sections.map((section) =>
+                [cells[section]?.round1, cells[section]?.round2].map((points, j) => (
+                  <td
+                    key={`${section}-${j}`}
+                    className={`px-2 py-1 text-center whitespace-nowrap ${highlight(section)} ${j === 0 ? groupStart : `${roundLine} ${closing(section)}`}`}
+                  >
+                    {points == null ? (
+                      <span className={`${cellBox} text-gray-400`}>–</span>
+                    ) : (
+                      <span className={`${cellBox} font-medium tabular-nums text-gray-700`}>
+                        <Swatch points={points} className="size-2.5" />
+                        {points}
+                      </span>
+                    )}
+                  </td>
+                )),
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      </div>
+      <CautionFlag className="mt-2 shrink items-start">{BIDDING_DISCLAIMER}</CautionFlag>
     </div>
   )
 }

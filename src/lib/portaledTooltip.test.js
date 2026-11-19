@@ -32,9 +32,21 @@ describe('besidePlacement', () => {
     expect(style.maxHeight).toBeLessThanOrEqual(900 - 16 - 120)
   })
 
-  test('long descriptions scroll inside the popup', () => {
+  test('the popup is the only thing that scrolls (no separate description height)', () => {
     const style = besidePlacement(row(370, 700, 120, 160), viewport, { hasDescription: true })
-    expect(style['--tooltip-desc-max']).toMatch(/px$/)
+    expect(style['--tooltip-desc-max']).toBeUndefined()
+  })
+
+  test('a wide bidding table: no room beside the row → null, so it opens above/below at full width', () => {
+    // 400 px free on the right, 396 on the left.
+    const narrowRow = row(420, 1016, 200, 240)
+    expect(besidePlacement(narrowRow, viewport, { minWidth: 450 })).toBeNull()
+    expect(besidePlacement(narrowRow, viewport, { minWidth: 300 }).width).toBe(400)
+  })
+
+  test('a table wider than the usual 640 px widens the popup beyond it', () => {
+    const style = besidePlacement(row(100, 500, 200, 240), viewport, { minWidth: 715 })
+    expect(style.width).toBe(715)
   })
 
   test('Single plan (rows span the whole right side): opens over the empty right part of the row', () => {

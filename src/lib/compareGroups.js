@@ -9,7 +9,7 @@
  * category still starts that course fresh.)
  */
 
-function isEmbaSection(course) {
+export function isEmbaSection(course) {
   return (course.category ?? '').trim() === 'EMBA'
 }
 

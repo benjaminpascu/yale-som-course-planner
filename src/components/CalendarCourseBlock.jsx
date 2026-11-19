@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { BiddingHistoryDetail } from './BiddingHistory'
+import { BiddingHistoryGrid, useBiddingTableWidth } from './BiddingHistory'
 import CourseDetailSheet from './CourseDetailSheet'
 import { normalizeCategory } from '../lib/categoryDisplay'
 import {
@@ -10,8 +10,6 @@ import {
 import { isSomCourse } from '../lib/schools'
 import { formatSessionLabel } from '../lib/sessionDisplay'
 import {
-  CALENDAR_DESCRIPTION_LINE_COUNT,
-  LARGE_DESCRIPTION_LINE_COUNT,
   TOOLTIP_HIDE_DELAY_MS,
   calendarCourseTooltipStyle,
   clampPortaledTooltipLeft,
@@ -21,8 +19,6 @@ export function CalendarCourseDetail({
   course,
   fallYear = null,
   springYear = null,
-  // Your Plan's bigger popup shows more description before it scrolls.
-  descriptionLines = CALENDAR_DESCRIPTION_LINE_COUNT,
 }) {
   const timeRange =
     course.startTime && course.endTime
@@ -90,9 +86,6 @@ export function CalendarCourseDetail({
               </div>
             ) : null}
           </dl>
-          <div className="text-xs">
-            <BiddingHistoryDetail course={course} />
-          </div>
           {course.syllabusUrl ? (
             <a
               href={course.syllabusUrl}
@@ -128,16 +121,22 @@ export function CalendarCourseDetail({
             >
               Description
             </p>
+            {/* Full text; the popup itself is the only thing that scrolls. */}
             <p
               data-tooltip-description-body
-              className="mt-1 overflow-y-auto text-xs leading-relaxed text-gray-600"
-              style={{ maxHeight: `min(${descriptionLines}lh, var(--tooltip-desc-max, 100vh))` }}
+              className="mt-1 text-xs leading-relaxed text-gray-600"
             >
               {course.description}
             </p>
           </div>
         ) : null}
       </div>
+
+      {isSomCourse(course) ? (
+        <div className="border-t border-gray-100 pt-3">
+          <BiddingHistoryGrid course={course} />
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -165,6 +164,7 @@ export default function CalendarCourseBlock({
   const preferAbove = blockTopPx > gridHeight * 0.55
   const [desktopTooltipOpen, setDesktopTooltipOpen] = useState(false)
   const [tooltipStyle, setTooltipStyle] = useState(null)
+  const tableMinWidth = useBiddingTableWidth(tooltipRef, desktopTooltipOpen)
 
   const refreshTooltipStyle = useCallback(() => {
     if (!buttonRef.current) return
@@ -173,9 +173,15 @@ export default function CalendarCourseBlock({
         above: preferAbove,
         hasDescription: Boolean(course.description),
         large: true, // Same size as the Your Plan hover box.
+        minWidth: tableMinWidth,
       }),
     )
-  }, [preferAbove, course.description])
+  }, [preferAbove, course.description, tableMinWidth])
+
+  // The bidding table is wider than the popup: widen it.
+  useEffect(() => {
+    if (desktopTooltipOpen && tableMinWidth) refreshTooltipStyle()
+  }, [desktopTooltipOpen, tableMinWidth, refreshTooltipStyle])
 
   const cancelHideTooltip = useCallback(() => {
     if (hideTimerRef.current !== null) {
@@ -300,7 +306,7 @@ export default function CalendarCourseBlock({
               ref={tooltipRef}
               id={tooltipId}
               role="tooltip"
-              className="overflow-y-auto rounded-lg border border-gray-200 bg-white p-4 text-left shadow-xl max-md:hidden"
+              className="overflow-y-auto overscroll-contain rounded-lg border border-gray-200 bg-white p-4 text-left shadow-xl max-md:hidden"
               style={tooltipStyle}
               onMouseEnter={openDesktopTooltip}
               onMouseLeave={scheduleHideDesktopTooltip}
@@ -309,7 +315,6 @@ export default function CalendarCourseBlock({
                 course={course}
                 fallYear={fallYear}
                 springYear={springYear}
-                descriptionLines={LARGE_DESCRIPTION_LINE_COUNT}
               />
             </div>,
             document.body,

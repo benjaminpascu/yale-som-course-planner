@@ -11,6 +11,7 @@
  */
 import Papa from 'papaparse'
 import { termCodeToCalendarYear, termCodeToSemester } from './academicYear'
+import { isEmbaSection } from './compareGroups'
 import { isSomCourse } from './schools'
 
 const keyOf = (term, courseNumber, section) =>
@@ -119,6 +120,92 @@ export function getBiddingRounds(course, history) {
   return withResults.length ? withResults.flat() : sameSeason.flat()
 }
 
+/**
+ * Every section of this course number with a result in the last three years,
+ * newest semester first, then by section. `isThisSection` marks rows with the
+ * same section number. Trips matched by destination (MGT 416) only list their
+ * own destination.
+ *
+ * @returns {{ term: string, section: string, round1: number|null, round2: number|null, isThisSection: boolean }[]}
+ */
+export function getAllSectionsHistory(course, history) {
+  if (!history) return []
+  const number = course.courseNumber.trim()
+  const rows = []
+  for (const term of recentTermsFor(course.termCode)) {
+    if (history.byTitle.has(`${term}|${number}`)) {
+      const entry = history.rounds.get(keyOf(term, number, `@${destinationOf(course.title)}`))
+      if (entry && (entry.round1 != null || entry.round2 != null)) {
+        rows.push({ term, section: '–', ...entry, isThisSection: true })
+      }
+      continue
+    }
+    const prefix = `${term}|${number}|`
+    const sections = []
+    for (const [key, entry] of history.rounds) {
+      if (!key.startsWith(prefix)) continue
+      if (entry.round1 == null && entry.round2 == null) continue
+      const section = key.slice(prefix.length)
+      sections.push({
+        term,
+        section,
+        ...entry,
+        isThisSection: section === String(course.section).trim().padStart(2, '0'),
+      })
+    }
+    sections.sort((a, b) => a.section.localeCompare(b.section))
+    rows.push(...sections)
+  }
+  return rows
+}
+
+/**
+ * The popup table (spec: docs/specs/bidding-by-section.md): one row per past
+ * semester with a result (last three years, newest first), one column per section
+ * (this semester's sections + past ones). Trips matched by destination fill this
+ * section's column. EMBA courses get no rows.
+ *
+ * @returns {{ sections: string[], thisSection: string, rows: { term: string, cells: Record<string, { round1: number|null, round2: number|null }> }[] }}
+ */
+export function getBiddingGrid(course, history, currentSections = []) {
+  const thisSection = String(course.section ?? '').trim().padStart(2, '0')
+  // SOM's file only has full-time results: an EMBA section would get someone else's numbers.
+  if (isEmbaSection(course)) return { sections: [], thisSection, rows: [] }
+  // Sections offered this semester get a column even with no past results.
+  const sections = new Set(currentSections.map((section) => String(section).trim().padStart(2, '0')))
+  const rows = []
+  for (const row of getAllSectionsHistory(course, history)) {
+    const section = row.section === '–' ? thisSection : row.section
+    sections.add(section)
+    let termRow = rows.at(-1)
+    if (termRow?.term !== row.term) {
+      termRow = { term: row.term, cells: {} }
+      rows.push(termRow)
+    }
+    termRow.cells[section] = { round1: row.round1, round2: row.round2 }
+  }
+  return { sections: [...sections].sort(), thisSection, rows }
+}
+
+const sectionKey = (course) =>
+  `${course.termCode}|${course.courseNumber.trim()}|${isEmbaSection(course) ? 'emba' : 'ft'}`
+
+/** Sections offered per semester, by course number and program (EMBA apart). Built once. */
+export function buildSectionIndex(courses) {
+  const index = new Map()
+  for (const course of courses) {
+    const key = sectionKey(course)
+    if (!index.has(key)) index.set(key, [])
+    index.get(key).push(course.section)
+  }
+  return index
+}
+
+/** This semester's sections of the same course and program, e.g. MGT 822 → ["01", "G1"]. */
+export function sectionsFor(index, course) {
+  return index?.get(sectionKey(course)) ?? []
+}
+
 /** SOM sections with at least one past result. Blank = no history; gray = no result that round. */
 export function showsBiddingHistory(course, rounds) {
   return isSomCourse(course) && rounds.some((round) => round.points != null)
@@ -161,4 +248,4 @@ export function formatPoints(points, { short = false } = {}) {
 }
 
 export const BIDDING_DISCLAIMER =
-  'Based on past results for this section. Sections can change from year to year, so keep that in mind.'
+  'Section times and professors may change from year to year.'

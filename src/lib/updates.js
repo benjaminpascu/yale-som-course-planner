@@ -10,6 +10,13 @@
  */
 export const UPDATES = [
   {
+    version: '1.3.2',
+    date: '2026-11-19',
+    changes: [
+      'Hover a course on your Weekly Calendar or in Your Plan to see Bidding History by Section: the Round 1 and Round 2 points of every section from the last three years side by side, with your section in green. The popup now also shows the full course description.',
+    ],
+  },
+  {
     version: '1.3.1',
     date: '2026-11-18',
     changes: [

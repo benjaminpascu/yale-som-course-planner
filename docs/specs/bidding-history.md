@@ -99,21 +99,18 @@ Bidding history
 Spring 2026    ■ 0 pts      ■ 143 pts
 Spring 2025    ■ 10 pts     ■ No data
 ─────────────────────────────────────
-Based on past results for this section. Sections can
-change from year to year, so keep that in mind.
+Section times and professors may change from year to
+year.
 ```
 
 - One row per semester, one column per round, thin lines between rows, a small
   color square next to each number.
 
-### Course popups (Weekly Calendar and Your Plan; user request Nov 13, 2026)
+### Course popups (Weekly Calendar and Your Plan)
 
-The hover popup for a course on the calendar or in Your Plan shows **Bidding history
-(points)** in its left facts column, under Category: the same table in a compact
-form ("R1" / "R2" headers, numbers without "pts", "–" for no data, colored squares)
-plus the disclaimer in small text. SOM courses without past results show
-"Bidding history: No bidding history" in the same spot (user request); other
-schools' courses show nothing there.
+Replaced in **1.3.2** (Nov 19, 2026) by a full-width **Bidding history by section**
+table at the bottom of the popup, with every section's past results side by side.
+See `docs/specs/bidding-by-section.md`.
 
 ### Tutorial tip (user request, Nov 13, 2026)
 

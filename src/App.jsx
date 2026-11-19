@@ -10,6 +10,7 @@ import MobileBottomNav from './components/MobileBottomNav'
 import MobilePlansPanel from './components/MobilePlansPanel'
 import NavBar from './components/NavBar'
 import UpdatesPage from './components/UpdatesPage'
+import { CourseSectionsContext } from './components/BiddingHistory'
 import PlansMenu from './components/PlansMenu'
 import PlanningPanel from './components/PlanningPanel'
 import { CalendarSessionTabs, SessionTabHint } from './components/WeeklyCalendar'
@@ -37,6 +38,7 @@ import {
 import { decisionCounts, orderGroups } from './lib/compareShortlist'
 import { ensureShuffledOrder, getTermData } from './lib/compareStorage'
 import { loadAppData, loadOtherSchoolCourses } from './lib/loadData'
+import { buildSectionIndex } from './lib/biddingHistory'
 import { SOM_SCHOOL, isOtherSchoolCourseId, isSomCourse, pickerSchools } from './lib/schools'
 import { getConflictingCourseIds } from './lib/scheduleConflicts'
 import {
@@ -89,6 +91,8 @@ function App() {
   const [otherCourses, setOtherCourses] = useState([])
   const [otherStatus, setOtherStatus] = useState('loading')
   const courses = useMemo(() => [...somCourses, ...otherCourses], [somCourses, otherCourses])
+  // Sections offered per semester, for the course popup's bidding table.
+  const sectionIndex = useMemo(() => buildSectionIndex(somCourses), [somCourses])
   // Which school's courses the catalog shows (one at a time); the plan mixes schools.
   const [schoolId, setSchoolId] = useState(SOM_SCHOOL)
   const [status, setStatus] = useState('loading')
@@ -621,6 +625,7 @@ function App() {
   }
 
   return (
+    <CourseSectionsContext.Provider value={sectionIndex}>
     <div className="flex min-h-dvh flex-col bg-gray-50 lg:h-dvh lg:overflow-hidden">
       <NavBar
         mode={view}
@@ -957,6 +962,7 @@ function App() {
 
       {computerNoticeOpen ? <ComputerNotice onContinue={() => setComputerNoticeOpen(false)} /> : null}
     </div>
+    </CourseSectionsContext.Provider>
   )
 }
 
