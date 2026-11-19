@@ -73,7 +73,7 @@
  },
  "202603:10055": {
   "text": "Required of first-year M.Arch. I students. This studio is the first of four core design studios where beginning students bring to the school a wide range of experience and background. Exercises introduce the complexity of architectural design by engaging problems that are limited in scale but not in the issues they provoke. Experiential, social, and material concerns are introduced together with formal and conceptual issues.",
-  "checkedOn": "2026-11-14"
+  "checkedOn": "2026-11-19"
  },
  "202603:10056": {
   "text": "(Required of second-year M.Arch. I students.) This third core studio concentrates on a medium-scale public building, focusing on the integration of composition, site, program, mass, and form in relation to structure, and methods of construction. Interior spaces are studied in detail. Large-scale models and drawings are developed to explore design issues.\n\nPrerequisite: ARCH 5001 and 5002.",
@@ -2873,7 +2873,7 @@
  },
  "202701:25344": {
   "text": "Former President of Colombia (2018–2022) is a co-instructor for this course, which surveys current development issues in Latin America and the Caribbean. Students gain significant knowledge and practical understanding of the region’s socioeconomic and political situation that impacts development. The course focuses on key regional issues in Central America, South America, and the Caribbean, with particular attention to “hot spot” countries like Venezuela, Colombia, and Haiti. Dedicated sessions are held to discuss topics such as inequality and poverty; democracy and governance; indigenous and Afro-descendent people; migration crisis from Venezuela; the peace process in Colombia; climate change and disaster risk in the Caribbean; infrastructure investments; education policy; drug trafficking, crime, and violence. Potential solutions and policy responses to these issues are also reviewed from the perspective of development practitioners.",
-  "checkedOn": "2026-11-12"
+  "checkedOn": "2026-11-19"
  },
  "202701:25348": {
   "text": "",
@@ -2990,5 +2990,9 @@
  "202701:26082": {
   "text": "Program to be determined with a faculty adviser of the student’s choice and submitted, with the endorsement of the study area coordinator, to the Rules Committee for confirmation of the student’s eligibility under the rules. (See the School’s Academic Rules and Regulations.)",
   "checkedOn": "2026-11-18"
+ },
+ "202701:26133": {
+  "text": "Directed reading or individual project option is designed for qualified students who wish to investigate an area not covered in regular graduate-level courses. The student must be supervised by a faculty member, who sets the requirements and meets regularly with the student. Usually limited to one per semester, this option may involve reading the literature on a topic, attending a lecture or seminar series, and writing a substantial research paper. It is the student’s responsibility to make all the arrangements before the semester begins.\n\nBy arrangement with faculty.",
+  "checkedOn": "2026-11-19"
  }
 }
