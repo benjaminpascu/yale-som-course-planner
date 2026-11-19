@@ -38,6 +38,44 @@ const CONFLICT_OPTIONS = [
   ),
 }))
 
+/**
+ * Filters → Bidding (spec: docs/specs/bidding-filter.md): minimum average past
+ * points per round. Whole numbers only; empty (gray 0) = no minimum.
+ */
+function BiddingMinimums({ minRound1, minRound2, onChange }) {
+  const fields = [
+    { key: 'minRound1', id: 'bid-min-round-1', label: 'Round 1 at least', value: minRound1 },
+    { key: 'minRound2', id: 'bid-min-round-2', label: 'Round 2 at least', value: minRound2 },
+  ]
+  return (
+    <fieldset className="space-y-1.5">
+      <legend className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+        Bidding
+      </legend>
+      <p className="text-xs text-gray-500">Average of past years</p>
+      <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
+        {fields.map((field) => (
+          <div key={field.key}>
+            <label htmlFor={field.id} className="text-xs text-gray-600">
+              {field.label}
+            </label>
+            <input
+              id={field.id}
+              type="text"
+              inputMode="numeric"
+              autoComplete="off"
+              placeholder="0"
+              value={field.value}
+              onChange={(e) => onChange(field.key, e.target.value.replace(/\D/g, ''))}
+              className="mt-0.5 block w-40 rounded-md border border-yale-200 bg-yale-50/80 px-2 py-2 text-sm tabular-nums placeholder:text-gray-400 hover:bg-yale-50 focus:border-yale-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-yale-800"
+            />
+          </div>
+        ))}
+      </div>
+    </fieldset>
+  )
+}
+
 const FILTER_CARD =
   'rounded-lg border border-yale-200/90 bg-white p-3 shadow-sm space-y-4'
 
@@ -55,6 +93,7 @@ export default function CourseFilters({
   onTimeFromChange,
   onTimeToChange,
   onToggle,
+  onBiddingChange,
   onClear,
   hasFilters,
 }) {
@@ -149,6 +188,11 @@ export default function CourseFilters({
             options={bidOptions}
             selected={filters.bidTypes}
             onToggle={(id) => onToggle('bidTypes', id)}
+          />
+          <BiddingMinimums
+            minRound1={filters.minRound1}
+            minRound2={filters.minRound2}
+            onChange={onBiddingChange}
           />
         </div>
 

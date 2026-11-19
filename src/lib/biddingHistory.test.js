@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   NO_DATA_COLOR,
+  averageRounds,
   buildSectionIndex,
   getBiddingGrid,
   sectionsFor,
@@ -191,5 +192,27 @@ describe('bidding history by section (popup table)', () => {
     expect(sectionsFor(index, course({ courseNumber: 'MGT 822' }))).toEqual(['01', 'G1'])
     expect(sectionsFor(index, course({ courseNumber: 'MGT 822', category: 'EMBA' }))).toEqual(['E1'])
     expect(sectionsFor(null, course())).toEqual([])
+  })
+})
+
+describe('averageRounds (Filters → Bidding)', () => {
+  const round = (label, points) => ({ label, points })
+  it('averages each round over the squares that have a number', () => {
+    expect(
+      averageRounds([
+        round('Round 1, Spring 2026', 0),
+        round('Round 2, Spring 2026', 300),
+        round('Round 1, Spring 2025', 120),
+        round('Round 2, Spring 2025', null),
+      ]),
+    ).toEqual({ round1: 60, round2: 300 })
+  })
+
+  it('is null for a round with no numbers at all', () => {
+    expect(averageRounds([round('Round 1, Fall 2025', null), round('Round 2, Fall 2025', null)])).toEqual({
+      round1: null,
+      round2: null,
+    })
+    expect(averageRounds([])).toEqual({ round1: null, round2: null })
   })
 })

@@ -63,6 +63,7 @@ The user is a non-technical student. Explain clearly; ask explicitly when a prod
 | **Release 1.2** (version 1.2.0: Shortlist, Bidding history, Conflicts filter) | ✅ Live (Nov 14, 2026). Release 1.3 (version 1.3.0: Non-SOM Units) live Nov 16, 2026. Next release: make `release/1.4` from `main` when the next feature starts |
 | **Shortlist** (★ star + ★ button by search; spec `docs/specs/shortlist.md`; part of 1.2.0) | ✅ Live (issue #11) |
 | **Conflicts filter** (Filters → Conflicts: Only / Hide, follows the plan being edited; `filterByConflicts` in `src/lib/filterCourses.js`; part of 1.2.0) | ✅ Live (issue #13) |
+| **Bidding filter** (Filters → Bidding: Round 1 / Round 2 at least, average of past years; `filterByBidding` in `src/lib/filterCourses.js`, `BiddingMinimums` in `CourseFilters.jsx`; spec `docs/specs/bidding-filter.md`; version 1.3.3) | ✅ Live (Nov 19, 2026) |
 | **Non-SOM Units** (button + window in Requirements; spec `docs/specs/non-som-units.md`; part of 1.3.0) | ✅ Live (Nov 16, 2026) |
 | **Wider promo** | When you choose (not a separate dev milestone) |
 

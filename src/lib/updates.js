@@ -10,6 +10,13 @@
  */
 export const UPDATES = [
   {
+    version: '1.3.3',
+    date: '2026-11-19',
+    changes: [
+      'Filters → Bidding: type a number in Round 1 at least or Round 2 at least to see only courses whose past bids averaged at least that many points, for example to find popular courses.',
+    ],
+  },
+  {
     version: '1.3.2',
     date: '2026-11-19',
     changes: [

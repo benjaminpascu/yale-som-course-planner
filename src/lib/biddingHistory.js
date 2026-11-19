@@ -206,6 +206,23 @@ export function sectionsFor(index, course) {
   return index?.get(sectionKey(course)) ?? []
 }
 
+/**
+ * Filters → Bidding (spec: docs/specs/bidding-filter.md): the average of each
+ * round over the squares that have a number (gray squares are skipped); null when
+ * a round has none. `rounds` is getBiddingRounds' output.
+ *
+ * @returns {{ round1: number|null, round2: number|null }}
+ */
+export function averageRounds(rounds) {
+  const average = (prefix) => {
+    const points = rounds
+      .filter((round) => round.label.startsWith(prefix) && round.points != null)
+      .map((round) => round.points)
+    return points.length ? points.reduce((sum, p) => sum + p, 0) / points.length : null
+  }
+  return { round1: average('Round 1'), round2: average('Round 2') }
+}
+
 /** SOM sections with at least one past result. Blank = no history; gray = no result that round. */
 export function showsBiddingHistory(course, rounds) {
   return isSomCourse(course) && rounds.some((round) => round.points != null)

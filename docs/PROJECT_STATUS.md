@@ -221,3 +221,4 @@ Course CSVs update themselves every 6 hours (`docs/updating-course-data.md`); fo
 | Nov 16, 2026 | Conflict tag hover lists the plan courses it clashes with (issue #19; `ConflictTag.jsx`, `getConflictsByCourseId` in `scheduleConflicts.js`). Added to the 1.3.0 Updates entry, no new version (owner's call) |
 | Nov 18, 2026 | **1.3.1**: bidding squares look across semesters when a course moved (issue #23); switching schools starts the catalog at page 1 (issue #24, no version) |
 | Nov 19, 2026 | **1.3.2**: **Bidding history by section** in the calendar / Your Plan popups (all sections side by side, yours in green; full description; popup widens to fit). Spec `docs/specs/bidding-by-section.md`. Small feature straight to `main` (owner's call) |
+| Nov 19, 2026 | **1.3.3**: **Filters → Bidding** (Round 1 / Round 2 at least, average of past years). Spec `docs/specs/bidding-filter.md`. Small feature straight to `main` |

@@ -1,3 +1,4 @@
+import { averageRounds, getBiddingRounds } from './biddingHistory'
 import { normalizeCategory } from './categoryDisplay'
 import { hasMeetingTime } from './parseCourses'
 import { parseTimeToMinutes } from './courseDisplay'
@@ -258,7 +259,45 @@ export function createEmptyFilters() {
     subjects: new Set(),
     // Filters → Conflicts: 'only' or 'hide' (one at a time), checked against the open plan.
     conflicts: new Set(),
+    // Filters → Bidding: minimum average points per round, as typed ('' = none).
+    minRound1: '',
+    minRound2: '',
   }
+}
+
+/** A Bidding box's value as whole points; empty, 0 or anything else = 0 (no minimum). */
+export function minPoints(value) {
+  const points = Number.parseInt(String(value ?? ''), 10)
+  return Number.isFinite(points) && points > 0 ? points : 0
+}
+
+/** How many Bidding boxes are in use (each counts once in the Filters number). */
+export function countBiddingFilters(filters) {
+  return (minPoints(filters.minRound1) > 0 ? 1 : 0) + (minPoints(filters.minRound2) > 0 ? 1 : 0)
+}
+
+/**
+ * Filters → Bidding (spec: docs/specs/bidding-filter.md). Keeps sections whose
+ * average past points (the rounds of their four squares) are at least the minimum
+ * for each filled box; both boxes must hold. Sections without a number for a filled
+ * round are hidden. Empty / 0 boxes keep everything.
+ *
+ * @template T
+ * @param {T[]} courses
+ * @param {{ minRound1: string, minRound2: string }} minimums
+ * @param {object} history  the parsed bidding file (parseBiddingCsv)
+ * @returns {T[]}
+ */
+export function filterByBidding(courses, { minRound1, minRound2 }, history) {
+  const min1 = minPoints(minRound1)
+  const min2 = minPoints(minRound2)
+  if (!min1 && !min2) return courses
+  return courses.filter((course) => {
+    const { round1, round2 } = averageRounds(getBiddingRounds(course, history))
+    if (min1 && (round1 == null || round1 < min1)) return false
+    if (min2 && (round2 == null || round2 < min2)) return false
+    return true
+  })
 }
 
 /**
@@ -293,6 +332,7 @@ export function hasActiveFilters(filters) {
     filters.categories.size > 0 ||
     filters.tagCodes.size > 0 ||
     (filters.subjects?.size ?? 0) > 0 ||
-    (filters.conflicts?.size ?? 0) > 0
+    (filters.conflicts?.size ?? 0) > 0 ||
+    countBiddingFilters(filters) > 0
   )
 }

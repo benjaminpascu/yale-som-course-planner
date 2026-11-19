@@ -31,7 +31,8 @@ import {
 
 /** Loaded once in the background, shared by every course row. */
 let historyPromise = null
-function useBiddingHistory() {
+/** The parsed bidding file, or null while it loads. Also used by Filters → Bidding. */
+export function useBiddingHistory() {
   const [history, setHistory] = useState(null)
   useEffect(() => {
     let active = true

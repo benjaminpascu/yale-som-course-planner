@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   createEmptyFilters,
+  countBiddingFilters,
+  filterByBidding,
   filterByConflicts,
   filterCourses,
   getTimeRangeError,
@@ -18,6 +20,7 @@ import {
 import { getConflictsByCourseId } from '../lib/scheduleConflicts'
 import { sectionTone } from '../lib/sectionTheme'
 import CourseFilters from './CourseFilters'
+import { useBiddingHistory } from './BiddingHistory'
 import CourseRow from './CourseRow'
 import SectionHeader from './SectionHeader'
 
@@ -209,6 +212,8 @@ export default function CourseBrowser({
   }, [sessions, categories, unitValues, bidValues, requirementTags, departments])
 
   const timeRangeError = useMemo(() => getTimeRangeError(filters), [filters])
+  // Filters → Bidding uses the same past results as the squares (loaded in the background).
+  const biddingHistory = useBiddingHistory()
 
   // Course id → the plan courses it clashes with (shown when hovering the Conflict tag).
   const conflictingIds = useMemo(
@@ -226,8 +231,21 @@ export default function CourseBrowser({
       conflictingIds,
       selectedIds,
     )
-    return onlyShortlisted ? matches.filter((c) => shortlistIds.has(c.courseId)) : matches
-  }, [termCourses, filters, timeRangeError, onlyShortlisted, shortlistIds, conflictingIds, selectedIds])
+    // Bidding: SOM only (the box is hidden for other schools); nothing hidden until the file loads.
+    const byBids =
+      somFilters && biddingHistory ? filterByBidding(matches, filters, biddingHistory) : matches
+    return onlyShortlisted ? byBids.filter((c) => shortlistIds.has(c.courseId)) : byBids
+  }, [
+    termCourses,
+    filters,
+    timeRangeError,
+    onlyShortlisted,
+    shortlistIds,
+    conflictingIds,
+    selectedIds,
+    somFilters,
+    biddingHistory,
+  ])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
 
@@ -269,8 +287,9 @@ export default function CourseBrowser({
     count += filters.tagCodes.size
     count += filters.subjects.size
     count += filters.conflicts.size
+    if (somFilters) count += countBiddingFilters(filters)
     return count
-  }, [filters])
+  }, [filters, somFilters])
 
   function getCourseRowProps(course) {
     return {
@@ -320,6 +339,7 @@ export default function CourseBrowser({
       setFilters((prev) => ({ ...prev, timeFrom })),
     onTimeToChange: (timeTo) => setFilters((prev) => ({ ...prev, timeTo })),
     onToggle: handleToggle,
+    onBiddingChange: (key, value) => setFilters((prev) => ({ ...prev, [key]: value })),
     onClear: handleClear,
     hasFilters: panelFiltersActive,
   }
