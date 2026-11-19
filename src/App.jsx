@@ -747,6 +747,7 @@ function App() {
         >
           <CourseBrowser
             courses={catalogCourses}
+            schoolId={activeSchoolId}
             somFilters={activeSchoolId === SOM_SCHOOL}
             selectedIds={selectedIds}
             selectedCourses={selectedCourses}
@@ -864,6 +865,7 @@ function App() {
         {mobileTab === 'catalog' ? (
           <CourseBrowser
             courses={catalogCourses}
+            schoolId={activeSchoolId}
             somFilters={activeSchoolId === SOM_SCHOOL}
             selectedIds={selectedIds}
             selectedCourses={selectedCourses}

@@ -140,6 +140,8 @@ export default function CourseBrowser({
   fallYear = null,
   springYear = null,
   termCode = null,
+  // Switching schools starts the list back at page 1.
+  schoolId = null,
   fullHeight = false,
   somFilters = true,
   shortlistIds = NO_IDS,
@@ -232,7 +234,7 @@ export default function CourseBrowser({
   useEffect(() => {
     setPage(1)
     setExpandedCourseId(null)
-  }, [filters, timeRangeError, termCode, onlyShortlisted])
+  }, [filters, timeRangeError, termCode, schoolId, onlyShortlisted])
 
   useEffect(() => {
     setExpandedCourseId(null)
