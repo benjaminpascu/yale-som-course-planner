@@ -1,6 +1,6 @@
 # Spec: Bidding filter
 
-GitHub issue: #26 · Status: **approved and built** (Nov 19, 2026) · Version **1.3.3**
+GitHub issue: #26 · Status: **approved and built** (Nov 19, 2026) · Version **1.3.2** (same day as Bidding history by section, so it shares that entry)
 
 Small feature (user decision): a short spec, then straight to `main`, like 1.3.2.
 Plan: `docs/specs/bidding-filter-plan.md`.
@@ -99,7 +99,7 @@ Round 1 at least     Round 2 at least
 
 ## Release
 
-- Version **1.3.3** (`package.json` + new top entry in `src/lib/updates.js`). Draft:
+- Shipped as **1.3.3**, then merged into the **1.3.2** Updates entry (user rule: same day = one entry and version). Line:
   "**Filters → Bidding**: type a number in Round 1 at least or Round 2 at least to
   see only courses whose past bids averaged at least that many points, for example
   to find popular courses."

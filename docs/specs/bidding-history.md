@@ -112,7 +112,7 @@ Replaced in **1.3.2** (Nov 19, 2026) by a full-width **Bidding history by sectio
 table at the bottom of the popup, with every section's past results side by side.
 See `docs/specs/bidding-by-section.md`.
 
-### Filters → Bidding (1.3.3, Nov 19, 2026)
+### Filters → Bidding (1.3.2, Nov 19, 2026)
 
 "Round 1 at least" / "Round 2 at least" boxes in Filters keep sections whose average
 past points (the rounds of their four squares) meet the minimum. See

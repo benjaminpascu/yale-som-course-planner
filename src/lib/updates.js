@@ -5,22 +5,17 @@
  *
  * Version rules: small fixes pushed straight to main bump the last number
  * (1.0.1 → 1.0.2); new features that went through a spec bump the middle
- * number (1.0.x → 1.1). Each change is one or two explicit sentences for
+ * number (1.0.x → 1.1). Changes shipped on the same day share one entry and
+ * version: add lines to that day's entry instead of a new version. Each change is one or two explicit sentences for
  * students: what changed, where it is, and how to use it.
  */
 export const UPDATES = [
-  {
-    version: '1.3.3',
-    date: '2026-11-19',
-    changes: [
-      'Filters → Bidding: type a number in Round 1 at least or Round 2 at least to see only courses whose past bids averaged at least that many points, for example to find popular courses.',
-    ],
-  },
   {
     version: '1.3.2',
     date: '2026-11-19',
     changes: [
       'Hover a course on your Weekly Calendar or in Your Plan to see Bidding History by Section: the Round 1 and Round 2 points of every section from the last three years side by side, with your section in green. The popup now also shows the full course description.',
+      'Filters → Bidding: type a number in Round 1 at least or Round 2 at least to see only courses whose past bids averaged at least that many points, for example to find popular courses.',
     ],
   },
   {

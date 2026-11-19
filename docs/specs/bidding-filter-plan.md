@@ -12,7 +12,7 @@
 
 ## Global Constraints
 
-- Version **1.3.3**, straight to `main` after `npm test`, `npm run build`, browser check (Single plan, Compare plans, phone).
+- Version **1.3.2** (merged into that day's entry), straight to `main` after `npm test`, `npm run build`, browser check (Single plan, Compare plans, phone).
 - Copy: legend "Bidding", hint "Average of past years", labels "Round 1 at least" / "Round 2 at least", placeholder "0".
 - Empty or 0 = no filter; ≥ 1 hides sections with no number for that round; both boxes must hold.
 
@@ -42,4 +42,4 @@
 
 ### Task 3: Ship
 
-- [ ] Checks + browser; docs (`AGENTS.md`, `docs/PROJECT_STATUS.md`, `docs/specs/bidding-history.md`, spec status); Updates 1.3.3 + `npm version 1.3.3 --no-git-tag-version`; issue, commit, push, check live.
+- [ ] Checks + browser; docs (`AGENTS.md`, `docs/PROJECT_STATUS.md`, `docs/specs/bidding-history.md`, spec status); Updates line in the 1.3.2 entry; issue, commit, push, check live.
