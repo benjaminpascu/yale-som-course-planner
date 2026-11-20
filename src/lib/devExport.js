@@ -134,6 +134,46 @@ export function buildBiddingTable(courses, biddingCsvText) {
 
 const bold = { bold: true }
 
+/**
+ * Bidding points colors (user-set Nov 20, 2026): gray at 0, fading to yellow at
+ * 50 and red at 100; above 100 is dark red. Blank cells stay white.
+ */
+const BIDDING_COLORS = { zero: 'FFE5E7EB', fifty: 'FFFFD966', hundred: 'FFF8696B', over: 'FF8B0000' }
+
+function colorBiddingPoints(sheet, ref) {
+  sheet.addConditionalFormatting({
+    ref,
+    rules: [
+      {
+        // First, and stops there, so the scale below never repaints these cells.
+        priority: 1,
+        type: 'cellIs',
+        operator: 'greaterThan',
+        formulae: [100],
+        stopIfTrue: true,
+        style: {
+          fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: BIDDING_COLORS.over } },
+          font: { color: { argb: 'FFFFFFFF' } },
+        },
+      },
+      {
+        priority: 2,
+        type: 'colorScale',
+        cfvo: [
+          { type: 'num', value: 0 },
+          { type: 'num', value: 50 },
+          { type: 'num', value: 100 },
+        ],
+        color: [
+          { argb: BIDDING_COLORS.zero },
+          { argb: BIDDING_COLORS.fifty },
+          { argb: BIDDING_COLORS.hundred },
+        ],
+      },
+    ],
+  })
+}
+
 /** The workbook. `ExcelJS` is passed in so the library stays lazy-loaded. */
 export function buildExportWorkbook(ExcelJS, { courses, tags, biddingCsvText }) {
   const workbook = new ExcelJS.Workbook()
@@ -185,6 +225,7 @@ export function buildExportWorkbook(ExcelJS, { courses, tags, biddingCsvText }) 
     }
     sheet.getCell(`A${avgRow}`).border = { top: { style: 'thin' } }
     sheet.columns = [{ width: 16 }, { width: 12 }, { width: 12 }, { width: 40 }]
+    colorBiddingPoints(sheet, `B${first}:C${avgRow}`)
   }
 
   const table = buildCourseTable(courses, { tags })
@@ -205,6 +246,7 @@ export function buildExportWorkbook(ExcelJS, { courses, tags, biddingCsvText }) 
     dataSheet.columns = [{ width: 50 }, { width: 14 }, { width: 10 }, { width: 10 }, { width: 10 }]
     dataSheet.views = [{ state: 'frozen', ySplit: 1 }]
     dataSheet.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: 5 } }
+    colorBiddingPoints(dataSheet, `C2:D${bidding.rows.length + 1}`)
 
     const lists = workbook.addWorksheet('Lists', { state: 'hidden' })
     bidding.courses.forEach((name, i) => (lists.getCell(`A${i + 1}`).value = name))

@@ -92,6 +92,12 @@ describe('buildExportWorkbook', () => {
     expect(sheet.getCell('A5').value).toBe('Spring 2026')
     expect(sheet.getCell('B5').value.formula).toContain('AVERAGEIFS')
     expect(sheet.getCell('A7').value).toBe('Average')
+    // Gray → yellow → red up to 100, dark red above, on the table and the data sheet.
+    const [rule] = sheet.conditionalFormattings
+    expect(rule.ref).toBe('B5:C7')
+    expect(rule.rules.map((r) => r.type)).toEqual(['cellIs', 'colorScale'])
+    expect(rule.rules[1].cfvo.map((v) => v.value)).toEqual([0, 50, 100])
+    expect(wb.getWorksheet('Bidding data').conditionalFormattings[0].ref).toBe('C2:D3')
   })
 
   it('leaves out the bidding sheets when no course has history', () => {
