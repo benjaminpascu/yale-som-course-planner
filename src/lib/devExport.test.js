@@ -11,7 +11,7 @@ const som = {
 }
 const yale = {
   ...som, courseId: '202701-CPSC3810-01', school: 'GS', courseNumber: 'CPSC 3810',
-  title: 'Intro to ML', meetingDays: [], startTime: null, endTime: null, units: 0,
+  title: 'Intro to ML', tags: [], meetingDays: [], startTime: null, endTime: null, units: 0,
   crossListings: ['CPSC 5810'], coursePageUrl: 'https://page',
 }
 const fall = { ...som, courseId: '0', termCode: '202603', courseNumber: 'MGT 999' }
@@ -23,9 +23,18 @@ describe('buildCourseListCsv', () => {
     const [a, b] = rows(buildCourseListCsv([yale, som]))
     expect(a).toMatchObject({
       Term: 'Spring 2027', School: 'School of Management', 'Course Number': 'MGT 653', 'Meeting Times': 'Mo 18:00–21:00',
-      Units: '2', Tags: 'STEM', Description: 'Line one, "quoted"\nLine two',
+      Units: '2', STEM: 'Yes', Description: 'Line one, "quoted"\nLine two',
     })
-    expect(b).toMatchObject({ 'Course Number': 'CPSC 3810', 'Meeting Times': '', Units: '', 'Cross Listings': 'CPSC 5810', 'Course Page': 'https://page' })
+    expect(b).toMatchObject({ STEM: '', 'Course Number': 'CPSC 3810', 'Meeting Times': '', Units: '', 'Cross Listings': 'CPSC 5810', 'Course Page': 'https://page' })
+  })
+
+  it('puts one Yes column per tag right after Category', () => {
+    const csv = buildCourseListCsv([{ ...som, tags: ['STEM', 'GBS Req'] }, { ...som, courseId: '9', tags: [] }], {
+      tags: ['GBS Req', 'Leadership', 'STEM'],
+    })
+    const header = csv.split('\r\n')[0].split(',')
+    expect(header.slice(header.indexOf('Category') + 1, header.indexOf('Category') + 4)).toEqual(['GBS Req', 'Leadership', 'STEM'])
+    expect(rows(csv)[0]).toMatchObject({ 'GBS Req': 'Yes', Leadership: '', STEM: 'Yes' })
   })
 
   it('sorts by term, then SOM first; or keeps the given order', () => {

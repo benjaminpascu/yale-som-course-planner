@@ -23,7 +23,6 @@ const COLUMNS = [
   // Other schools' files carry no SOM units.
   ['Units', (c) => (isSomCourse(c) ? String(c.units) : '')],
   ['Category', (c) => c.category],
-  ['Tags', (c) => (c.tags ?? []).join('; ')],
   ['Bid or Permission', (c) => c.bidOrPermission],
   ['Cross Listings', (c) => (c.crossListings ?? []).join('; ')],
   ['Prerequisites', (c) => c.prerequisites],
@@ -31,9 +30,24 @@ const COLUMNS = [
   ['Syllabus', (c) => c.syllabusUrl ?? ''],
   ['Course Page', (c) => c.coursePageUrl ?? ''],
 ]
+// Tag columns go right after Category.
+const TAGS_AT = COLUMNS.findIndex(([name]) => name === 'Category') + 1
 
-/** Courses (one row per section) as CSV text; `sort` orders by term, school, number. */
-export function buildCourseListCsv(courses, { sort = true } = {}) {
+/** Every tag name on these courses (STEM, GBS Req, …), alphabetically. */
+export function tagNames(courses) {
+  return [...new Set(courses.flatMap((c) => c.tags ?? []))].sort()
+}
+
+/**
+ * Courses (one row per section) as CSV text, with a Yes column per tag in `tags`
+ * (defaults to the tags found on these courses). `sort` orders by term, school, number.
+ */
+export function buildCourseListCsv(courses, { sort = true, tags = tagNames(courses) } = {}) {
+  const columns = [
+    ...COLUMNS.slice(0, TAGS_AT),
+    ...tags.map((tag) => [tag, (c) => (c.tags?.includes(tag) ? 'Yes' : '')]),
+    ...COLUMNS.slice(TAGS_AT),
+  ]
   const sorted = !sort ? courses : [...courses].sort(
     (a, b) =>
       a.termCode.localeCompare(b.termCode) ||
@@ -42,8 +56,8 @@ export function buildCourseListCsv(courses, { sort = true } = {}) {
       a.section.localeCompare(b.section),
   )
   return Papa.unparse({
-    fields: COLUMNS.map(([name]) => name),
-    data: sorted.map((course) => COLUMNS.map(([, value]) => value(course) ?? '')),
+    fields: columns.map(([name]) => name),
+    data: sorted.map((course) => columns.map(([, value]) => value(course) ?? '')),
   })
 }
 
