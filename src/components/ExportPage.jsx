@@ -1,26 +1,32 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
-  buildCourseListCsv,
-  downloadText,
+  downloadExportWorkbook,
   planCourses,
   safeFileName,
+  sortCourses,
   tagNames,
 } from '../lib/devExport'
+import { loadBiddingHistoryCsv } from '../lib/loadData'
 import { pickerSchools, SOM_SCHOOL } from '../lib/schools'
 
 const BUTTON =
   'rounded-md bg-yale-700 px-4 py-2 text-sm font-medium text-white hover:bg-yale-900 disabled:cursor-not-allowed disabled:opacity-50'
 
-function saveCsv(courses, fileName, options) {
-  downloadText(buildCourseListCsv(courses, options), `${fileName}.csv`, 'text/csv;charset=utf-8')
-}
-
-/** Owner-only page at ?export: download a saved plan's courses, or one school's (or every) course, as CSV. */
+/**
+ * Owner-only page at ?export: download a saved plan's courses, or one school's (or
+ * every) course, as Excel with a Bidding sheet first.
+ */
 export default function ExportPage({ courses, otherStatus, plans }) {
   const [planId, setPlanId] = useState(plans[0]?.id ?? '')
   const coursesById = useMemo(() => new Map(courses.map((c) => [c.courseId, c])), [courses])
   const plan = plans.find((p) => p.id === planId)
+  const [biddingCsvText, setBiddingCsvText] = useState(null)
+  const [saving, setSaving] = useState(false)
+  useEffect(() => {
+    loadBiddingHistoryCsv().then(setBiddingCsvText, () => setBiddingCsvText(''))
+  }, [])
   const loading = otherStatus === 'loading'
+  const busy = loading || biddingCsvText == null || saving
   const [school, setSchool] = useState('')
   const schools = useMemo(() => pickerSchools(courses, null), [courses])
   // Same tag columns in every file, even when a plan has no STEM course.
@@ -28,6 +34,15 @@ export default function ExportPage({ courses, otherStatus, plans }) {
   const schoolCourses = school
     ? courses.filter((c) => (c.school || SOM_SCHOOL) === school)
     : courses
+
+  async function save(fileName, list) {
+    setSaving(true)
+    try {
+      await downloadExportWorkbook(fileName, { courses: list, tags, biddingCsvText })
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
     <main className="min-h-dvh bg-gray-50">
@@ -54,12 +69,12 @@ export default function ExportPage({ courses, otherStatus, plans }) {
               <button
                 type="button"
                 className={BUTTON}
-                disabled={!plan || loading}
+                disabled={!plan || busy}
                 onClick={() =>
-                  saveCsv(planCourses(plan, coursesById), safeFileName(plan.name), { sort: false, tags })
+                  save(safeFileName(plan.name), planCourses(plan, coursesById))
                 }
               >
-                Export plan (CSV)
+                Export plan (Excel)
               </button>
             </div>
           )}
@@ -88,18 +103,17 @@ export default function ExportPage({ courses, otherStatus, plans }) {
             <button
               type="button"
               className={BUTTON}
-              disabled={loading}
+              disabled={busy}
               onClick={() =>
-                saveCsv(
-                  schoolCourses,
+                save(
                   school
                     ? `${safeFileName(schools.find((s) => s.id === school).label)}-courses`
                     : 'all-courses',
-                  { tags },
+                  sortCourses(schoolCourses),
                 )
               }
             >
-              Export list (CSV)
+              Export list (Excel)
             </button>
           </div>
         </section>
