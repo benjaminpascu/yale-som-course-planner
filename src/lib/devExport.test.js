@@ -4,9 +4,12 @@ import {
   buildBiddingTable,
   buildCourseTable,
   buildExportWorkbook,
+  buildGnwWorkbook,
+  pastGnwRows,
   planCourses,
   safeFileName,
   sortCourses,
+  upcomingGnws,
 } from './devExport.js'
 
 const som = {
@@ -104,6 +107,53 @@ describe('buildExportWorkbook', () => {
   it('leaves out the bidding sheets when no course has history', () => {
     const wb = buildExportWorkbook(ExcelJS, { courses: [yale], tags: [], biddingCsvText: BIDDING })
     expect(wb.worksheets.map((s) => s.name)).toEqual(['Courses'])
+  })
+})
+
+const GNW_BIDDING = `term,course_number,section,round_1,round_2,title
+Spring 2026,MGT 600,03,400,816,GNW: ESMT Berlin
+Spring 2026,MGT 600,09,0,,GNW: Indian Institute of Management Bangalore (IIMB)
+Fall 2025,MGT 600,03,25,200,"GNW: ESMT, Berlin, Germany"
+Fall 2000,MGT 600,01,5,5,GNW: Old tab
+Spring 2026,MGT 653,01,10,0,`
+
+const gnw = (id, title, start, end) => ({
+  ...som, courseId: id, courseNumber: 'MGT 600', section: id, title, description: 'Theme',
+  termCode: '202701', sessionStart: start, sessionEnd: end, units: 1.5, syllabusUrl: 'https://globalnetwork.io/x',
+})
+
+describe('GNW export', () => {
+  it('lists each past GNW location on its own row, newest first, skipping the "2000" tabs', () => {
+    expect(pastGnwRows(GNW_BIDDING)).toEqual([
+      { location: 'ESMT Berlin', term: 'Spring 2026', round1: 400, round2: 816, section: '03' },
+      { location: 'Indian Institute of Management Bangalore (IIMB)', term: 'Spring 2026', round1: 0, round2: null, section: '09' },
+      { location: 'ESMT, Berlin, Germany', term: 'Fall 2025', round1: 25, round2: 200, section: '03' },
+    ])
+  })
+
+  it('keeps only GNWs that are not over, by start date', () => {
+    const list = [
+      gnw('2', 'GNW: B', '2027-03-08', '2027-03-12'),
+      gnw('1', 'GNW: A', '2026-10-19', '2026-10-23'),
+      gnw('3', 'GNW: C', '2027-03-01', '2027-03-05'),
+    ]
+    expect(upcomingGnws(list, new Date(2026, 10, 20)).map((g) => g.title)).toEqual(['GNW: C', 'GNW: B'])
+  })
+
+  it('builds Bidding (search word) first, then the upcoming GNWs and every past name', () => {
+    const wb = buildGnwWorkbook(ExcelJS, {
+      gnws: [gnw('3', 'GNW: ESMT Berlin', '2027-03-08', '2027-03-12')],
+      biddingCsvText: GNW_BIDDING,
+      today: new Date(2026, 10, 20),
+    })
+    expect(wb.worksheets.map((s) => s.name)).toEqual(['Bidding', 'GNWs', 'Past GNWs'])
+    const sheet = wb.getWorksheet('Bidding')
+    expect(sheet.getCell('A5').value).toBe('Spring 2026')
+    expect(sheet.getCell('B5').value.formula).toContain(`"*"&$B$1&"*"`)
+    expect(sheet.getCell('A7').value).toBe('Average')
+    const row = wb.getWorksheet('GNWs').getRow(2).values.slice(1)
+    expect(row.slice(0, 7)).toEqual(['Spring 2027', '3', 'ESMT Berlin', 'Theme', 'Mar 8, 2027', 'Mar 12, 2027', 1.5])
+    expect(wb.getWorksheet('Past GNWs').rowCount).toBe(4)
   })
 })
 

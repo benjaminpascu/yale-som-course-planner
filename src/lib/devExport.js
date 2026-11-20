@@ -262,10 +262,145 @@ export function buildExportWorkbook(ExcelJS, { courses, tags, biddingCsvText }) 
   return workbook
 }
 
-/** Load ExcelJS on demand, build the workbook, and download it. */
-export async function downloadExportWorkbook(fileName, options) {
+const gnwLocation = (title) => String(title ?? '').replace(/^GNW:\s*/i, '').trim()
+
+/** "2027-03-08" → "Mar 8, 2027" */
+function formatDay(isoDay) {
+  if (!isoDay) return ''
+  const [y, m, d] = isoDay.split('-').map(Number)
+  return new Date(y, m - 1, d).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+}
+
+/** Every past GNW section in SOM's bidding file, newest semester first. Each location is its own row. */
+export function pastGnwRows(biddingCsvText) {
+  const { data } = Papa.parse(biddingCsvText ?? '', { header: true, skipEmptyLines: true })
+  return data
+    .filter(
+      (r) =>
+        r.course_number?.trim() === 'MGT 600' &&
+        /^GNW\b/i.test(r.title ?? '') &&
+        termKey(r.term) != null,
+    )
+    .map((r) => ({
+      location: gnwLocation(r.title),
+      term: r.term,
+      round1: toPoints(r.round_1),
+      round2: toPoints(r.round_2),
+      section: r.section,
+    }))
+    .sort((a, b) => termKey(b.term) - termKey(a.term) || a.location.localeCompare(b.location))
+}
+
+/** GNWs not over by `today`, by start date then location. */
+export function upcomingGnws(gnws, today = new Date()) {
+  const pad = (n) => String(n).padStart(2, '0')
+  const day = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`
+  return gnws
+    .filter((g) => !g.sessionEnd || g.sessionEnd >= day)
+    .sort(
+      (a, b) =>
+        (a.sessionStart ?? '').localeCompare(b.sessionStart ?? '') ||
+        gnwLocation(a.title).localeCompare(gnwLocation(b.title)),
+    )
+}
+
+/**
+ * The GNW workbook: Bidding (type part of a name, see points per semester and
+ * round), GNWs (the upcoming ones, with their website), Past GNWs (every past
+ * name as SOM wrote it, so the search word can be checked). Names change by
+ * year, so the owner searches by word instead of the app guessing matches.
+ */
+export function buildGnwWorkbook(ExcelJS, { gnws, biddingCsvText, today = new Date() }) {
+  const workbook = new ExcelJS.Workbook()
+  workbook.calcProperties.fullCalcOnLoad = true
+  const past = pastGnwRows(biddingCsvText)
+  const terms = [...new Set(past.map((r) => r.term))]
+  const pastSheet = "'Past GNWs'"
+
+  const sheet = workbook.addWorksheet('Bidding')
+  sheet.getCell('A1').value = 'Search'
+  sheet.getCell('A1').font = bold
+  const search = sheet.getCell('B1')
+  search.font = bold
+  search.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF4CC' } }
+  sheet.mergeCells('B1:D1')
+  sheet.getCell('A2').value =
+    'Type part of a GNW name in the yellow cell (e.g. ESMT, Cape Town, Chile); empty shows all GNWs. Names change by year: check them on Past GNWs.'
+  sheet.getCell('A2').font = { italic: true, color: { argb: 'FF6B7280' } }
+
+  const headerRow = 4
+  sheet.getRow(headerRow).values = ['Semester', 'Round 1', 'Round 2', 'GNWs found']
+  sheet.getRow(headerRow).font = bold
+  const first = headerRow + 1
+  const match = `${pastSheet}!$A:$A,"*"&$B$1&"*",${pastSheet}!$B:$B,$A`
+  terms.forEach((term, i) => {
+    const r = first + i
+    sheet.getCell(`A${r}`).value = term
+    for (const [col, dataCol] of [
+      ['B', 'C'],
+      ['C', 'D'],
+    ]) {
+      const cell = sheet.getCell(`${col}${r}`)
+      cell.value = {
+        formula: `IFERROR(AVERAGEIFS(${pastSheet}!$${dataCol}:$${dataCol},${match}${r}),"")`,
+      }
+      cell.numFmt = '0'
+    }
+    sheet.getCell(`D${r}`).value = { formula: `COUNTIFS(${match}${r})` }
+  })
+  const last = first + terms.length - 1
+  const avgRow = last + 1
+  sheet.getCell(`A${avgRow}`).value = 'Average'
+  sheet.getRow(avgRow).font = bold
+  for (const col of ['A', 'B', 'C']) sheet.getCell(`${col}${avgRow}`).border = { top: { style: 'thin' } }
+  for (const col of ['B', 'C']) {
+    const cell = sheet.getCell(`${col}${avgRow}`)
+    cell.value = { formula: `IFERROR(AVERAGE(${col}${first}:${col}${last}),"")` }
+    cell.numFmt = '0'
+  }
+  sheet.columns = [{ width: 16 }, { width: 12 }, { width: 12 }, { width: 12 }]
+  if (terms.length) colorBiddingPoints(sheet, `B${first}:C${avgRow}`)
+
+  const list = workbook.addWorksheet('GNWs')
+  const listHeader = ['Term', 'Section', 'Location', 'Theme', 'Starts', 'Ends', 'Units', 'Bid or Permission', 'Website']
+  list.addRow(listHeader).font = bold
+  for (const g of upcomingGnws(gnws, today)) {
+    const row = list.addRow([
+      formatTermLabel(g.termCode),
+      g.section,
+      gnwLocation(g.title),
+      g.description,
+      formatDay(g.sessionStart),
+      formatDay(g.sessionEnd),
+      g.units,
+      g.bidOrPermission,
+      g.syllabusUrl ? { text: g.syllabusUrl, hyperlink: g.syllabusUrl } : '',
+    ])
+    row.getCell(9).font = { color: { argb: 'FF1D4ED8' }, underline: true }
+  }
+  list.columns = [12, 8, 50, 40, 13, 13, 7, 10, 70].map((width) => ({ width }))
+  list.views = [{ state: 'frozen', ySplit: 1 }]
+  list.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: listHeader.length } }
+
+  const pastList = workbook.addWorksheet('Past GNWs')
+  pastList.addRow(['Location', 'Semester', 'Round 1', 'Round 2', 'Section']).font = bold
+  for (const r of past) pastList.addRow([r.location, r.term, r.round1, r.round2, r.section])
+  pastList.columns = [60, 14, 10, 10, 9].map((width) => ({ width }))
+  pastList.views = [{ state: 'frozen', ySplit: 1 }]
+  pastList.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: 5 } }
+  if (past.length) colorBiddingPoints(pastList, `C2:D${past.length + 1}`)
+
+  return workbook
+}
+
+/** Load ExcelJS on demand, build the workbook (`build`, default the course export), and download it. */
+export async function downloadExportWorkbook(fileName, options, build = buildExportWorkbook) {
   const ExcelJS = (await import('exceljs')).default
-  const buffer = await buildExportWorkbook(ExcelJS, options).xlsx.writeBuffer()
+  const buffer = await build(ExcelJS, options).xlsx.writeBuffer()
   const url = URL.createObjectURL(
     new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
   )

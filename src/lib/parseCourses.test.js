@@ -30,3 +30,13 @@ describe('parseCoursesCsv with other-school files', () => {
     expect(parseCoursesCsv(somCsv)[0].school).toBe('SOM')
   })
 })
+
+describe('parseCoursesCsv hidden rows', () => {
+  it('leaves out hidden courses unless asked (GNW files)', () => {
+    const row = (id, visible) =>
+      OUTPUT_COLUMNS.map((c) => ({ 'Course ID': id, Visible: visible, TermCode: '202701' })[c] ?? '').join(',')
+    const csv = `${OUTPUT_COLUMNS.join(',')}\n${row('1', '1')}\n${row('2', '0')}\n`
+    expect(parseCoursesCsv(csv).map((c) => c.courseId)).toEqual(['1'])
+    expect(parseCoursesCsv(csv, { includeHidden: true }).map((c) => c.courseId)).toEqual(['1', '2'])
+  })
+})

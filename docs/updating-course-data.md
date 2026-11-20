@@ -65,6 +65,9 @@ job's last step resets that clock on every run.
 - **Leaves out courses Yale marks hidden** (`visible` ≠ 1), e.g. most GNAM
   courses and the Global Network Week trips. To show a hidden course anyway,
   that would need a code change in `buildCourseRows`.
+- **Saves the hidden GNW trips** (MGT 600, titles "GNW: …") to their own
+  `gnw_<term>.csv` (same columns, `Visible` = 0). The app never lists them;
+  only the owner's `?export` page reads them (`isGnw` in `courseImport.js`).
 - Builds `days_clean`, `start_24h`, `end_24h` from `daysTimes`
   (e.g. `T  Th 1:00 PM-2:20 PM` → `Tu,Th`, `13:00`, `14:20`). A time it can't
   read (e.g. Saturday `S 7:30 AM-9:00 AM`) shows as "No time defined".

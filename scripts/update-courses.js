@@ -24,6 +24,7 @@ import {
   buildCourseRows,
   diffCourses,
   feedUrl,
+  isGnw,
   parseCsv,
   termCodeFromFileName,
   termFileSlug,
@@ -133,6 +134,21 @@ for (const { termCode, isNew } of plan) {
   if (oldRows.length > 0 && rows.length < oldRows.length * 0.5 && !force) {
     failures.push(`${name}: Yale's list suddenly has far fewer courses (${rows.length} vs ${oldRows.length}). Kept the current file; run with --force if this is really right.`)
     continue
+  }
+
+  // GNW trips (hidden on Yale's site) go to their own file for the ?export page.
+  const gnwRows = buildCourseRows(items, { keep: isGnw }).rows
+  const gnwName = `gnw_${termFileSlug(termCode)}.csv`
+  const gnwFile = path.join(DATA_DIR, gnwName)
+  if (gnwRows.length > 0) {
+    const gnwCsv = toCsv(gnwRows)
+    if (!fs.existsSync(gnwFile) || fs.readFileSync(gnwFile, 'utf8') !== gnwCsv) {
+      summary.push(`${name}: ${gnwRows.length} GNWs`)
+      if (!checkOnly) {
+        fs.writeFileSync(gnwFile, gnwCsv)
+        console.log(`  ✔ Wrote docs/data-samples/${gnwName} (${gnwRows.length} GNWs)`)
+      }
+    }
   }
 
   const csv = toCsv(rows)

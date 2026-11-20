@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
+  buildGnwWorkbook,
   downloadExportWorkbook,
   planCourses,
   safeFileName,
   sortCourses,
   tagNames,
+  upcomingGnws,
 } from '../lib/devExport'
-import { loadBiddingHistoryCsv } from '../lib/loadData'
+import { loadBiddingHistoryCsv, loadGnwCourses } from '../lib/loadData'
 import { pickerSchools, SOM_SCHOOL } from '../lib/schools'
 
 const BUTTON =
@@ -14,17 +16,20 @@ const BUTTON =
 
 /**
  * Owner-only page at ?export: download a saved plan's courses, or one school's (or
- * every) course, as Excel with a Bidding sheet first.
+ * every) course, as Excel with a Bidding sheet first; or the GNWs with their past bidding.
  */
 export default function ExportPage({ courses, otherStatus, plans }) {
   const [planId, setPlanId] = useState(plans[0]?.id ?? '')
   const coursesById = useMemo(() => new Map(courses.map((c) => [c.courseId, c])), [courses])
   const plan = plans.find((p) => p.id === planId)
   const [biddingCsvText, setBiddingCsvText] = useState(null)
+  const [gnws, setGnws] = useState(null)
   const [saving, setSaving] = useState(false)
   useEffect(() => {
     loadBiddingHistoryCsv().then(setBiddingCsvText, () => setBiddingCsvText(''))
+    loadGnwCourses().then(setGnws, () => setGnws([]))
   }, [])
+  const upcoming = useMemo(() => upcomingGnws(gnws ?? []), [gnws])
   const loading = otherStatus === 'loading'
   const busy = loading || biddingCsvText == null || saving
   const [school, setSchool] = useState('')
@@ -116,6 +121,30 @@ export default function ExportPage({ courses, otherStatus, plans }) {
               Export list (Excel)
             </button>
           </div>
+        </section>
+
+        <section className="rounded-lg border border-yale-150 bg-white px-5 py-4">
+          <h3 className="font-semibold">GNWs</h3>
+          <p className="mt-1 text-sm text-gray-500">
+            {gnws == null
+              ? 'Loading GNWs…'
+              : `${upcoming.length} upcoming, plus past bidding by location`}
+          </p>
+          <button
+            type="button"
+            className={`${BUTTON} mt-3`}
+            disabled={busy || gnws == null}
+            onClick={async () => {
+              setSaving(true)
+              try {
+                await downloadExportWorkbook('gnws', { gnws, biddingCsvText }, buildGnwWorkbook)
+              } finally {
+                setSaving(false)
+              }
+            }}
+          >
+            Export GNWs (Excel)
+          </button>
         </section>
       </div>
     </main>

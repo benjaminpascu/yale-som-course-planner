@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   applyOverrides,
   buildCourseRows,
+  isGnw,
   currentTermCode,
   nextTermCode,
   parseCsv,
@@ -48,6 +49,19 @@ describe('buildCourseRows', () => {
   it('leaves out courses Yale marks hidden', () => {
     const { rows } = buildCourseRows([item('1'), item('2', { visible: '0' }), item('3', { visible: '0', daysTimes: 'Th 2:35 PM-5:35 PM' })])
     expect(rows.map((row) => row['Course ID'])).toEqual(['1'])
+  })
+
+  it('keeps only the hidden GNW trips when asked (for gnw_<term>.csv)', () => {
+    const { rows } = buildCourseRows(
+      [
+        item('1'),
+        item('2', { visible: '0', courseNumber: 'MGT 600', courseTitle: 'GNW: ESMT Berlin' }),
+        item('3', { visible: '0', courseNumber: 'MGT 601', courseTitle: 'Hidden other' }),
+      ],
+      { keep: isGnw },
+    )
+    expect(rows.map((row) => row['Course ID'])).toEqual(['2'])
+    expect(rows[0].Visible).toBe('0')
   })
 
   it('reports unreadable times and duplicate IDs', () => {

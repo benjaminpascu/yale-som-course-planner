@@ -120,20 +120,31 @@ function text(value) {
   return value == null ? '' : String(value)
 }
 
+/** Courses Yale shows on its site (visible = 1); the only ones the app lists. */
+export const isVisible = (item) => text(item.visible).trim() === '1'
+
 /**
- * Builds the term CSV rows from Yale's feed items. Courses Yale marks hidden
- * (visible ≠ 1) are left out.
+ * Global Network Week trips (MGT 600, titles "GNW: …"). Yale marks them hidden,
+ * so the app doesn't list them; they're saved to gnw_<term>.csv for the owner's
+ * ?export page only.
+ */
+export const isGnw = (item) =>
+  text(item.courseNumber).trim() === 'MGT 600' && /^GNW\b/i.test(text(item.courseTitle).trim())
+
+/**
+ * Builds the term CSV rows from Yale's feed items. By default courses Yale marks
+ * hidden (visible ≠ 1) are left out; `keep` picks other items instead (e.g. isGnw).
  *
  * @param {Record<string, unknown>[]} items — the feed's data.items
  * @returns {{ rows: Record<string, string>[], problems: string[] }}
  */
-export function buildCourseRows(items) {
+export function buildCourseRows(items, { keep = isVisible } = {}) {
   const problems = []
   const seen = new Set()
   const rows = []
 
   for (const item of items) {
-    if (text(item.visible).trim() !== '1') continue
+    if (!keep(item)) continue
     const daytimes = text(item.daysTimes).trim()
 
     const row = {}

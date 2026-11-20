@@ -133,7 +133,7 @@ export function harmonizeSectionTags(courses) {
  * @param {string} csvText
  * @param {{ validate?: boolean }} [options]
  */
-export function parseCoursesCsv(csvText, { validate = true } = {}) {
+export function parseCoursesCsv(csvText, { validate = true, includeHidden = false } = {}) {
   if (validate) {
     const columnCheck = validateCoursesCsvColumns(csvText)
     if (!columnCheck.ok) {
@@ -152,7 +152,8 @@ export function parseCoursesCsv(csvText, { validate = true } = {}) {
     console.warn('CSV parse warnings:', errors)
   }
 
-  return data.filter((row) => row.Visible === '1').map(rowToCourse)
+  // Hidden rows only come from gnw_<term>.csv (the ?export page asks for them).
+  return data.filter((row) => includeHidden || row.Visible === '1').map(rowToCourse)
 }
 
 /** @param {string} isoDate — `YYYY-MM-DD` */

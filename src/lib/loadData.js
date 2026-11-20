@@ -27,6 +27,20 @@ export async function loadOtherSchoolCourses() {
 }
 
 /**
+ * Global Network Week trips (docs/data-samples/gnw_<term>.csv). Hidden on Yale's
+ * site and in the app; only the owner's ?export page loads them.
+ */
+const gnwCsvs = import.meta.glob('../../docs/data-samples/gnw_*.csv', {
+  query: '?raw',
+  import: 'default',
+})
+
+export async function loadGnwCourses() {
+  const csvs = await Promise.all(Object.values(gnwCsvs).map((load) => load()))
+  return csvs.flatMap((csv) => parseCoursesCsv(csv, { includeHidden: true }))
+}
+
+/**
  * Load course data for every term. Tags are inline on each course; sections
  * of the same course share their requirement tags. Finished terms stay loaded
  * (so saved plans keep their courses); getCatalogTerms hides them.
