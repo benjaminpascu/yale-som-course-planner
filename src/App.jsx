@@ -10,6 +10,7 @@ import MobileBottomNav from './components/MobileBottomNav'
 import MobilePlansPanel from './components/MobilePlansPanel'
 import NavBar from './components/NavBar'
 import UpdatesPage from './components/UpdatesPage'
+import ExportPage from './components/ExportPage'
 import { CourseSectionsContext } from './components/BiddingHistory'
 import PlansMenu from './components/PlansMenu'
 import PlanningPanel from './components/PlanningPanel'
@@ -73,6 +74,10 @@ import { UPDATES_PATH, isUpdatesPath } from './lib/updates'
 // Rank is hidden for launch; only links ending in ?rank show it (the owner's private link).
 const RANK_UNLOCKED =
   typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('rank')
+
+// The owner's private export page (CSV of a plan or every course); only links ending in ?export.
+const EXPORT_PAGE =
+  typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('export')
 
 /** Bidding history tip (same words on computer and phone, except Hover over / Tap). */
 function BiddingTipText({ action }) {
@@ -568,6 +573,10 @@ function App() {
         <p className="mt-1 text-sm">{error}</p>
       </div>
     )
+  }
+
+  if (EXPORT_PAGE) {
+    return <ExportPage courses={courses} otherStatus={otherStatus} plans={planStore.plans} />
   }
 
   const planningPanelProps = {

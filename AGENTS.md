@@ -57,6 +57,7 @@ The user is a non-technical student. Explain clearly; ask explicitly when a prod
 | **Compare Courses + two-bar header** | ✅ Live (Nov 2026) |
 | **Compare Plans** (two plans side by side; tabs renamed Plan / Rank) | ✅ Built (Nov 2026) |
 | **Rank hidden for launch** | Only links ending in `?rank` show the Rank tab (`RANK_UNLOCKED` in `App.jsx`) |
+| **Owner's export page** | Hidden; only `somtimes.vercel.app/?export` (`EXPORT_PAGE` in `App.jsx`): pick a saved plan → CSV of its courses, or CSV of every course (`src/components/ExportPage.jsx`, `src/lib/devExport.js`). No Updates entry. |
 | **Automatic course updates** | ✅ Every 6 hours from Yale SOM's feed (Nov 2026); new semesters appear, finished ones hide |
 | **Updates page** (`/updates`, patch notes; version 1.0.1) | ✅ Live (Nov 2026); every change adds an entry (Workflow step 5) |
 | **Courses from across Yale** (School picker; spec `docs/specs/cross-registration.md`; version 1.1.0) | ✅ Live (Nov 2026); daily Yale job; Law reader unfinished |
