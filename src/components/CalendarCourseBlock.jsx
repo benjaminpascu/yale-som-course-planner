@@ -67,6 +67,12 @@ export function CalendarCourseDetail({
                 {formatSessionLabel(course.session, { fallYear, springYear })}
               </dd>
             </div>
+            {course.section ? (
+              <div>
+                <dt className="font-medium text-gray-500">Section</dt>
+                <dd>{course.section}</dd>
+              </div>
+            ) : null}
             {course.room ? (
               <div>
                 <dt className="font-medium text-gray-500">Room</dt>
