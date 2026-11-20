@@ -92,11 +92,12 @@ describe('buildExportWorkbook', () => {
     expect(sheet.getCell('A5').value).toBe('Spring 2026')
     expect(sheet.getCell('B5').value.formula).toContain('AVERAGEIFS')
     expect(sheet.getCell('A7').value).toBe('Average')
-    // Gray → yellow → red up to 100, dark red above, on the table and the data sheet.
+    // Blank gray, then dark red above 100, then gray → yellow → red; table and data sheet.
     const [rule] = sheet.conditionalFormattings
     expect(rule.ref).toBe('B5:C7')
-    expect(rule.rules.map((r) => r.type)).toEqual(['cellIs', 'colorScale'])
-    expect(rule.rules[1].cfvo.map((v) => v.value)).toEqual([0, 50, 100])
+    expect(rule.rules.map((r) => r.type)).toEqual(['expression', 'expression', 'colorScale'])
+    expect(rule.rules.map((r) => r.formulae?.[0])).toEqual(['NOT(ISNUMBER(B5))', 'B5>100', undefined])
+    expect(rule.rules[2].cfvo.map((v) => v.value)).toEqual([0, 50, 100])
     expect(wb.getWorksheet('Bidding data').conditionalFormattings[0].ref).toBe('C2:D3')
   })
 

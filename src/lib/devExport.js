@@ -135,29 +135,36 @@ export function buildBiddingTable(courses, biddingCsvText) {
 const bold = { bold: true }
 
 /**
- * Bidding points colors (user-set Nov 20, 2026): gray at 0, fading to yellow at
- * 50 and red at 100; above 100 is dark red. Blank cells stay white.
+ * Bidding points colors (user-set Nov 20, 2026): gray at 0 and for blank cells
+ * (no result), fading to yellow at 50 and red at 100; above 100 is dark red.
  */
 const BIDDING_COLORS = { zero: 'FFE5E7EB', fifty: 'FFFFD966', hundred: 'FFF8696B', over: 'FF8B0000' }
 
 function colorBiddingPoints(sheet, ref) {
+  const topLeft = ref.split(':')[0]
+  const fill = (argb) => ({ type: 'pattern', pattern: 'solid', bgColor: { argb } })
   sheet.addConditionalFormatting({
     ref,
     rules: [
+      // Blanks first: the table's empty results are text (""), which Excel would
+      // otherwise count as more than 100. Both rules stop there, so the scale
+      // below never repaints these cells.
       {
-        // First, and stops there, so the scale below never repaints these cells.
         priority: 1,
-        type: 'cellIs',
-        operator: 'greaterThan',
-        formulae: [100],
+        type: 'expression',
+        formulae: [`NOT(ISNUMBER(${topLeft}))`],
         stopIfTrue: true,
-        style: {
-          fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: BIDDING_COLORS.over } },
-          font: { color: { argb: 'FFFFFFFF' } },
-        },
+        style: { fill: fill(BIDDING_COLORS.zero) },
       },
       {
         priority: 2,
+        type: 'expression',
+        formulae: [`${topLeft}>100`],
+        stopIfTrue: true,
+        style: { fill: fill(BIDDING_COLORS.over), font: { color: { argb: 'FFFFFFFF' } } },
+      },
+      {
+        priority: 3,
         type: 'colorScale',
         cfvo: [
           { type: 'num', value: 0 },
