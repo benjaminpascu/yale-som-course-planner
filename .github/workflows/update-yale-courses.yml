@@ -22,7 +22,7 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 240 # room for the waits below when Yale is down
     steps:
       - uses: actions/checkout@v4
 
@@ -35,12 +35,21 @@ jobs:
 
       # Save safe updates even if a term or the Course Search health check fails.
       # Report the failure after testing and publishing any valid changes.
+      # When Yale's servers are down (exit code 75), wait and try again:
+      # after 30 minutes, then 1 hour, then 1 hour. Only report if all tries fail.
       - name: Fetch courses from Yale
         id: fetch
         continue-on-error: true
         env:
           YALE_API_KEY: ${{ secrets.YALE_API_KEY }}
-        run: npm run update-yale-courses -- --summary-file "$RUNNER_TEMP/summary.txt"
+        run: |
+          for wait in 30 60 60 0; do
+            code=0
+            npm run update-yale-courses -- --summary-file "$RUNNER_TEMP/summary.txt" || code=$?
+            if [ "$code" -ne 75 ] || [ "$wait" -eq 0 ]; then exit "$code"; fi
+            echo "Yale's servers seem down. Trying again in $wait minutes…"
+            sleep $((wait * 60))
+          done
 
       - name: Check for changes
         id: changes

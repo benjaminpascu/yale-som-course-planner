@@ -161,6 +161,11 @@ How it works and stays safe:
   source. If none of the attempted sections get a valid detail response,
   the job reports a failure after saving and testing any valid catalog
   updates. Open the `Fetch courses from Yale` step for details.
+- **When Yale's servers are down** (no server answers, the subject list is
+  missing, or Yale gives errors), the script exits with code 75 and the job
+  waits and runs it again: after 30 minutes, then 1 hour, then 1 hour. It
+  only fails (and emails the owner) if Yale is still down after the last try.
+  Yale has been down on Sundays (Nov 15 and 22, 2026).
 - Department names for the Department filter: `docs/data-samples/yale_subjects.json`.
 - Times: Yale writes `MW 2.35-3.50` (no am/pm: 8–11 morning, 12 noon, 1–6
   afternoon) and `Th 7.00-8.55p` (evening). Several meeting patterns with the

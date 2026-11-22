@@ -184,6 +184,12 @@ const bulletinLookup = createBulletinLookup(bulletin, today)
 // A school/subject pair with courses in one semester probably has some in the other too.
 const knownAnywhere = new Set(Object.values(state).flatMap((term) => Object.keys(term.pairs ?? {})))
 const failures = []
+// Problems that mean Yale's servers were down; the workflow waits and runs again for these.
+let yaleWasDown = false
+function yaleDown(message) {
+  yaleWasDown = true
+  failures.push(message)
+}
 const summary = []
 const subjectNames = fs.existsSync(SUBJECT_NAMES_FILE) ? JSON.parse(fs.readFileSync(SUBJECT_NAMES_FILE, 'utf8')) : {}
 
@@ -201,11 +207,11 @@ for (const termCode of terms) {
     for (const { code, description } of subjectList) if (code && description) subjectNames[code] = description.trim()
     subjects = subjectList.map((s) => s.code).filter(Boolean)
   } catch (error) {
-    failures.push(`${name}: couldn't get Yale's subject list (${error.message}). Kept the current file.`)
+    yaleDown(`${name}: couldn't get Yale's subject list (${error.message}). Kept the current file.`)
     continue
   }
   if (subjects.length === 0) {
-    failures.push(`${name}: Yale's subject list is empty. Kept the current file.`)
+    yaleDown(`${name}: Yale's subject list is empty. Kept the current file.`)
     continue
   }
 
@@ -229,7 +235,7 @@ for (const termCode of terms) {
 
   let server = await findWorkingServer(termCode)
   if (!server) {
-    failures.push(`${name}: no Yale server answered with courses. Kept the current file.`)
+    yaleDown(`${name}: no Yale server answered with courses. Kept the current file.`)
     continue
   }
 
@@ -258,7 +264,7 @@ for (const termCode of terms) {
       if (!server) break
     }
     if (!server) {
-      failures.push(`${name}: lost Yale's working server mid-run. Kept the current file.`)
+      yaleDown(`${name}: lost Yale's working server mid-run. Kept the current file.`)
       break
     }
     for (const { pair, sections, error } of answers) {
@@ -309,7 +315,7 @@ for (const termCode of terms) {
   for (const [key, kept] of oldByPair) if (!asked.has(key)) rows.unshift(...kept)
 
   if (errors > toAsk.length / 2) {
-    failures.push(`${name}: Yale gave errors for ${errors} of ${toAsk.length} questions. Kept the current file.`)
+    yaleDown(`${name}: Yale gave errors for ${errors} of ${toAsk.length} questions. Kept the current file.`)
     continue
   }
 
@@ -386,7 +392,8 @@ if (summaryFile && summary.length > 0) fs.writeFileSync(summaryFile, `${summary.
 if (failures.length > 0) {
   console.error('\n✖ Yale course update reported problems:')
   for (const failure of failures) console.error(`  • ${failure}`)
-  process.exit(1)
+  // 75 = "try again later": the workflow waits and runs the update again.
+  process.exit(yaleWasDown ? 75 : 1)
 }
 console.log(summary.length > 0 ? `Done: ${summary.join('; ')}` : 'Done: everything already up to date.')
 
