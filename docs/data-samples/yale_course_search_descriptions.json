@@ -93,7 +93,7 @@
  },
  "202603:10060": {
   "text": "Advanced studios are limited in enrollment. Selection for studios is determined by lottery.",
-  "checkedOn": "2026-11-14"
+  "checkedOn": "2026-11-23"
  },
  "202603:10061": {
   "text": "Advanced studios are limited in enrollment. Selection for studios is determined by lottery.",
@@ -2705,7 +2705,7 @@
  },
  "202701:24555": {
   "text": "This course equips students with an applied understanding of how artificial intelligence can cause or amplify harm, and how the actors who develop, deploy, and govern these systems can be held accountable. Across seven classes, the course takes an interdisciplinary approach, using disinformation and online manipulation as an entry point into broader questions of AI safety, power, and governance. We begin with the relationships among influencers, audiences, and algorithms that drive disinformation, then examine how propagandists use generative AI and synthetic media to shape public discourse and political outcomes. We turn to responses: the institutions and trade-offs of content moderation; product policies for text, image, and other generative AI systems; and competing approaches to technology regulation and self-regulation. The final two classes examine the alignment problem, including immediate and catastrophic risks, and the implications of AI agents and artificial general intelligence (AGI) for governing collective intelligence. Throughout, students ask who defines acceptable AI behavior, whose interests and rights are protected, and how responsibility should be allocated among companies, governments, and users. Through case studies, hands-on experimentation with generative AI, policy drafting, and a constitutional AI exercise, students develop tools to assess harms, evaluate safeguards, and design approaches to AI accountability that reflect societal values.",
-  "checkedOn": "2026-11-12"
+  "checkedOn": "2026-11-23"
  },
  "202701:24596": {
   "text": "Earth system tipping elements, ecosystems that may have thresholds where small changes can provoke irreversible shifts to new, potentially very different, states, are increasingly recognized economic, security, and development risks. They are also hard to govern. They are foreseeable but not predictable. They are driven by both global warming and local pressures such as land use and pollution. Their impacts may appear only after a threshold is crossed, then cascade globally over decades. This half-term seminar focuses on one tipping element, the Amazon rain forest, as a case for exploring what such nonlinear risks demand of institutional design and policy strategy. It draws on comparative “risk repertoires” from terrorism, pandemics, and nuclear preparedness, on decision-making under deep uncertainty, and on current proposals for tipping-element governance to identify possible approaches to institutional design. It includes a spring-break field visit to Brazil that brings students into conversation with policymakers, scientists, and civil society working on tipping element governance. The seminar is demanding: its reading load exceeds a typical M.P.P. course. Assignments are designed to encourage substantive contributions to live policy discussions and require independent research beyond curated course materials.",
@@ -2994,5 +2994,9 @@
  "202701:26133": {
   "text": "Directed reading or individual project option is designed for qualified students who wish to investigate an area not covered in regular graduate-level courses. The student must be supervised by a faculty member, who sets the requirements and meets regularly with the student. Usually limited to one per semester, this option may involve reading the literature on a topic, attending a lecture or seminar series, and writing a substantial research paper. It is the student’s responsibility to make all the arrangements before the semester begins.\n\nBy arrangement with faculty.",
   "checkedOn": "2026-11-19"
+ },
+ "202701:26281": {
+  "text": "Directed reading or individual project option is designed for qualified students who wish to investigate an area not covered in regular graduate-level courses. The student must be supervised by a faculty member, who sets the requirements and meets regularly with the student. Usually limited to one per semester, this option may involve reading the literature on a topic, attending a lecture or seminar series, and writing a substantial research paper. It is the student’s responsibility to make all the arrangements before the semester begins.\n\nBy arrangement with faculty.",
+  "checkedOn": "2026-11-23"
  }
 }
