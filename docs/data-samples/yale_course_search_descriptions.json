@@ -97,7 +97,7 @@
  },
  "202603:10061": {
   "text": "Advanced studios are limited in enrollment. Selection for studios is determined by lottery.",
-  "checkedOn": "2026-11-14"
+  "checkedOn": "2026-11-24"
  },
  "202603:10062": {
   "text": "Advanced studios are limited in enrollment. Selection for studios is determined by lottery.",
@@ -2701,7 +2701,7 @@
  },
  "202701:24515": {
   "text": "This course examines the evolution of defense innovation in the United States and its allies and partners over the last fifteen years, and particularly efforts to leverage commercially derived technology and rapid technology development cycles in areas such as artificial intelligence, autonomy, space, biotechnology, energy, cyber/telecom, and advanced manufacturing for national security. We examine the origins and imperative for transformation in this arena, critical areas of tech and their impact, related policy and acquisition/procurement tools and structural reforms, the intersection between the Department of Defense (or “War”) and Congress, the evolution of the defense tech ecosystem’s founders and funders, operational integration and the perspective from the warfighter, lessons from the war in Ukraine and other recent conflicts, adversary approaches and threats, and the critical role of allies and partners. The course also provides students with the opportunity to explore remaining barriers, current efforts at reform, and potential solutions. Perspectives from current practitioners across the military, policy and legislative, and defense-tech sectors are incorporated, including through selected guest speakers.",
-  "checkedOn": "2026-11-12"
+  "checkedOn": "2026-11-24"
  },
  "202701:24555": {
   "text": "This course equips students with an applied understanding of how artificial intelligence can cause or amplify harm, and how the actors who develop, deploy, and govern these systems can be held accountable. Across seven classes, the course takes an interdisciplinary approach, using disinformation and online manipulation as an entry point into broader questions of AI safety, power, and governance. We begin with the relationships among influencers, audiences, and algorithms that drive disinformation, then examine how propagandists use generative AI and synthetic media to shape public discourse and political outcomes. We turn to responses: the institutions and trade-offs of content moderation; product policies for text, image, and other generative AI systems; and competing approaches to technology regulation and self-regulation. The final two classes examine the alignment problem, including immediate and catastrophic risks, and the implications of AI agents and artificial general intelligence (AGI) for governing collective intelligence. Throughout, students ask who defines acceptable AI behavior, whose interests and rights are protected, and how responsibility should be allocated among companies, governments, and users. Through case studies, hands-on experimentation with generative AI, policy drafting, and a constitutional AI exercise, students develop tools to assess harms, evaluate safeguards, and design approaches to AI accountability that reflect societal values.",
